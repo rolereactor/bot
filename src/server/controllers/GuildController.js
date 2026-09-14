@@ -192,6 +192,21 @@ export async function apiGetGuildSettings(req, res) {
       }
     }
 
+    // Get goodbye settings from the separate goodbye_settings collection
+    let goodbyeSettings = null;
+    if (dbManager.goodbyeSettings) {
+      goodbyeSettings = await dbManager.goodbyeSettings.getByGuild(guildId);
+      if (goodbyeSettings) {
+        goodbyeSettings = {
+          enabled: goodbyeSettings.enabled ?? false,
+          channelId: goodbyeSettings.channelId ?? null,
+          message:
+            goodbyeSettings.message ?? "Goodbye **{user}**! We'll miss you. 👋",
+          embed: goodbyeSettings.embedEnabled ?? true,
+        };
+      }
+    }
+
     const client = getDiscordClient();
 
     if (!commandRegistry.initialized) await commandRegistry.initialize(client);
@@ -232,6 +247,7 @@ export async function apiGetGuildSettings(req, res) {
       settings: {
         ...settings,
         welcomeSystem: welcomeSettings,
+        goodbyeSystem: goodbyeSettings,
       },
       guildStats,
       premiumFeatures: settings.premiumFeatures || {},
@@ -412,8 +428,12 @@ export async function apiUpdateGuildSettings(req, res) {
       updates?.welcomeSystem &&
       typeof updates.welcomeSystem === "object" &&
       !Array.isArray(updates.welcomeSystem);
+    const hasGoodbyeUpdate =
+      updates?.goodbyeSystem &&
+      typeof updates.goodbyeSystem === "object" &&
+      !Array.isArray(updates.goodbyeSystem);
 
-    if (!hasWelcomeUpdate && Object.keys(editableUpdates).length === 0) {
+    if (!hasWelcomeUpdate && !hasGoodbyeUpdate && Object.keys(editableUpdates).length === 0) {
       return res
         .status(400)
         .json(
@@ -447,6 +467,23 @@ export async function apiUpdateGuildSettings(req, res) {
         };
         await dbManager.welcomeSettings.set(guildId, welcomeUpdates);
         welcomeSettings = welcomeUpdates;
+      }
+    }
+
+    // Handle goodbye system settings separately
+    let goodbyeSettings = null;
+    if (hasGoodbyeUpdate) {
+      if (dbManager.goodbyeSettings) {
+        const goodbyeUpdates = {
+          enabled: updates.goodbyeSystem.enabled ?? false,
+          channelId: updates.goodbyeSystem.channelId ?? null,
+          message:
+            updates.goodbyeSystem.message ??
+            "Goodbye **{user}**! We'll miss you. 👋",
+          embedEnabled: updates.goodbyeSystem.embed ?? true,
+        };
+        await dbManager.goodbyeSettings.set(guildId, goodbyeUpdates);
+        goodbyeSettings = goodbyeUpdates;
       }
     }
 
@@ -498,6 +535,7 @@ export async function apiUpdateGuildSettings(req, res) {
         settings: {
           ...newSettings,
           welcomeSystem: welcomeSettings || existingSettings.welcomeSystem,
+          goodbyeSystem: goodbyeSettings || existingSettings.goodbyeSystem,
         },
       }),
     );
@@ -570,6 +608,67 @@ export async function apiTestWelcome(req, res) {
       .json(
         createErrorResponse(
           "Failed to test welcome message",
+          500,
+          error.message,
+        ).response,
+      );
+  }
+}
+
+/**
+ * Test goodbye message (preview)
+ */
+export async function apiTestGoodbye(req, res) {
+  const { guildId } = req.params;
+  logRequest(`Test goodbye: ${guildId}`, req);
+
+  const client = getDiscordClient();
+  const guild = client?.guilds.cache.get(guildId);
+  if (!guild)
+    return res
+      .status(404)
+      .json(createErrorResponse("Guild not found", 404).response);
+
+  try {
+    const { getDatabaseManager } = await import(
+      "../../utils/storage/databaseManager.js"
+    );
+    const dbManager = await getDatabaseManager();
+    const settings = await dbManager.goodbyeSettings.getByGuild(guildId);
+
+    if (!settings?.enabled) {
+      return res
+        .status(400)
+        .json(
+          createErrorResponse("Goodbye system is not enabled", 400).response,
+        );
+    }
+
+    const { sendTestGoodbyeMessage } = await import(
+      "../../utils/discord/goodbyeUtils.js"
+    );
+
+    const result = await sendTestGoodbyeMessage(guildId, settings, guild);
+
+    if (result.success) {
+      res.json(
+        createSuccessResponse({
+          message: "Test message sent successfully",
+          details: {
+            format: result.format,
+          },
+        }),
+      );
+    } else {
+      res.status(400).json(createErrorResponse(result.error, 400).response);
+    }
+  } catch (error) {
+    logger.error(`❌ Error testing goodbye for guild ${guildId}:`, error);
+    res
+      .status(500)
+      .json(
+        createErrorResponse(
+          "Failed to test goodbye message",
           500,
           error.message,
         ).response,

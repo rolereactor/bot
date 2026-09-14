@@ -66,6 +66,7 @@ export async function handleGoodbyeConfigModal(interaction) {
       message:
         sanitizedMessage ||
         `**{user}** left the server\nThanks for being part of **{server}**! ${EMOJIS.ACTIONS.WAVE}`,
+      updatedAt: new Date(),
     };
 
     await dbManager.goodbyeSettings.set(interaction.guild.id, newSettings);

@@ -77,3 +77,64 @@ function getOrdinal(num) {
   const v = num % 100;
   return num + (suffixes[(v - 20) % 10] || suffixes[v] || suffixes[0]);
 }
+
+/**
+ * Send a test goodbye message to the configured channel
+ * @param {string} guildId - Guild ID
+ * @param {Object} settings - Goodbye settings
+ * @param {import('discord.js').Guild} guild - Discord guild object
+ * @returns {Object} - Result
+ */
+export async function sendTestGoodbyeMessage(guildId, settings, guild) {
+  if (!settings?.channelId) {
+    return {
+      success: false,
+      error: "No goodbye channel configured",
+    };
+  }
+
+  const goodbyeChannel = guild.channels.cache.get(settings.channelId);
+  if (!goodbyeChannel) {
+    return {
+      success: false,
+      error: "Goodbye channel not found",
+    };
+  }
+
+  const botMember = guild.members.me;
+  const channelPermissions = goodbyeChannel.permissionsFor(botMember);
+
+  if (!channelPermissions?.has("SendMessages")) {
+    return {
+      success: false,
+      error: "Bot lacks permission to send messages in goodbye channel",
+    };
+  }
+
+  if (settings.embedEnabled && !channelPermissions.has("EmbedLinks")) {
+    return {
+      success: false,
+      error: "Bot lacks permission to embed links in goodbye channel",
+    };
+  }
+
+  // Use bot's own member for test message
+  const testMember = botMember;
+
+  // Send test message
+  if (settings.embedEnabled) {
+    const embed = createGoodbyeEmbed(settings, testMember);
+    await goodbyeChannel.send({ embeds: [embed] });
+  } else {
+    const processedMessage = processGoodbyeMessage(
+      settings.message,
+      testMember,
+    );
+    await goodbyeChannel.send(processedMessage);
+  }
+
+  return {
+    success: true,
+    format: settings.embedEnabled ? "Embed" : "Text",
+  };
+}

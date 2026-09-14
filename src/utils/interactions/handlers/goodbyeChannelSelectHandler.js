@@ -44,6 +44,21 @@ export async function handleGoodbyeChannelSelect(interaction) {
       );
     }
 
+    // Check bot permissions in the selected channel
+    const botMember = interaction.guild.members.me;
+    const channelPermissions = selectedChannel.permissionsFor(botMember);
+
+    if (!channelPermissions?.has("SendMessages")) {
+      return interaction.editReply(
+        errorEmbed({
+          title: "Permission Error",
+          description: `I don't have permission to send messages in ${selectedChannel.toString()}`,
+          solution:
+            "Please grant me Send Messages permission in the selected channel.",
+        }),
+      );
+    }
+
     // Get current settings and update with selected channel
     const dbManager = await getDatabaseManager();
     const currentSettings = await dbManager.goodbyeSettings.getByGuild(

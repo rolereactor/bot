@@ -5,6 +5,7 @@ import {
   createGoodbyeEmbed,
 } from "../utils/discord/goodbyeUtils.js";
 import { fireEventTriggers } from "../utils/core/CustomEventExecutor.js";
+import { sseBroadcaster } from "../utils/sseBroadcaster.js";
 
 import { getAnalyticsManager } from "../features/analytics/AnalyticsManager.js";
 
@@ -25,6 +26,15 @@ export async function execute(member) {
     // Record leave in analytics
     const analyticsManager = await getAnalyticsManager();
     await analyticsManager.recordLeave(member.guild.id);
+
+    // Broadcast activity event to SSE clients (overlays, dashboard)
+    sseBroadcaster.broadcast(member.guild.id, "activity", {
+      type: "member_leave",
+      username: member.user.tag,
+      details: `Member #${member.guild.memberCount}`,
+      avatar: member.user.displayAvatarURL({ size: 64 }),
+      timestamp: Date.now(),
+    });
 
     // Get database manager and goodbye settings
     const dbManager = await getDatabaseManager();

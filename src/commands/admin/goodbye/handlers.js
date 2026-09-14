@@ -1,4 +1,4 @@
-import { MessageFlags } from "discord.js";
+import { MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { getLogger } from "../../../utils/logger.js";
 import {
   botHasRequiredPermissions,
@@ -100,9 +100,16 @@ export async function handleSetup(interaction, _client) {
 
     const components = createGoodbyeSettingsComponents(updatedSettings);
 
+    const dashboardRow = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Open Dashboard")
+        .setStyle(ButtonStyle.Link)
+        .setURL(`https://rolereactor.xyz/dashboard/${interaction.guild.id}`),
+    );
+
     await interaction.editReply({
       embeds: [embed],
-      components,
+      components: [...components.map(c => c.toJSON()), dashboardRow.toJSON()],
     });
 
     const duration = Date.now() - startTime;

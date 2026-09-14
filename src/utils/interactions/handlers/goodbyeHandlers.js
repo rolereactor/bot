@@ -367,6 +367,18 @@ export async function handleGoodbyeToggle(interaction) {
       interaction.guild.id,
     );
 
+    // Prevent enabling without a channel configured
+    if (!currentSettings.enabled && !currentSettings.channelId) {
+      return interaction.editReply(
+        errorEmbed({
+          title: "Channel Required",
+          description:
+            "Please configure a goodbye channel first before enabling.",
+          solution: "Use the Configure button to set a channel.",
+        }),
+      );
+    }
+
     // Toggle the enabled state
     const newSettings = {
       ...currentSettings,
@@ -526,7 +538,7 @@ export async function handleGoodbyeTest(interaction) {
           description:
             "The goodbye system is not enabled or no channel is set.",
           solution:
-            "Use `/setup-goodbye` to configure the goodbye system first.",
+            "Use `/goodbye setup` to configure the goodbye system first.",
         }),
       );
     }
@@ -540,7 +552,7 @@ export async function handleGoodbyeTest(interaction) {
         errorEmbed({
           title: "Channel Not Found",
           description: "The configured goodbye channel no longer exists.",
-          solution: "Use `/setup-goodbye` to set a new goodbye channel.",
+          solution: "Use `/goodbye setup` to set a new goodbye channel.",
         }),
       );
     }

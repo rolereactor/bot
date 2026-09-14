@@ -8,6 +8,7 @@ import {
   apiCheckGuilds,
   apiListGuilds,
   apiTestWelcome,
+  apiTestGoodbye,
 } from "../../controllers/GuildController.js";
 import {
   apiActivatePremiumFeature,
@@ -298,6 +299,15 @@ router.post(
   requireAuth,
   requireGuildPermission,
   apiTestWelcome,
+);
+
+// Goodbye System - Test endpoint
+router.post(
+  "/:guildId/goodbye/test",
+  internalAuth,
+  requireAuth,
+  requireGuildPermission,
+  apiTestGoodbye,
 );
 
 export default router;

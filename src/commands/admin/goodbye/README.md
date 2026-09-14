@@ -53,13 +53,18 @@ Following the modular pattern established by other admin commands:
 - Toggle between embed and text formats
 - Real-time settings display
 - Permission-based access control
+- Test goodbye functionality
 
 ## Message Placeholders
 
 - `{user}` - Mentions the user who left
-- `{userName}` - Username of the user who left
+- `{user.name}` - Username of the user who left
+- `{user.tag}` - Username#Discriminator of the user who left
+- `{user.id}` - User ID of the user who left
 - `{server}` - Server name
+- `{server.id}` - Server ID
 - `{memberCount}` - Current member count
+- `{memberCount.ordinal}` - Ordinal member count (e.g., 100th)
 
 ## Dependencies
 

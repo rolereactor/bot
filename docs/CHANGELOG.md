@@ -11,15 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **License**: Relicensed from MIT to **AGPL-3.0-or-later**. The bot remains fully open source and self-hostable; anyone offering it as a hosted service must now make their modified source available under the same license.
 - **Vote Rewards**: Voting for the bot on top.gg now earns **Sparks** ⚡ (earned currency) instead of Core credits — starting at 5 Sparks per vote and scaling with your voting streak up to 8 (12-hour cooldown).
+- **Balance Command**: Simplified to check-only — `/balance send` removed in favor of Power Cells + `/trade`.
 
 ### Added
 
 - **Live Reactor**: Connect your streaming channel to Discord with go-live alerts, real-time chat relay, customizable timers, stream commands, and quote system. Supports Twitch and YouTube.
-- **Dual-Balance Economy**: Earn **Sparks** ⚡ through voting and activity; purchase **Cores** for premium features.
-- **Core Gifting**: Send Cores to other users with `/balance send` (a 10% burn tax applies).
+- **Shop System (Beta)**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and flash sales.
+- **Inventory System (Beta)**: New `/inventory` command to view and use purchased items.
+- **Trade System (Beta)**: New `/trade` command to gift items to other users (no tax).
 - **Referral System**: Claim a friend's referral code for a **+25 Sparks** ⚡ welcome bonus and **+10% bonus Cores** on your first $10+ purchase. Referrers earn **15% bonus Cores** on every qualifying purchase made by users they referred.
 - **Ticket Management Dashboard**: Build and manage ticket panels from the web dashboard.
 - **Goodbye System Dashboard**: Configure goodbye messages, channels, and settings from the web dashboard.
+- **Role Bundle Dashboard API**: Manage role bundles from the web dashboard with GET, POST, and DELETE endpoints. Includes configurable limits for max active bundles and max roles per bundle.
 
 ## [1.8.0] - 2026-07-23
 

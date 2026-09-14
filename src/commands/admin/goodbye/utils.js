@@ -11,7 +11,17 @@ import {
  * @returns {Object} Validation result
  */
 export function validateGoodbyeInputs(inputs) {
-  const { channel, message } = inputs;
+  const { channel, message, enabled } = inputs;
+
+  // Cannot enable without a channel
+  if (enabled && !channel) {
+    return {
+      valid: false,
+      error: "Cannot Enable Without Channel",
+      reason:
+        "You must provide a channel to enable the goodbye system. Please select a channel and try again.",
+    };
+  }
 
   // Validate channel
   if (channel) {

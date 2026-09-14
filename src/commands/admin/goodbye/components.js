@@ -84,6 +84,7 @@ export function createChannelSelectComponents(guild, currentChannelId = null) {
       `Channel ID: ${channel.id}`,
     value: channel.id,
     emoji: EMOJIS.UI.CHANNELS,
+    default: currentChannelId === channel.id,
   }));
 
   // Add current channel if it's not in the list
