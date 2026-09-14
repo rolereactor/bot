@@ -26,14 +26,6 @@ const BENEFITS = [
     category: "Role Reactions",
   },
   {
-    name: "Total Roles per Menu",
-    freeKey: "ROLE_REACTION_MAX_ROLES",
-    proKey: "ROLE_REACTION_MAX_ROLES",
-    tooltip: "Total roles across all emojis in a single reaction menu",
-    type: "limit",
-    category: "Role Reactions",
-  },
-  {
     name: "Max Usage Limits",
     free: true,
     pro: true,
