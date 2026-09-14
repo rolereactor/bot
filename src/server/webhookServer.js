@@ -37,6 +37,7 @@ import commandsRouter from "./routes/v1/commands.js";
 import servicesRouter from "./routes/v1/services.js";
 import docsRouter from "./routes/v1/docs.js";
 import statsRouter from "./routes/v1/stats.js";
+import premiumBenefitsRouter from "./routes/v1/premiumBenefits.js";
 import logsRouter from "./routes/v1/logs.js";
 import configRouter from "./routes/v1/config.js";
 import healthRouter from "./routes/v1/health.js";
@@ -154,7 +155,28 @@ async function initializeMiddleware({ withSession = true } = {}) {
         );
       }
 
-      app.use(session(sessionConfig));
+      // Skip session loading for internal API calls (website → bot).
+      // These use INTERNAL_API_KEY + X-User-Id instead of sessions,
+      // so touching MongoDB for sessions is unnecessary overhead.
+      app.use((req, _res, next) => {
+        const authHeader = req.headers["authorization"] || "";
+        const apiKey = req.headers["x-api-key"];
+        const internalKey = process.env.INTERNAL_API_KEY;
+        const hasInternalAuth =
+          internalKey &&
+          ((authHeader.startsWith("Bearer ") && authHeader.slice(7) === internalKey) ||
+            apiKey === internalKey);
+        if (hasInternalAuth) {
+          req._skipSession = true;
+        }
+        next();
+      });
+
+      const sessionMiddleware = session(sessionConfig);
+      app.use((req, res, next) => {
+        if (req._skipSession) return next();
+        sessionMiddleware(req, res, next);
+      });
     } catch (_error) {
       logger.warn(
         `⚠️ Session setup error: ${_error.message}. Install with: npm install express-session connect-mongo`,
@@ -273,6 +295,8 @@ function initializeRoutes() {
   app.use(`${API_PREFIX}/docs`, internalAuth, docsRouter);
   // Stats router declares its own per-route auth (public: /info, /pricing)
   app.use(`${API_PREFIX}/stats`, statsRouter);
+  // Premium benefits — public, no auth (static feature comparison data)
+  app.use(`${API_PREFIX}/premium`, premiumBenefitsRouter);
   app.use(`${API_PREFIX}/logs`, internalAuth, logsRouter);
   app.use(`${API_PREFIX}/config`, internalAuth, configRouter);
   app.use(`${API_PREFIX}/health`, healthRouter);
