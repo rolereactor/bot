@@ -211,7 +211,7 @@ function formatLimit(value, def, side) {
 }
 
 // GET /api/v1/premium/benefits — public, no auth required
-router.get("/", (_req, res) => {
+router.get("/benefits", (_req, res) => {
   const benefits = BENEFITS.map((def) => ({
     name: def.name,
     category: def.category,
