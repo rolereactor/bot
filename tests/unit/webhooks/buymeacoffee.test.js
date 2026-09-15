@@ -44,7 +44,7 @@ const mockConfig = {
   payments: { buymeacoffeeWebhookSecret: SECRET },
   calculateCores: amount => Math.floor(amount * 15),
   corePricing: {
-    coreSystem: { conversionRate: 15 },
+    coreSystem: { conversionRate: 15, bmacFeeMultiplier: 0.85 },
   },
 };
 
@@ -404,13 +404,13 @@ describe("handleBMACWebhook", () => {
     it("credits cores, marks the code used, and audits the payment", async () => {
       await handleBMACWebhook(makeReq(createBMACBody()), res);
 
-      // Cores granted: $10 × 15 conversion rate = 150 (atomic $inc)
+      // Cores granted: $10 × 15 conversion rate × 0.85 BMAC fee = 127 (atomic $inc)
       expect(
         mockDbManager.coreCredits.collection.findOneAndUpdate,
       ).toHaveBeenCalledWith(
         { userId: "123456" },
         expect.objectContaining({
-          $inc: expect.objectContaining({ credits: 150, totalGenerated: 150 }),
+          $inc: expect.objectContaining({ credits: 127, totalGenerated: 127 }),
         }),
         expect.objectContaining({ upsert: true, returnDocument: "after" }),
       );
@@ -430,7 +430,7 @@ describe("handleBMACWebhook", () => {
           provider: "buymeacoffee",
           status: "completed",
           amount: 10,
-          coresGranted: 150,
+          coresGranted: 127,
         }),
       );
 
@@ -452,7 +452,7 @@ describe("handleBMACWebhook", () => {
       ).toHaveBeenCalledWith(
         { userId: "123456" },
         expect.objectContaining({
-          $inc: expect.objectContaining({ credits: 150, totalGenerated: 150 }),
+          $inc: expect.objectContaining({ credits: 127, totalGenerated: 127 }),
         }),
         expect.objectContaining({ upsert: true, returnDocument: "after" }),
       );
@@ -466,7 +466,7 @@ describe("handleBMACWebhook", () => {
           refereeId: "123456",
           paymentId: "bmac_123",
           purchaseAmount: 10,
-          coresGranted: 150,
+          coresGranted: 127,
         }),
       );
     });
@@ -482,7 +482,7 @@ describe("handleBMACWebhook", () => {
       ).toHaveBeenCalledWith(
         { userId: "123456" },
         expect.objectContaining({
-          $inc: expect.objectContaining({ credits: 75 }),
+          $inc: expect.objectContaining({ credits: 63 }),
         }),
         expect.objectContaining({ upsert: true, returnDocument: "after" }),
       );

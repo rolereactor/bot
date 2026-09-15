@@ -425,6 +425,10 @@ class Config {
         minimumPayment: 1, // Reduced minimum to $1 for testing and accessibility
         priorityProcessing: true, // Core members get priority (planned feature)
 
+        // BMAC fee multiplier — BMAC charges ~5-8% + processing fees
+        // 0.85 = users get 85% of standard cores (15% fee absorbed)
+        bmacFeeMultiplier: parseFloat(process.env.BMAC_FEE_MULTIPLIER) || 0.85,
+
         // Advanced pricing features
         dynamicPricing: {
           enabled: true,

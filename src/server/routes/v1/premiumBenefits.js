@@ -224,6 +224,8 @@ router.get("/benefits", (_req, res) => {
 
   const proFeature = PremiumFeatures.PRO;
   const packages = config.corePricing?.packages || {};
+  const bmacMultiplier = config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
+
   const rateCard = Object.entries(packages)
     .filter(([, pkg]) => !pkg.hidden)
     .map(([, pkg]) => ({
@@ -231,6 +233,16 @@ router.get("/benefits", (_req, res) => {
       name: pkg.name,
       totalCores: pkg.totalCores,
       rate: pkg.rate,
+    }))
+    .sort((a, b) => a.price - b.price);
+
+  const bmacRateCard = Object.entries(packages)
+    .filter(([, pkg]) => !pkg.hidden)
+    .map(([, pkg]) => ({
+      price: pkg.price,
+      name: pkg.name,
+      totalCores: Math.floor(pkg.totalCores * bmacMultiplier),
+      rate: parseFloat((pkg.rate * bmacMultiplier).toFixed(2)),
     }))
     .sort((a, b) => a.price - b.price);
 
@@ -244,6 +256,7 @@ router.get("/benefits", (_req, res) => {
         periodDays: proFeature.periodDays,
       },
       rateCard,
+      bmacRateCard,
     },
   });
 });

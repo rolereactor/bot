@@ -249,14 +249,16 @@ export async function handleBMACWebhook(req, res) {
       }
 
       try {
-        // Calculate cores based on fiat amount
-        const coresToAdd =
+        // Calculate cores based on fiat amount, adjusted for BMAC fees
+        const baseCores =
           typeof config.calculateCores === "function"
             ? config.calculateCores(paymentAmount)
             : Math.floor(
                 paymentAmount *
                   (config.corePricing?.coreSystem?.conversionRate || 15),
               );
+        const bmacMultiplier = config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
+        const coresToAdd = Math.floor(baseCores * bmacMultiplier);
 
         // Atomic credit — $inc + $push in one op; no stale-read, no
         // whole-doc replaceOne that could overwrite concurrent writers.
