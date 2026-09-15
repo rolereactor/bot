@@ -292,6 +292,26 @@ export async function apiDeployRoleReactions(req, res) {
         .json(createErrorResponse("Missing permissions", 403).response);
     }
 
+    if (selectionMode === "unique") {
+      const { getPremiumManager } = await import(
+        "../../features/premium/PremiumManager.js"
+      );
+      const isPro = await getPremiumManager().isFeatureActive(
+        guildId,
+        "pro_engine",
+      );
+      if (!isPro) {
+        return res
+          .status(403)
+          .json(
+            createErrorResponse(
+              "Unique selection mode requires Pro Engine",
+              403,
+            ).response,
+          );
+      }
+    }
+
     const { validRoles, roleMapping } = mergeReactionRoles(reactions);
 
     let embedColor = color || "#9b8bf0";
@@ -402,6 +422,26 @@ export async function apiUpdateRoleReactions(req, res) {
       return res
         .status(404)
         .json(createErrorResponse("Role mapping not found", 404).response);
+
+    if (selectionMode === "unique") {
+      const { getPremiumManager } = await import(
+        "../../features/premium/PremiumManager.js"
+      );
+      const isPro = await getPremiumManager().isFeatureActive(
+        guildId,
+        "pro_engine",
+      );
+      if (!isPro) {
+        return res
+          .status(403)
+          .json(
+            createErrorResponse(
+              "Unique selection mode requires Pro Engine",
+              403,
+            ).response,
+          );
+      }
+    }
 
     const guild = client.guilds.cache.get(guildId);
     const channel = guild?.channels.cache.get(existingMapping.channelId);
