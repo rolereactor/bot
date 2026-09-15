@@ -1,5 +1,6 @@
 import express from "express";
-import { FREE_TIER, PRO_TIER } from "../../../features/premium/config.js";
+import { FREE_TIER, PRO_TIER, PremiumFeatures } from "../../../features/premium/config.js";
+import config from "../../../config/config.js";
 
 const router = express.Router();
 
@@ -221,7 +222,30 @@ router.get("/benefits", (_req, res) => {
     pro: formatLimit(resolveValue(def, PRO_TIER, "pro"), def, "pro"),
   }));
 
-  res.json({ success: true, benefits });
+  const proFeature = PremiumFeatures.PRO;
+  const packages = config.corePricing?.packages || {};
+  const rateCard = Object.entries(packages)
+    .filter(([, pkg]) => !pkg.hidden)
+    .map(([, pkg]) => ({
+      price: pkg.price,
+      name: pkg.name,
+      totalCores: pkg.totalCores,
+      rate: pkg.rate,
+    }))
+    .sort((a, b) => a.price - b.price);
+
+  res.json({
+    success: true,
+    benefits,
+    pricing: {
+      pro: {
+        cost: proFeature.cost,
+        period: proFeature.period,
+        periodDays: proFeature.periodDays,
+      },
+      rateCard,
+    },
+  });
 });
 
 export default router;

@@ -7,6 +7,7 @@ import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
 import { PREMIUM_FEATURES } from "./premiumData.js";
 import { WEBSITE_URL } from "../../../config/domains.js";
 import { PremiumManager } from "../../../features/premium/PremiumManager.js";
+import { PremiumFeatures } from "../../../features/premium/config.js";
 
 const PRO_NAME = "Pro Engine";
 
@@ -66,7 +67,7 @@ async function handleDisplay(interaction) {
       [
         `Upgrade to unlock **unlimited features** and **higher limits**!`,
         "",
-        `**Cost:** 20 Cores/week (~$5/month at current package rates)`,
+        `**Cost:** ${PremiumFeatures.PRO.cost} Cores/${PremiumFeatures.PRO.period}`,
         `**How to upgrade:** Visit **[${WEBSITE_URL}](${WEBSITE_URL})** to purchase Cores and enable ${PRO_NAME}.`,
         "",
         `You can also earn **free Cores** by voting for Role Reactor on Top.gg!`,
@@ -98,6 +99,13 @@ async function handleDisplay(interaction) {
     name: "🎁 Free Trial",
     value:
       "New to Pro? Run `/premium trial` to start a **7-day free trial** — no Cores required, one trial per server.",
+    inline: false,
+  });
+
+  embed.addFields({
+    name: "⚡ Earn with Sparks",
+    value:
+      "Use your earned Sparks to get temporary Pro access! Run `/shop` to browse available items.",
     inline: false,
   });
 

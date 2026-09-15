@@ -1,4 +1,4 @@
-import { CORE_STATUS } from "../../features/premium/config.js";
+import { CORE_STATUS, PremiumFeatures } from "../../features/premium/config.js";
 import { errorEmbed } from "./responseMessages.js";
 import { getMentionableCommand } from "../commandUtils.js";
 import { WEBSITE_URL } from "../../config/domains.js";
@@ -24,7 +24,8 @@ export function createFreeVsProField(freeLimit, proLimit) {
   };
 }
 
-const PRO_COST_LINE = "**20 Cores/week** (~$5/month at current package rates)";
+const { cost, period } = PremiumFeatures.PRO;
+const PRO_COST_LINE = `**${cost} Cores/${period}**`;
 
 /**
  * Creates a consistent upgrade embed when a user hits a free tier limit.
