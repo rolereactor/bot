@@ -102,7 +102,7 @@ const embedFactory = new EmbedFactory(THEME, EMOJIS);
 export function roleCreatedEmbed({ messageUrl, roleCount, channelId }) {
   const embed = embedFactory.create("SUCCESS", {
     title: "Role Setup Complete",
-    description: `Your role-reaction message has been created successfully.`,
+    description: `Your role-reaction panel has been created successfully.`,
     fields: [
       {
         name: "Channel",
@@ -175,7 +175,7 @@ export function roleUpdatedEmbed({
 
   const embed = embedFactory.create("SUCCESS", {
     title: "Configuration Updated",
-    description: `Your role-reaction message has been updated with the latest changes.`,
+    description: `Your role-reaction panel has been updated with the latest changes.`,
     fields: [
       ...fields,
       {
@@ -233,7 +233,7 @@ export function roleDeletedEmbed({ messageId, rolesRemoved = 0 }) {
   const embed = embedFactory.create("SUCCESS", {
     // Changed from WARNING to SUCCESS
     title: "Role Configuration Removed", // Simplified title
-    description: `The role-reaction message has been successfully removed from the system.`,
+    description: `The role-reaction panel has been successfully removed from the system.`,
     fields,
     footer: "Role Reactor • Role Reactions", // Updated footer to match other commands
   });

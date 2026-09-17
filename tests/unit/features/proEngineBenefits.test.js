@@ -124,6 +124,7 @@ describe("Pro Engine Benefits", () => {
       "ROLE_BUNDLE_MAX_ACTIVE",
       "ROLE_REACTION_MAX_EMOJIS",
       "ROLE_REACTION_MAX_ROLES",
+      "ROLE_REACTION_MAX_ROLES_PER_EMOJI",
       "ROLE_REACTION_MAX_MESSAGES",
       "CUSTOM_VARIABLES_MAX",
       "CUSTOM_EVENT_TRIGGERS_MAX",
@@ -143,6 +144,7 @@ describe("Pro Engine Benefits", () => {
       "ROLE_BUNDLE_MAX_ACTIVE",
       "ROLE_REACTION_MAX_EMOJIS",
       "ROLE_REACTION_MAX_ROLES",
+      "ROLE_REACTION_MAX_ROLES_PER_EMOJI",
       "ROLE_REACTION_MAX_MESSAGES",
       "CUSTOM_VARIABLES_MAX",
       "CUSTOM_EVENT_TRIGGERS_MAX",
@@ -211,7 +213,7 @@ describe("Pro Engine Benefits", () => {
       expect(featureNames).toContain("Ticket Capacity");
       expect(featureNames).toContain("Bulk Actions");
       expect(featureNames).toContain("Level Rewards");
-      expect(featureNames).toContain("Role Reaction Menus");
+      expect(featureNames).toContain("Role Reaction Panels");
       expect(featureNames).toContain("Role Reaction Emojis");
     });
 
@@ -263,8 +265,8 @@ describe("Pro Engine Benefits", () => {
       expect(row.pro).toContain("Unlimited");
     });
 
-    it("Role Reaction Menus matches config", () => {
-      const row = table.find(r => r.feature === "Role Reaction Menus");
+    it("Role Reaction Panels matches config", () => {
+      const row = table.find(r => r.feature === "Role Reaction Panels");
       expect(row.free).toBe(String(FREE_TIER.ROLE_REACTION_MAX_MESSAGES));
       expect(row.pro).toBe(String(PRO_TIER.ROLE_REACTION_MAX_MESSAGES));
     });
@@ -289,13 +291,13 @@ describe("Pro Engine Benefits", () => {
     it("role-reactions display matches config", () => {
       const f = findFeature("role-reactions");
       expect(f).toBeDefined();
-      expect(extractNumber(f.free, /(\d+) menus/)).toBe(
+      expect(extractNumber(f.free, /(\d+) panels/)).toBe(
         FREE_TIER.ROLE_REACTION_MAX_MESSAGES,
       );
       expect(extractNumber(f.free, /(\d+) emojis/)).toBe(
         FREE_TIER.ROLE_REACTION_MAX_EMOJIS,
       );
-      expect(extractNumber(f.pro, /(\d+) menus/)).toBe(
+      expect(extractNumber(f.pro, /(\d+) panels/)).toBe(
         PRO_TIER.ROLE_REACTION_MAX_MESSAGES,
       );
       expect(extractNumber(f.pro, /(\d+) emojis/)).toBe(
@@ -400,7 +402,7 @@ describe("Pro Engine Benefits", () => {
     it("mentions Role Reactions with correct limits", () => {
       expect(includes).toContain("role reactions");
       expect(includes).toContain(`${PRO_TIER.ROLE_REACTION_MAX_EMOJIS} emojis`);
-      expect(includes).toContain(`${PRO_TIER.ROLE_REACTION_MAX_MESSAGES} menus`);
+      expect(includes).toContain(`${PRO_TIER.ROLE_REACTION_MAX_MESSAGES} panels`);
     });
 
     it("mentions Role Bundles with correct limit", () => {

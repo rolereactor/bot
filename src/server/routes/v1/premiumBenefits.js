@@ -11,27 +11,43 @@ const router = express.Router();
 const BENEFITS = [
   // Role Reactions
   {
-    name: "Reaction Messages",
+    name: "Reaction Panels",
     freeKey: "ROLE_REACTION_MAX_MESSAGES",
     proKey: "ROLE_REACTION_MAX_MESSAGES",
-    tooltip: "Number of role-assignment menus you can set up in your server",
+    tooltip: "Number of role-assignment panels you can set up in your server",
     type: "limit",
     category: "Role Reactions",
   },
   {
-    name: "Emojis per Message",
+    name: "Emojis per Panel",
     freeKey: "ROLE_REACTION_MAX_EMOJIS",
     proKey: "ROLE_REACTION_MAX_EMOJIS",
-    tooltip: "How many roles users can pick from a single reaction menu",
+    tooltip: "How many emojis (role options) you can add to a single panel",
     type: "limit",
     category: "Role Reactions",
   },
   {
-    name: "Max Usage Limits",
-    free: true,
-    pro: true,
-    tooltip: "Cap how many people can claim a specific role via reaction",
-    type: "feature",
+    name: "Roles per Emoji",
+    freeKey: "ROLE_REACTION_MAX_ROLES_PER_EMOJI",
+    proKey: "ROLE_REACTION_MAX_ROLES_PER_EMOJI",
+    tooltip: "How many roles a single emoji can assign at once",
+    type: "limit",
+    category: "Role Reactions",
+  },
+  {
+    name: "Roles per Bundle",
+    freeKey: "ROLE_BUNDLE_MAX_ROLES",
+    proKey: "ROLE_BUNDLE_MAX_ROLES",
+    tooltip: "How many roles can be saved in a single bundle",
+    type: "limit",
+    category: "Role Reactions",
+  },
+  {
+    name: "Bundle Slots",
+    freeKey: "ROLE_BUNDLE_MAX_ACTIVE",
+    proKey: "ROLE_BUNDLE_MAX_ACTIVE",
+    tooltip: "How many role bundles you can create per server",
+    type: "limit",
     category: "Role Reactions",
   },
 
@@ -86,14 +102,6 @@ const BENEFITS = [
     freeKey: "SCHEDULE_MAX_ACTIVE",
     proKey: "SCHEDULE_MAX_ACTIVE",
     tooltip: "Automatically assign or remove roles on a timer",
-    type: "limit",
-    category: "Automation",
-  },
-  {
-    name: "Role Bundles",
-    freeKey: "ROLE_BUNDLE_MAX_ROLES",
-    proKey: "ROLE_BUNDLE_MAX_ROLES",
-    tooltip: "Save groups of roles and apply them all at once",
     type: "limit",
     category: "Automation",
   },
@@ -186,7 +194,6 @@ const BENEFITS = [
 ];
 
 function resolveValue(def, tier, key) {
-  if (key in def) return def[key];
   if (key === "free") {
     if (def.free !== undefined) return def.free;
     if (def.freeKey) return tier[def.freeKey];
@@ -197,6 +204,8 @@ function resolveValue(def, tier, key) {
     if (def.proKey) return tier[def.proKey];
     if (def.proValue !== undefined) return def.proValue;
   }
+  if (key === "freeSub" && def.freeSub) return tier[def.freeSub];
+  if (key === "proSub" && def.proSub) return tier[def.proSub];
   return null;
 }
 
@@ -213,14 +222,33 @@ function formatLimit(value, def, side) {
 
 // GET /api/v1/premium/benefits — public, no auth required
 router.get("/benefits", (_req, res) => {
-  const benefits = BENEFITS.map((def) => ({
-    name: def.name,
-    category: def.category,
-    tooltip: def.tooltip,
-    type: def.type,
-    free: formatLimit(resolveValue(def, FREE_TIER, "free"), def, "free"),
-    pro: formatLimit(resolveValue(def, PRO_TIER, "pro"), def, "pro"),
-  }));
+  const benefits = BENEFITS.map((def) => {
+    const free = formatLimit(resolveValue(def, FREE_TIER, "free"), def, "free");
+    const pro = formatLimit(resolveValue(def, PRO_TIER, "pro"), def, "pro");
+
+    // Handle merged limits (e.g., "3 bundles × 3 roles each")
+    if (def.freeSub) {
+      const freeSubVal = resolveValue(def, FREE_TIER, "freeSub") ?? resolveValue(def, FREE_TIER, "proSub");
+      const proSubVal = resolveValue(def, PRO_TIER, "proSub") ?? resolveValue(def, PRO_TIER, "freeSub");
+      return {
+        name: def.name,
+        category: def.category,
+        tooltip: def.tooltip,
+        type: def.type,
+        free: freeSubVal ? `${free} bundles × ${freeSubVal} roles each` : free,
+        pro: proSubVal ? `${pro} bundles × ${proSubVal} roles each` : pro,
+      };
+    }
+
+    return {
+      name: def.name,
+      category: def.category,
+      tooltip: def.tooltip,
+      type: def.type,
+      free,
+      pro,
+    };
+  });
 
   const proFeature = PremiumFeatures.PRO;
   const packages = config.corePricing?.packages || {};

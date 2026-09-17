@@ -32,9 +32,9 @@ export const metadata = {
       inline: false,
     },
     {
-      name: `Integrating Bundles into Menus`,
+      name: `Integrating Bundles into Panels`,
       value:
-        "Once a bundle is created, simply drop it into a `/role-reactions` menu natively by wrapping it in brackets: `💡:[StarterPack]`",
+        "Once a bundle is created, simply drop it into a `/role-reactions` panel natively by wrapping it in brackets: `💡:[StarterPack]`",
       inline: false,
     },
     {

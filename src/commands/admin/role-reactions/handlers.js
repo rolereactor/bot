@@ -126,17 +126,17 @@ export async function handleSetup(interaction, client) {
       if (!isPro) {
         return interaction.editReply(
           upgradeLimitEmbed({
-            feature: "Role Reaction Menus",
-            freeText: `${FREE_TIER.ROLE_REACTION_MAX_MESSAGES} menus`,
-            proText: `${PRO_TIER.ROLE_REACTION_MAX_MESSAGES} menus`,
+            feature: "Role Reaction Panels",
+            freeText: `${FREE_TIER.ROLE_REACTION_MAX_MESSAGES} panels`,
+            proText: `${PRO_TIER.ROLE_REACTION_MAX_MESSAGES} panels`,
             client: interaction.client,
           }),
         );
       }
       return interaction.editReply(
         errorEmbed({
-          title: "Maximum Menus Reached",
-          description: `You have reached the maximum limit of **${maxMessages}** active Role Reaction menus.`,
+          title: "Maximum Panels Reached",
+          description: `You have reached the maximum limit of **${maxMessages}** active Role Reaction panels.`,
         }),
       );
     }
@@ -165,8 +165,8 @@ export async function handleSetup(interaction, client) {
         return interaction.editReply(
           upgradeLimitEmbed({
             feature: "Role Reaction Emojis",
-            freeText: `${FREE_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per menu`,
-            proText: `${PRO_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per menu`,
+            freeText: `${FREE_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per panel`,
+            proText: `${PRO_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per panel`,
             client: interaction.client,
           }),
         );
@@ -174,12 +174,12 @@ export async function handleSetup(interaction, client) {
       return interaction.editReply(
         errorEmbed({
           title: "Too Many Reactions",
-          description: `A role reaction message can contain a maximum of **${maxEmojis}** unique reaction emojis. You provided **${validRoles.length}**.`,
+          description: `A role reaction panel can contain a maximum of **${maxEmojis}** unique reaction emojis. You provided **${validRoles.length}**.`,
         }),
       );
     }
 
-    // Prepare message data
+    // Prepare panel data
     const title = interaction.options.getString("title")?.replace(/\\n/g, "\n");
     const description = interaction.options
       .getString("description")
@@ -192,7 +192,7 @@ export async function handleSetup(interaction, client) {
     }
     const hideList = interaction.options.getBoolean("hide_list") ?? false;
 
-    // Create role-reaction message
+    // Create role-reaction panel
     const messageResult = await createRoleReactionMessage(
       interaction,
       {
@@ -224,12 +224,12 @@ export async function handleSetup(interaction, client) {
       // Delete the message since reactions failed - it's not usable without reactions
       try {
         await message.delete();
-        logger.debug("Deleted role-reaction message due to reaction failures", {
+        logger.debug("Deleted role-reaction panel due to reaction failures", {
           messageId: message.id,
         });
       } catch (deleteError) {
         logger.warn(
-          "Failed to delete role-reaction message after reaction failure",
+          "Failed to delete role-reaction panel after reaction failure",
           {
             messageId: message.id,
             error: deleteError.message,
@@ -257,14 +257,6 @@ export async function handleSetup(interaction, client) {
       roleCount: validRoles.length,
       channelId: interaction.channel.id,
     });
-    setupResponse.components.push(
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("Open Dashboard")
-          .setStyle(ButtonStyle.Link)
-          .setURL(`https://rolereactor.xyz/dashboard/${interaction.guild.id}`),
-      ),
-    );
     await interaction.editReply(setupResponse);
 
     logger.debug("Role-reaction setup completed successfully");
@@ -343,11 +335,11 @@ export async function handleList(
       if (!isButtonUpdate) activeLists.delete(interaction.id);
       return interaction.editReply(
         errorEmbed({
-          title: "No Role-Reaction Messages Found",
+          title: "No Role-Reaction Panels Found",
           description:
-            "There are no role-reaction messages set up in this server yet.",
+            "There are no role-reaction panels set up in this server yet.",
           solution:
-            "Use `role-reactions setup` to create your first role-reaction message!",
+            "Use `role-reactions setup` to create your first role-reaction panel!",
         }),
       );
     }
@@ -457,7 +449,7 @@ export async function handleDelete(interaction) {
         errorEmbed({
           title: "Message Not Found",
           description:
-            "I couldn't find a role-reaction message with that ID in this server.",
+            "I couldn't find a role-reaction panel with that ID in this server.",
         }),
       );
     }
@@ -534,7 +526,7 @@ export async function handleUpdate(interaction) {
         errorEmbed({
           title: "Message Not Found",
           description:
-            "I couldn't find a role-reaction message with that ID in this server.",
+            "I couldn't find a role-reaction panel with that ID in this server.",
         }),
       );
     }
@@ -567,8 +559,8 @@ export async function handleUpdate(interaction) {
           return interaction.editReply(
             upgradeLimitEmbed({
               feature: "Role Reaction Emojis",
-              freeText: `${FREE_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per menu`,
-              proText: `${PRO_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per menu`,
+              freeText: `${FREE_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per panel`,
+              proText: `${PRO_TIER.ROLE_REACTION_MAX_EMOJIS} emojis per panel`,
               client: interaction.client,
             }),
           );
@@ -576,7 +568,7 @@ export async function handleUpdate(interaction) {
         return interaction.editReply(
           errorEmbed({
             title: "Too Many Reactions",
-            description: `A role reaction message can contain a maximum of **${maxEmojis}** unique reaction emojis. You provided **${validRoles.length}**.`,
+            description: `A role reaction panel can contain a maximum of **${maxEmojis}** unique reaction emojis. You provided **${validRoles.length}**.`,
           }),
         );
       }
@@ -655,14 +647,6 @@ export async function handleUpdate(interaction) {
       messageUrl: message.url,
       channelId: mapping.channelId,
     });
-    updateResponse.components.push(
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setLabel("Open Dashboard")
-          .setStyle(ButtonStyle.Link)
-          .setURL(`https://rolereactor.xyz/dashboard/${interaction.guild.id}`),
-      ),
-    );
     await interaction.editReply(updateResponse);
 
     logger.debug("Role-reaction update completed successfully");

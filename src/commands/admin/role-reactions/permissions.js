@@ -68,7 +68,7 @@ export function validateGuildPermissions(interaction) {
           {
             name: "📋 Required Permissions",
             value:
-              "• **Manage Roles** - To assign/remove roles from users\n• **Manage Messages** - To manage role-reaction messages\n• **Add Reactions** - To add emoji reactions to messages\n• **Read Message History** - To read channel history\n• **View Channel** - To access channel information\n• **Send Messages** - To send role-reaction messages\n• **Embed Links** - To create rich embeds\n• **Use External Emojis** - To use emojis from other servers",
+              "• **Manage Roles** - To assign/remove roles from users\n• **Manage Messages** - To manage role-reaction panels\n• **Add Reactions** - To add emoji reactions to panels\n• **Read Message History** - To read channel history\n• **View Channel** - To access channel information\n• **Send Messages** - To send role-reaction panels\n• **Embed Links** - To create rich embeds\n• **Use External Emojis** - To use emojis from other servers",
             inline: false,
           },
         ],
@@ -132,7 +132,7 @@ export function validateChannelPermissions(
         errorResponse: errorEmbed({
           title: "Cannot Setup Role Reactions",
           description:
-            "I don't have the **Add Reactions** permission in this channel, which is required to create role-reaction messages.",
+            "I don't have the **Add Reactions** permission in this channel, which is required to create role-reaction panels.",
           solution:
             "Please grant me the **Add Reactions** permission in this channel and try again.",
           fields: [
@@ -145,7 +145,7 @@ export function validateChannelPermissions(
             {
               name: "📋 Why This Permission is Critical",
               value:
-                "• **Add Reactions** - Required to add emoji reactions to role-reaction messages\n• Without this permission, role-reaction messages are useless\n• Users won't be able to click reactions to get/remove roles",
+                "• **Add Reactions** - Required to add emoji reactions to role-reaction panels\n• Without this permission, role-reaction panels are useless\n• Users won't be able to click reactions to get/remove roles",
               inline: false,
             },
           ],
@@ -171,7 +171,7 @@ export function validateChannelPermissions(
             name: "📋 Missing Channel Permissions",
             value: missingChannelPermissions
               .map(
-                perm => `• **${perm}** - Required for role-reaction messages`,
+                perm => `• **${perm}** - Required for role-reaction panels`,
               )
               .join("\n"),
             inline: false,

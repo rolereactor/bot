@@ -292,14 +292,20 @@ export async function apiDeployRoleReactions(req, res) {
         .json(createErrorResponse("Missing permissions", 403).response);
     }
 
+    // Check Pro status for tier limits
+    const { getPremiumManager } = await import(
+      "../../features/premium/PremiumManager.js"
+    );
+    const { FREE_TIER, PRO_TIER } = await import(
+      "../../features/premium/config.js"
+    );
+    const isPro = await getPremiumManager().isFeatureActive(
+      guildId,
+      "pro_engine",
+    );
+    console.log(`[DEBUG-PRO-DEPLOY] guildId=${guildId} isPro=${isPro}`);
+
     if (selectionMode === "unique") {
-      const { getPremiumManager } = await import(
-        "../../features/premium/PremiumManager.js"
-      );
-      const isPro = await getPremiumManager().isFeatureActive(
-        guildId,
-        "pro_engine",
-      );
       if (!isPro) {
         return res
           .status(403)
@@ -313,6 +319,24 @@ export async function apiDeployRoleReactions(req, res) {
     }
 
     const { validRoles, roleMapping } = mergeReactionRoles(reactions);
+
+    // Validate per-emoji role limit
+    const maxRolesPerEmoji = isPro
+      ? PRO_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI
+      : FREE_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI;
+    for (const r of validRoles) {
+      const roleCount = r.roleIds?.length || 0;
+      if (roleCount > maxRolesPerEmoji) {
+        return res
+          .status(400)
+          .json(
+            createErrorResponse(
+              `Too many roles for emoji ${r.emoji}. You have ${roleCount} roles, but the maximum is ${maxRolesPerEmoji} roles per emoji.`,
+              400,
+            ).response,
+          );
+      }
+    }
 
     let embedColor = color || "#9b8bf0";
     if (embedColor && !embedColor.startsWith("#"))
@@ -423,26 +447,6 @@ export async function apiUpdateRoleReactions(req, res) {
         .status(404)
         .json(createErrorResponse("Role mapping not found", 404).response);
 
-    if (selectionMode === "unique") {
-      const { getPremiumManager } = await import(
-        "../../features/premium/PremiumManager.js"
-      );
-      const isPro = await getPremiumManager().isFeatureActive(
-        guildId,
-        "pro_engine",
-      );
-      if (!isPro) {
-        return res
-          .status(403)
-          .json(
-            createErrorResponse(
-              "Unique selection mode requires Pro Engine",
-              403,
-            ).response,
-          );
-      }
-    }
-
     const guild = client.guilds.cache.get(guildId);
     const channel = guild?.channels.cache.get(existingMapping.channelId);
     if (!guild || !channel || !channel.isTextBased())
@@ -462,6 +466,51 @@ export async function apiUpdateRoleReactions(req, res) {
       const merged = mergeReactionRoles(reactions);
       roleMapping = merged.roleMapping;
       validRoles = merged.validRoles;
+    }
+
+    // Check Pro status for tier limits
+    const { getPremiumManager } = await import(
+      "../../features/premium/PremiumManager.js"
+    );
+    const { FREE_TIER, PRO_TIER } = await import(
+      "../../features/premium/config.js"
+    );
+    const isPro = await getPremiumManager().isFeatureActive(
+      guildId,
+      "pro_engine",
+    );
+    console.log(`[DEBUG-PRO-UPDATE] guildId=${guildId} isPro=${isPro}`);
+
+    if (selectionMode === "unique") {
+      if (!isPro) {
+        return res
+          .status(403)
+          .json(
+            createErrorResponse(
+              "Unique selection mode requires Pro Engine",
+              403,
+            ).response,
+          );
+      }
+    }
+
+    // Validate per-emoji role limit
+    const maxRolesPerEmoji = isPro
+      ? PRO_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI
+      : FREE_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI;
+
+    for (const r of validRoles) {
+      const roleCount = r.roleIds?.length || 0;
+      if (roleCount > maxRolesPerEmoji) {
+        return res
+          .status(400)
+          .json(
+            createErrorResponse(
+              `Too many roles for emoji ${r.emoji}. You have ${roleCount} roles, but the maximum is ${maxRolesPerEmoji} roles per emoji.`,
+              400,
+            ).response,
+          );
+      }
     }
 
     const finalRoleMapping = Object.keys(roleMapping).length

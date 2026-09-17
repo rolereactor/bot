@@ -8,7 +8,7 @@ import {
   PRO_TIER,
 } from "../../features/premium/config.js";
 
-// Member cache for reducing API calls
+// Member cache for reducing API calls (long-lived, 5-minute TTL)
 class MemberCache {
   constructor() {
     this.cache = new Map();
@@ -50,6 +50,9 @@ const memberCache = new MemberCache();
 // Cleanup cache every 5 minutes
 setInterval(() => memberCache.cleanup(), 5 * 60 * 1000).unref();
 
+// In-flight fetch deduplication — prevents redundant API calls for the same user
+const inflightFetches = new Map();
+
 /**
  * Gets a member with caching to reduce API calls
  * @param {import("discord.js").Guild} guild The guild to search in
@@ -70,6 +73,222 @@ export async function getCachedMember(guild, userId) {
   } catch (error) {
     getLogger().debug(`Failed to fetch member ${userId}: ${error.message}`);
     return null;
+  }
+}
+
+/**
+ * Fetches a fresh member from Discord API with request deduplication.
+ * If two handlers fire for the same user simultaneously, only one API call is made.
+ * Use this in unique mode handlers where stale cache is a concern.
+ * @param {import("discord.js").Guild} guild The guild to search in
+ * @param {string} userId The user ID to fetch
+ * @returns {Promise<import("discord.js").GuildMember|null>} Fresh member, or null if not found
+ */
+export async function fetchFreshMember(guild, userId) {
+  const key = `${guild.id}:${userId}`;
+
+  // If there's already an in-flight request for this user, reuse it
+  if (inflightFetches.has(key)) {
+    return inflightFetches.get(key);
+  }
+
+  const fetchPromise = guild.members
+    .fetch(userId)
+    .then(member => {
+      // Update the long-lived cache so future getCachedMember calls are fresh too
+      memberCache.set(guild.id, userId, member);
+      return member;
+    })
+    .catch(error => {
+      getLogger().debug(`Failed to fetch fresh member ${userId}: ${error.message}`);
+      return null;
+    })
+    .finally(() => {
+      inflightFetches.delete(key);
+    });
+
+  inflightFetches.set(key, fetchPromise);
+  return fetchPromise;
+}
+
+// Per-user task queue — serializes role operations to prevent race conditions
+// When two unique mode events fire for the same user concurrently,
+// the second waits for the first to complete before starting.
+const userQueues = new Map();
+const USER_QUEUE_TIMEOUT = 30_000; // 30s safety timeout per task
+
+// Per-user cooldown for unique mode — prevents spam when user rapidly clicks between emojis
+const UNIQUE_MODE_COOLDOWN_MS = 3000; // 3 seconds
+const uniqueModeCooldowns = new Map(); // key: guildId:userId -> timestamp of last processed event
+
+/**
+ * Checks if a user is within the unique mode cooldown window.
+ * @param {string} guildId
+ * @param {string} userId
+ * @returns {boolean} True if the user is still within cooldown (should skip this event)
+ */
+export function isUniqueModeCooldownActive(guildId, userId) {
+  const key = `${guildId}:${userId}`;
+  const lastTimestamp = uniqueModeCooldowns.get(key);
+  if (!lastTimestamp) return false;
+  return Date.now() - lastTimestamp < UNIQUE_MODE_COOLDOWN_MS;
+}
+
+/**
+ * Records that a unique mode event was processed for a user.
+ * @param {string} guildId
+ * @param {string} userId
+ */
+export function recordUniqueModeEvent(guildId, userId) {
+  const key = `${guildId}:${userId}`;
+  uniqueModeCooldowns.set(key, Date.now());
+}
+
+// Cleanup cooldowns every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of uniqueModeCooldowns.entries()) {
+    if (now - timestamp > UNIQUE_MODE_COOLDOWN_MS * 2) {
+      uniqueModeCooldowns.delete(key);
+    }
+  }
+}, 5 * 60 * 1000).unref();
+
+/**
+ * Per-user mutex that waits for Discord to confirm role changes via GUILD_MEMBER_UPDATE.
+ *
+ * Discord API promises resolve when Discord ACKNOWLEDGES the request, not when it
+ * APPLIES it. The member.roles.cache is only updated when GUILD_MEMBER_UPDATE fires.
+ * This mutex ensures we wait for that event before allowing the next operation.
+ *
+ * Fallback: auto-unlock after 5 seconds to prevent deadlocks.
+ */
+class UserMutex {
+  constructor() {
+    this.#locks = new Map(); // userId -> { locked: boolean, waiters: Function[] }
+    this.#timers = new Map(); // userId -> NodeJS.Timeout
+  }
+
+  #locks;
+  #timers;
+  #TIMEOUT = 5000;
+
+  /**
+   * Acquire the lock for a user. Blocks until the lock is available.
+   * The lock is released when unlock() is called (typically by guildMemberUpdate).
+   * @param {string} userId
+   */
+  async lock(userId) {
+    if (!this.#locks.has(userId)) {
+      this.#locks.set(userId, { locked: false, waiters: [] });
+    }
+
+    const lock = this.#locks.get(userId);
+
+    // If locked, wait for it to be released
+    if (lock.locked) {
+      await new Promise(resolve => {
+        lock.waiters.push(resolve);
+      });
+    }
+
+    // Acquire the lock
+    lock.locked = true;
+
+    // Set up fallback timer to prevent deadlocks
+    const timer = setTimeout(() => {
+      this.unlock(userId, true);
+    }, this.#TIMEOUT);
+
+    this.#timers.set(userId, timer);
+  }
+
+  /**
+   * Release the lock for a user. Called by guildMemberUpdate when Discord confirms
+   * the role change, or by the fallback timer.
+   * @param {string} userId
+   * @param {boolean} timedOut - Whether this unlock was triggered by the fallback timer
+   */
+  unlock(userId, timedOut = false) {
+    const lock = this.#locks.get(userId);
+    if (!lock || !lock.locked) return;
+
+    // Clear the fallback timer
+    if (this.#timers.has(userId)) {
+      clearTimeout(this.#timers.get(userId));
+      this.#timers.delete(userId);
+    }
+
+    // Release the lock
+    lock.locked = false;
+
+    // Wake up the next waiter, or clean up
+    if (lock.waiters.length > 0) {
+      const next = lock.waiters.shift();
+      next();
+    } else {
+      this.#locks.delete(userId);
+    }
+  }
+}
+
+export const userMutex = new UserMutex();
+
+/**
+ * Enqueues a task for a specific user, guaranteeing serial execution.
+ * Tasks for the same guild:user execute one at a time, in order.
+ * @param {string} guildId
+ * @param {string} userId
+ * @param {() => Promise<void>} task Async function to execute
+ * @returns {Promise<void>}
+ */
+export function enqueueForUser(guildId, userId, task) {
+  const key = `${guildId}:${userId}`;
+  const queue = userQueues.get(key) || [];
+  userQueues.set(key, queue);
+
+  const deferred = { resolve: null, reject: null, promise: null };
+  deferred.promise = new Promise((resolve, reject) => {
+    deferred.resolve = resolve;
+    deferred.reject = reject;
+  });
+
+  queue.push({ task, deferred });
+
+  // If this is the only task in queue, start processing immediately
+  if (queue.length === 1) {
+    processUserQueue(key);
+  }
+
+  return deferred.promise;
+}
+
+async function processUserQueue(key) {
+  const queue = userQueues.get(key);
+  if (!queue || queue.length === 0) return;
+
+  const { task, deferred } = queue[0];
+
+  const timeout = new Promise((_, reject) =>
+    setTimeout(
+      () => reject(new Error(`User queue task timed out after ${USER_QUEUE_TIMEOUT}ms`)),
+      USER_QUEUE_TIMEOUT,
+    ),
+  );
+
+  try {
+    await Promise.race([task(), timeout]);
+    deferred.resolve();
+  } catch (error) {
+    getLogger().error(`User queue task failed for ${key}`, error);
+    deferred.reject(error);
+  } finally {
+    queue.shift();
+    if (queue.length > 0) {
+      processUserQueue(key);
+    } else {
+      userQueues.delete(key);
+    }
   }
 }
 
@@ -570,6 +789,24 @@ export async function processRoles(interaction, rolesString) {
       validRoles: [],
       roleMapping: {},
     };
+  }
+
+  // Check per-emoji role limit
+  const maxRolesPerEmoji = isPro
+    ? PRO_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI
+    : FREE_TIER.ROLE_REACTION_MAX_ROLES_PER_EMOJI;
+
+  for (const r of validRoles) {
+    if (r.roleIds && r.roleIds.length > maxRolesPerEmoji) {
+      return {
+        success: false,
+        errors: [
+          `Too many roles for emoji ${r.emoji}. You have ${r.roleIds.length} roles, but the maximum is ${maxRolesPerEmoji} roles per emoji.`,
+        ],
+        validRoles: [],
+        roleMapping: {},
+      };
+    }
   }
 
   if (validationErrors.length > 0) {

@@ -75,9 +75,9 @@ export function createListRolesEmbed(
   const totalItems = pagination ? pagination.totalItems : guildMappings.length;
 
   const embed = new EmbedBuilder()
-    .setTitle("Role Reaction Messages") // Simplified title
+    .setTitle("Role Reaction Panels") // Simplified title
     .setDescription(
-      `Found **${totalItems}** role-reaction message${totalItems !== 1 ? "s" : ""} in this server.`,
+      `Found **${totalItems}** role-reaction panel${totalItems !== 1 ? "s" : ""} in this server.`,
     )
     .setColor(THEME.PRIMARY) // Use THEME.PRIMARY
     .setTimestamp()
@@ -91,8 +91,8 @@ export function createListRolesEmbed(
   if (guildMappings.length === 0) {
     embed.addFields([
       {
-        name: "Messages",
-        value: "No role-reaction messages found in this server.",
+        name: "Panels",
+        value: "No role-reaction panels found in this server.",
         inline: false,
       },
     ]);

@@ -34,8 +34,8 @@ export const PremiumFeatures = {
       "4x Scheduled Role Capacity (100 active slots)",
       "4x Bulk Action Capacity (100 users per action)",
       "Advanced Auto-Mod (domain allowlist, caps lock, wildcard/regex, per-channel, analytics, export)",
-      "Role Reactions (20 emojis, 15 menus)",
-      "Role Bundles (20 roles per bundle)",
+      "Role Reactions (20 emojis, 15 panels)",
+      "Role Bundles (10 roles per bundle)",
     ],
   },
 };
@@ -59,10 +59,11 @@ export const FREE_TIER = {
   GIVEAWAY_MAX_WINNERS: 5,
   SCHEDULE_MAX_ACTIVE: 25,
   BULK_ACTION_MAX_MEMBERS: 25,
-  ROLE_BUNDLE_MAX_ROLES: 5,
+  ROLE_BUNDLE_MAX_ROLES: 3,
   ROLE_BUNDLE_MAX_ACTIVE: 5,
-  ROLE_REACTION_MAX_EMOJIS: 3,
-  ROLE_REACTION_MAX_ROLES: 3, // Total roles across all emojis per menu
+  ROLE_REACTION_MAX_EMOJIS: 5,
+  ROLE_REACTION_MAX_ROLES: 5, // Total roles across all emojis per panel
+  ROLE_REACTION_MAX_ROLES_PER_EMOJI: 3,
   ROLE_REACTION_MAX_MESSAGES: 3,
   // Custom Variables & Event Triggers
   CUSTOM_VARIABLES_MAX: 10,
@@ -81,10 +82,11 @@ export const PRO_TIER = {
   GIVEAWAY_MAX_WINNERS: 10, // Prevents Discord DM rate-limiting (Reduced from 20)
   SCHEDULE_MAX_ACTIVE: 100, // Keeps timer loop lightweight on VPS (Reduced from 500)
   BULK_ACTION_MAX_MEMBERS: 100, // Prevents Discord API rate-limit 429 errors (Reduced from 250)
-  ROLE_BUNDLE_MAX_ROLES: 20, // 4x free tier
+  ROLE_BUNDLE_MAX_ROLES: 10,
   ROLE_BUNDLE_MAX_ACTIVE: 20, // 4x free tier
   ROLE_REACTION_MAX_EMOJIS: 20, // Discord's hard limit
-  ROLE_REACTION_MAX_ROLES: 20, // Total roles across all emojis per menu
+  ROLE_REACTION_MAX_ROLES: 20, // Total roles across all emojis per panel
+  ROLE_REACTION_MAX_ROLES_PER_EMOJI: 10,
   ROLE_REACTION_MAX_MESSAGES: 15, // 3x free tier
   // Custom Variables & Event Triggers
   CUSTOM_VARIABLES_MAX: 100,

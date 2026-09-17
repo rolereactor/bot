@@ -24,7 +24,7 @@ import { getColorChoices } from "./utils.js";
 export const metadata = {
   name: "role-reactions",
   category: "admin",
-  description: "Manage role reaction messages",
+  description: "Manage role reaction panels",
   keywords: [
     "role-reactions",
     "role reactions",
@@ -50,10 +50,10 @@ export const metadata = {
     {
       name: `Subcommands`,
       value: [
-        "**setup** - Create a new role-reaction message",
-        "**list** - List all role-reaction messages",
-        "**update** - Update an existing role-reaction message",
-        "**delete** - Delete a role-reaction message",
+        "**setup** - Create a new role-reaction panel",
+        "**list** - List all role-reaction panels",
+        "**update** - Update an existing role-reaction panel",
+        "**delete** - Delete a role-reaction panel",
       ].join("\n"),
       inline: false,
     },
@@ -81,9 +81,9 @@ export const metadata = {
     {
       name: `Tier Limitations`,
       value: [
-        "• **Active Menus:** 3 Menus (Free) | 15 Menus (Pro Engine)",
-        "• **Emojis per Menu:** 3 Emojis (Free) | 20 Emojis (Pro Engine)",
-        "• **Total Roles per Menu:** 3 Roles (Free) | 20 Roles (Pro Engine)",
+        "• **Active Panels:** 3 Panels (Free) | 15 Panels (Pro Engine)",
+        "• **Emojis per Panel:** 5 Emojis (Free) | 20 Emojis (Pro Engine)",
+        "• **Total Roles per Panel:** 5 Roles (Free) | 20 Roles (Pro Engine)",
       ].join("\n"),
       inline: false,
     },
@@ -101,18 +101,18 @@ export const data = new SlashCommandBuilder()
     sub
       .setName("setup")
       .setDescription(
-        "Create a role-reaction message for self-assignable roles",
+        "Create a role-reaction panel for self-assignable roles",
       )
       .addStringOption(opt =>
         opt
           .setName("title")
-          .setDescription("Title of the role message")
+          .setDescription("Title of the role panel")
           .setRequired(true),
       )
       .addStringOption(opt =>
         opt
           .setName("description")
-          .setDescription("Description of the role message")
+          .setDescription("Description of the role panel")
           .setRequired(true),
       )
       .addStringOption(opt =>
@@ -140,12 +140,12 @@ export const data = new SlashCommandBuilder()
       ),
   )
   .addSubcommand(sub =>
-    sub.setName("list").setDescription("List all role-reaction messages"),
+    sub.setName("list").setDescription("List all role-reaction panels"),
   )
   .addSubcommand(sub =>
     sub
       .setName("delete")
-      .setDescription("Delete a role-reaction message")
+      .setDescription("Delete a role-reaction panel")
       .addStringOption(opt =>
         opt
           .setName("message_id")
@@ -156,7 +156,7 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(sub =>
     sub
       .setName("update")
-      .setDescription("Update an existing role-reaction message")
+      .setDescription("Update an existing role-reaction panel")
       .addStringOption(opt =>
         opt
           .setName("message_id")
@@ -218,7 +218,7 @@ export async function execute(interaction, client) {
         errorEmbed({
           title: "Permission Denied",
           description:
-            "You need Administrator permissions to manage role reaction messages.",
+            "You need Administrator permissions to manage role reaction panels.",
           solution: "Contact a server administrator for assistance.",
         }),
       );

@@ -3,6 +3,7 @@ import { getLogger } from "../utils/logger.js";
 import { getStorageManager } from "../utils/storage/storageManager.js";
 import { getDatabaseManager } from "../utils/storage/databaseManager.js";
 import { fireEventTriggers } from "../utils/core/CustomEventExecutor.js";
+import { userMutex } from "../utils/discord/roleManager.js";
 
 /**
  * Handle guild member updates (including role changes)
@@ -17,9 +18,16 @@ export async function execute(oldMember, newMember, _client) {
     // Skip if not in a guild
     if (!newMember.guild) return;
 
-    // Check if roles changed
+    // Release mutex lock when roles change (confirms Discord applied the changes)
+    // This unblocks reaction handlers waiting on userMutex.lock()
     const oldRoleIds = new Set(oldMember.roles.cache.keys());
     const newRoleIds = new Set(newMember.roles.cache.keys());
+
+    if (oldRoleIds.size !== newRoleIds.size ||
+        [...oldRoleIds].some(id => !newRoleIds.has(id)) ||
+        [...newRoleIds].some(id => !oldRoleIds.has(id))) {
+      userMutex.unlock(newMember.id);
+    }
 
     // Find newly added roles
     const addedRoles = Array.from(newRoleIds).filter(

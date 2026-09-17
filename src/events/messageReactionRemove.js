@@ -4,8 +4,9 @@ import {
   decrementRoleUsage,
 } from "../utils/discord/roleMappingManager.js";
 import { getLogger } from "../utils/logger.js";
-import { getCachedMember } from "../utils/discord/roleManager.js";
+import { getCachedMember, fetchFreshMember, enqueueForUser, userMutex } from "../utils/discord/roleManager.js";
 import { StarboardManager } from "../features/starboard/StarboardManager.js";
+import { isBotRemoval } from "../utils/discord/botReactionTracker.js";
 
 export const name = Events.MessageReactionRemove;
 
@@ -73,6 +74,16 @@ export async function execute(reaction, user, client) {
       return;
     }
 
+    // Skip role removal if this was a bot-initiated reaction removal (unique mode)
+    // The add handler already handled role cleanup when unique mode removed this reaction
+    if (isBotRemoval(reaction.message.id, emoji, user.id)) {
+      // Still decrement usage counter since the reaction was removed
+      if (roleConfig.limit && roleConfig.limit > 0) {
+        await decrementRoleUsage(reaction.message.id, emoji);
+      }
+      return;
+    }
+
     // Handle multiple roles per emoji
     let roleIds = [];
 
@@ -105,8 +116,109 @@ export async function execute(reaction, user, client) {
       return;
     }
 
+    // Check selection mode — in unique mode, shared roles should not be removed
+    // because they may be assigned by another emoji the user has reacted to
+    const selectionMode =
+      roleMapping.selectionMode || rolesObj.selectionMode || "standard";
+
+    let roleIdsToRemove = roleIds;
+    let freshMember = null;
+
+    if (selectionMode === "unique") {
+      // Serialize per-user to prevent race conditions when events overlap
+      await enqueueForUser(guild.id, user.id, async () => {
+        // Acquire mutex lock — waits for Discord to confirm any previous role changes
+        // via GUILD_MEMBER_UPDATE before proceeding. This ensures member.roles.cache is fresh.
+        await userMutex.lock(user.id);
+
+        // Re-fetch member to avoid stale roles.cache
+        // Uses fetchFreshMember which deduplicates concurrent requests for the same user
+        freshMember = await fetchFreshMember(guild, user.id);
+        if (freshMember) {
+          logger.info(
+            `[DEBUG-REMOVE] Unique mode: freshMember.roles.cache size=${freshMember.roles.cache.size}, ids=[${[...freshMember.roles.cache.keys()].join(",")}]`,
+          );
+        }
+
+        // Find all other emojis in this menu that the user has reacted to
+        const message = reaction.message.partial
+          ? await reaction.message.fetch()
+          : reaction.message;
+
+        const otherEmojisRoles = [];
+
+        for (const [emojiKey, config] of Object.entries(rolesObj)) {
+          if (
+            emojiKey === "hideList" ||
+            emojiKey === "selectionMode" ||
+            emojiKey === "roles"
+          )
+            continue;
+          if (
+            typeof config === "boolean" ||
+            config === null ||
+            config === undefined
+          )
+            continue;
+          // Skip the current emoji being removed
+          if (emojiKey === emoji) continue;
+
+          // Check if user has reacted with this other emoji
+          const otherReaction = message.reactions.cache.find(r => {
+            if (r.emoji.id) {
+              return `<:${r.emoji.name}:${r.emoji.id}>` === emojiKey;
+            }
+            return r.emoji.name === emojiKey;
+          });
+
+          if (otherReaction) {
+            // Fetch users to populate cache (cache is empty when event fires)
+            const reactionUsers = await otherReaction.users.fetch().catch(() => null);
+            if (reactionUsers && reactionUsers.has(user.id)) {
+              // Collect role IDs from this other emoji
+              if (config.roleIds && Array.isArray(config.roleIds)) {
+                otherEmojisRoles.push(...config.roleIds);
+              } else if (config.roleId) {
+                otherEmojisRoles.push(config.roleId);
+              } else if (typeof config === "string") {
+                otherEmojisRoles.push(config);
+              }
+            }
+          }
+        }
+
+        // Only remove roles that are NOT assigned by any other active emoji
+        roleIdsToRemove = roleIds.filter(id => !otherEmojisRoles.includes(id));
+
+        // Use fresh member cache for role check
+        const memberForCheck = freshMember || member;
+
+        // Determine which roles actually need to be removed
+        const rolesToRemove = roleIdsToRemove.filter(id => memberForCheck.roles.cache.has(id));
+
+        if (rolesToRemove.length === 0) {
+          return;
+        }
+
+        // Remove roles via a single API call to prevent rate limits
+        await member.roles.remove(rolesToRemove);
+
+        // Decrement usage counter
+        if (roleConfig.limit && roleConfig.limit > 0) {
+          await decrementRoleUsage(reaction.message.id, emoji);
+        }
+
+        for (const id of rolesToRemove) {
+          logger.info(`✅ Role removed: ${id} from ${user.tag}`);
+        }
+      });
+
+      return;
+    }
+
+    // Standard mode — no serialization needed, roles are independent per emoji
     // Determine which roles actually need to be removed
-    const rolesToRemove = roleIds.filter(id => member.roles.cache.has(id));
+    const rolesToRemove = roleIdsToRemove.filter(id => member.roles.cache.has(id));
 
     if (rolesToRemove.length === 0) {
       return;

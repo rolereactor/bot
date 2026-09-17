@@ -44,6 +44,13 @@ export async function handleCreate(interaction) {
       });
     }
 
+    // Check premium status
+    const premiumManager = getPremiumManager();
+    const isPro = await premiumManager.isFeatureActive(
+      interaction.guild.id,
+      PremiumFeatures.PRO.id,
+    );
+
     // Validate bundle name
     const validation = roleBundleManager.validateName(name);
     if (!validation.valid) {
@@ -106,11 +113,6 @@ export async function handleCreate(interaction) {
       });
     }
 
-    const premiumManager = getPremiumManager();
-    const isPro = await premiumManager.isFeatureActive(
-      interaction.guild.id,
-      PremiumFeatures.PRO.id,
-    );
     const maxRoles = isPro
       ? PRO_TIER.ROLE_BUNDLE_MAX_ROLES
       : FREE_TIER.ROLE_BUNDLE_MAX_ROLES;
