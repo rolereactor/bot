@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **License**: Relicensed from MIT to **AGPL-3.0-or-later**. The bot remains fully open source and self-hostable; anyone offering it as a hosted service must now make their modified source available under the same license.
 - **Vote Rewards**: Voting for the bot on top.gg now earns **Sparks** ⚡ (earned currency) instead of Core credits — starting at 5 Sparks per vote and scaling with your voting streak up to 8 (12-hour cooldown).
 - **Balance Command**: Simplified to check-only — `/balance send` removed in favor of Power Cells + `/trade`.
+- **Role-Reaction Limits**: Free tier now supports 3 panels, 5 emojis per panel, 3 roles per emoji. Pro tier supports 15 panels, 20 emojis per emoji, 10 roles per emoji.
+- **Role Bundle Limits**: Free tier supports 3 roles per bundle and 5 bundles. Pro tier supports 10 roles per bundle and 20 bundles.
+- **Role-Reaction Deploy/Update**: Removed "Open Dashboard" button from success embeds. Backend now validates per-emoji role limits dynamically based on Pro tier.
 
 ### Added
 
@@ -22,7 +24,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Referral System**: Claim a friend's referral code for a **+25 Sparks** ⚡ welcome bonus and **+10% bonus Cores** on your first $10+ purchase. Referrers earn **15% bonus Cores** on every qualifying purchase made by users they referred.
 - **Ticket Management Dashboard**: Build and manage ticket panels from the web dashboard.
 - **Goodbye System Dashboard**: Configure goodbye messages, channels, and settings from the web dashboard.
-- **Role Bundle Dashboard API**: Manage role bundles from the web dashboard with GET, POST, and DELETE endpoints. Includes configurable limits for max active bundles and max roles per bundle.
+- **Role Bundle Dashboard**: Create, view, and delete role bundles directly from the web dashboard. Use bundles in role-reaction panels to apply multiple roles with a single click.
+
+### Fixed
+
+- **Role-Reaction Unique Mode**: Added per-user mutex and task queue to prevent race conditions where Discord API updates hadn't propagated before the next event.
+- **Role-Reaction Self-Removal Loop**: Bot no longer accidentally removes its own reactions from role-reaction panels.
+- **Role-Reaction Premium Limits**: Backend deploy/update endpoints now correctly enforce Pro tier limits instead of always using Free tier values.
+
+### Dashboard
+
+- **Dynamic Pro Engine Benefits**: Pro Engine benefits table now fetches limits from the API — always up to date with the latest tier values.
+- **Role-Reaction Panels**: All dashboard text standardized to "panels" (previously "messages" or "menus").
+- **Per-Emoji Role Limits**: Role builder now enforces per-emoji role limits (Free: 3, Pro: 10) pulled from the API.
+- **Bundle Validation**: Applying a role bundle now checks if it would exceed the per-emoji role limit before adding.
+- **Pro Engine Pricing**: All pricing displays (benefits table, donate page, BMAC payment) now fetch from the API instead of using hardcoded values.
 
 ## [1.8.0] - 2026-07-23
 
