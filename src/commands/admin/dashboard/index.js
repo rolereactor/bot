@@ -1,15 +1,25 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 import { getLogger } from "../../../utils/logger.js";
-import { WEBSITE_URL } from "../../../config/domains.js";
+import { errorEmbed } from "../../../utils/discord/responseMessages.js";
+import { handleDashboard } from "./handlers.js";
+import { validateDashboardPermissions } from "./permissions.js";
 
-const logger = getLogger();
+// ============================================================================
+// COMMAND METADATA
+// ============================================================================
 
+/**
+ * Command metadata for centralized registry
+ * This allows the command to be automatically discovered and integrated
+ * into help system, command suggestions, and other features
+ * This is the single source of truth for command information
+ */
 export const metadata = {
   name: "dashboard",
   category: "admin",
   description: "Open the server dashboard",
-  keywords: ["dashboard", "panel", "config", "settings"],
-  emoji: "⚙️",
+  keywords: ["dashboard", "panel", "config", "settings", "web"],
+  emoji: "🌐",
   premium: false,
   helpFields: [
     {
@@ -17,57 +27,85 @@ export const metadata = {
       value: "`/dashboard` — Opens the server dashboard in your browser",
       inline: false,
     },
+    {
+      name: "What You'll See",
+      value:
+        "Access your server's dashboard to configure all bot features including role reactions, tickets, welcome/goodbye messages, Pro Engine settings, and server analytics.",
+      inline: false,
+    },
+    {
+      name: "Permissions",
+      value: "• **Manage Server** permission required",
+      inline: false,
+    },
   ],
 };
 
+// ============================================================================
+// COMMAND DEFINITION
+// ============================================================================
+
 export const data = new SlashCommandBuilder()
-  .setName("dashboard")
-  .setDescription("Open the server dashboard")
+  .setName(metadata.name)
+  .setDescription(metadata.description)
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
+// ============================================================================
+// COMMAND EXECUTION
+// ============================================================================
+
 export async function execute(interaction) {
-  const guildId = interaction.guildId;
+  const logger = getLogger();
+
+  logger.debug("Dashboard command executing", {
+    userId: interaction.user.id,
+    guildId: interaction.guildId,
+  });
+
+  // Check if interaction has already been acknowledged
+  if (interaction.replied || interaction.deferred) {
+    logger.warn("Interaction already acknowledged, skipping command");
+    return;
+  }
 
   try {
-    const dashboardUrl = `${WEBSITE_URL}/dashboard/${guildId}`;
+    // Validate permissions
+    const permissionCheck = validateDashboardPermissions(interaction);
+    if (!permissionCheck.success) {
+      return interaction.reply(permissionCheck.errorResponse);
+    }
 
-    const embed = {
-      title: "⚙️ Server Dashboard",
-      description: "Click the button below to open the dashboard.",
-      color: 0x5865f2,
-      fields: [
-        {
-          name: "Server",
-          value: interaction.guild?.name || "Unknown",
-          inline: true,
-        },
-      ],
-    };
+    // Handle the dashboard command
+    await handleDashboard(interaction);
 
-    const row = {
-      type: 1,
-      components: [
-        {
-          type: 2,
-          label: "Open Dashboard",
-          style: 5,
-          url: dashboardUrl,
-        },
-      ],
-    };
-
-    await interaction.reply({
-      embeds: [embed],
-      components: [row],
-      ephemeral: true,
-    });
-
-    logger.info(`Dashboard link sent for guild ${guildId}`);
+    logger.debug("Dashboard command completed successfully");
   } catch (error) {
-    logger.error("Dashboard command error", error);
-    await interaction.reply({
-      content: "❌ An error occurred",
-      ephemeral: true,
+    logger.error("Error in dashboard command handler", {
+      error: error.message,
+      stack: error.stack,
     });
+
+    // Check for specific error types
+    if (error.message.includes("Unknown interaction")) {
+      logger.warn("Interaction expired before response could be sent");
+      return;
+    }
+
+    // Only try to respond if the interaction hasn't been acknowledged yet
+    if (!interaction.replied && !interaction.deferred) {
+      try {
+        await interaction.reply(
+          errorEmbed({
+            title: "Error",
+            description: "Failed to open the dashboard.",
+            solution: "Please try again or contact support.",
+          })
+        );
+      } catch (replyError) {
+        logger.error("Failed to send error reply", {
+          error: replyError.message,
+        });
+      }
+    }
   }
 }
