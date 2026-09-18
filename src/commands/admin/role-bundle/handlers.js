@@ -1,8 +1,3 @@
-/**
- * Role Bundle Command Handlers
- * @module commands/admin/role-bundle/handlers
- */
-
 import { EmbedBuilder, PermissionsBitField, MessageFlags } from "discord.js";
 import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
 import roleBundleManager from "../../../features/rolebundles/RoleBundleManager.js";
@@ -16,6 +11,11 @@ import {
   PRO_TIER,
 } from "../../../features/premium/config.js";
 import { upgradeLimitEmbed } from "../../../utils/discord/premiumHelp.js";
+import {
+  createErrorEmbed,
+  createSuccessEmbed,
+  createInfoEmbed,
+} from "./embeds.js";
 
 const logger = getLogger();
 
@@ -399,49 +399,4 @@ function parseRoles(rolesString, guild) {
   }
 
   return roles;
-}
-
-/**
- * Create error embed
- * @param {string} title - Embed title
- * @param {string} description - Embed description
- * @returns {EmbedBuilder}
- */
-function createErrorEmbed(title, description) {
-  return new EmbedBuilder()
-    .setTitle("❌ " + title)
-    .setDescription(description)
-    .setColor(THEME.ERROR)
-    .setFooter(UI_COMPONENTS.createFooter("Role Bundles"))
-    .setTimestamp();
-}
-
-/**
- * Create success embed
- * @param {string} title - Embed title
- * @param {string} description - Embed description
- * @returns {EmbedBuilder}
- */
-function createSuccessEmbed(title, description) {
-  return new EmbedBuilder()
-    .setTitle("✅ " + title)
-    .setDescription(description)
-    .setColor(THEME.SUCCESS)
-    .setFooter(UI_COMPONENTS.createFooter("Role Bundles"))
-    .setTimestamp();
-}
-
-/**
- * Create info embed
- * @param {string} title - Embed title
- * @param {string} description - Embed description
- * @returns {EmbedBuilder}
- */
-function createInfoEmbed(title, description) {
-  return new EmbedBuilder()
-    .setTitle("ℹ️ " + title)
-    .setDescription(description)
-    .setColor(THEME.INFO)
-    .setFooter(UI_COMPONENTS.createFooter("Role Bundles"))
-    .setTimestamp();
 }

@@ -8,10 +8,19 @@ The Role Bundle system allows administrators to create pre-configured "bundles" 
 
 ```
 role-bundle/
-├── index.js              # Command definition and subcommands
-├── handlers.js           # Main logic for creating, viewing, deleting, and listing role bundles
-└── README.md             # This documentation
+├── index.js          # Command definition, metadata, and entry point
+├── handlers.js       # Main logic for creating, viewing, deleting, and listing role bundles
+├── embeds.js         # Discord embed creation helpers
+└── README.md         # This documentation
 ```
+
+## Architecture
+
+Following the modular pattern established by other admin commands:
+
+- **`index.js`**: Command definition, metadata, and main execution flow
+- **`handlers.js`**: Core business logic, database operations, and interaction processing
+- **`embeds.js`**: Discord embed creation and formatting
 
 ## Subcommands
 

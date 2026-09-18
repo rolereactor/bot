@@ -1,9 +1,3 @@
-/**
- * Role Bundle Commands - Manage reusable role bundles
- * @module commands/admin/role-bundle/index
- */
-const logger = getLogger();
-
 import { SlashCommandBuilder, MessageFlags } from "discord.js";
 import { getLogger } from "../../../utils/logger.js";
 import {
@@ -13,6 +7,18 @@ import {
   handleView,
 } from "./handlers.js";
 
+const logger = getLogger();
+
+// ============================================================================
+// COMMAND METADATA
+// ============================================================================
+
+/**
+ * Command metadata for centralized registry
+ * This allows the command to be automatically discovered and integrated
+ * into help system, command suggestions, and other features
+ * This is the single source of truth for command information
+ */
 export const metadata = {
   name: "role-bundle",
   category: "admin",
@@ -52,115 +58,106 @@ export const metadata = {
   ],
 };
 
-/**
- * Role bundle command definition
- */
-export const command = {
-  name: "role-bundle",
-  description: "Manage reusable role bundles",
-  data: new SlashCommandBuilder()
-    .setName("role-bundle")
-    .setDescription("Manage reusable role bundles")
+// ============================================================================
+// COMMAND DEFINITION
+// ============================================================================
 
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("create")
-        .setDescription("Create a new role bundle")
-        .addStringOption(option =>
-          option
-            .setName("name")
-            .setDescription(
-              "Bundle name (letters, numbers, spaces, hyphens, underscores)",
-            )
-            .setRequired(true)
-            .setMinLength(1)
-            .setMaxLength(50),
-        )
-        .addStringOption(option =>
-          option
-            .setName("roles")
-            .setDescription(
-              'Ex: @Role1 @Role2 "Role Name" (Space separated. Max 5-15)',
-            )
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("delete")
-        .setDescription("Delete a role bundle")
-        .addStringOption(option =>
-          option
-            .setName("name")
-            .setDescription("Bundle name to delete")
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("list")
-        .setDescription("List all role bundles in this server"),
-    )
-    .addSubcommand(subcommand =>
-      subcommand
-        .setName("view")
-        .setDescription("View roles in a specific role bundle")
-        .addStringOption(option =>
-          option
-            .setName("name")
-            .setDescription("Bundle name to view")
-            .setRequired(true),
-        ),
-    ),
+export const data = new SlashCommandBuilder()
+  .setName(metadata.name)
+  .setDescription(metadata.description)
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("create")
+      .setDescription("Create a new role bundle")
+      .addStringOption(option =>
+        option
+          .setName("name")
+          .setDescription(
+            "Bundle name (letters, numbers, spaces, hyphens, underscores)",
+          )
+          .setRequired(true)
+          .setMinLength(1)
+          .setMaxLength(50),
+      )
+      .addStringOption(option =>
+        option
+          .setName("roles")
+          .setDescription(
+            'Ex: @Role1 @Role2 "Role Name" (Space separated. Max 5-15)',
+          )
+          .setRequired(true),
+      ),
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("delete")
+      .setDescription("Delete a role bundle")
+      .addStringOption(option =>
+        option
+          .setName("name")
+          .setDescription("Bundle name to delete")
+          .setRequired(true),
+      ),
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("list")
+      .setDescription("List all role bundles in this server"),
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("view")
+      .setDescription("View roles in a specific role bundle")
+      .addStringOption(option =>
+        option
+          .setName("name")
+          .setDescription("Bundle name to view")
+          .setRequired(true),
+      ),
+  );
 
-  /**
-   * Execute the role-bundle command
-   * @param {Object} interaction - Discord interaction
-   * @param {Object} _client - Discord client (unused)
-   */
-  async execute(interaction, _client) {
-    try {
-      const subcommand = interaction.options.getSubcommand();
+// ============================================================================
+// COMMAND EXECUTION
+// ============================================================================
 
-      switch (subcommand) {
-        case "create":
-          await handleCreate(interaction);
-          break;
-        case "delete":
-          await handleDelete(interaction);
-          break;
-        case "list":
-          await handleList(interaction);
-          break;
-        case "view":
-          await handleView(interaction);
-          break;
-        default:
-          await interaction.reply({
-            content: "Unknown subcommand",
-            flags: [MessageFlags.Ephemeral],
-          });
-      }
-    } catch (error) {
-      logger.error("Role bundle command error:", error);
+export async function execute(interaction) {
+  try {
+    const subcommand = interaction.options.getSubcommand();
 
-      const errorContent = "An error occurred while processing this command.";
-      try {
-        if (interaction.replied || interaction.deferred) {
-          await interaction.editReply({ content: errorContent });
-        } else {
-          await interaction.reply({
-            content: errorContent,
-            flags: [MessageFlags.Ephemeral],
-          });
-        }
-      } catch {
-        /* interaction may have expired */
-      }
+    switch (subcommand) {
+      case "create":
+        await handleCreate(interaction);
+        break;
+      case "delete":
+        await handleDelete(interaction);
+        break;
+      case "list":
+        await handleList(interaction);
+        break;
+      case "view":
+        await handleView(interaction);
+        break;
+      default:
+        await interaction.reply({
+          content: "Unknown subcommand",
+          flags: [MessageFlags.Ephemeral],
+        });
     }
-  },
-};
+  } catch (error) {
+    logger.error("Role bundle command error:", error);
 
-// Export data and execute for command loader compatibility
-export const { data } = command;
-export const { execute } = command;
+    const errorContent = "An error occurred while processing this command.";
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({ content: errorContent });
+      } else {
+        await interaction.reply({
+          content: errorContent,
+          flags: [MessageFlags.Ephemeral],
+        });
+      }
+    } catch {
+      /* interaction may have expired */
+    }
+  }
+}
