@@ -330,4 +330,51 @@ export class GuildSettingsRepository extends BaseRepository {
       return { success: false, newBalance: 0 };
     }
   }
+
+  /**
+   * Get auto-deduct from owner setting for a guild
+   * @param {string} guildId - Guild ID
+   * @returns {Promise<boolean>}
+   */
+  async getAutoDeductFromOwner(guildId) {
+    try {
+      const settings = await this.getByGuild(guildId);
+      return settings?.autoDeductFromOwner ?? false;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get auto-deduct setting for guild ${guildId}`,
+        error,
+      );
+      return false;
+    }
+  }
+
+  /**
+   * Set auto-deduct from owner setting for a guild
+   * @param {string} guildId - Guild ID
+   * @param {boolean} enabled - Whether to auto-deduct from owner when vault is empty
+   * @returns {Promise<boolean>}
+   */
+  async setAutoDeductFromOwner(guildId, enabled) {
+    try {
+      await this.collection.updateOne(
+        { guildId },
+        {
+          $set: {
+            autoDeductFromOwner: !!enabled,
+            updatedAt: new Date(),
+          },
+        },
+        { upsert: true },
+      );
+      this._invalidate(guildId);
+      return true;
+    } catch (error) {
+      this.logger.error(
+        `Failed to set auto-deduct setting for guild ${guildId}`,
+        error,
+      );
+      return false;
+    }
+  }
 }

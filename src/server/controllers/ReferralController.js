@@ -64,7 +64,7 @@ export async function apiGetUserReferral(req, res) {
 
     const responseData = {
       referralCode: doc.referralCode,
-      shareUrl: `https://rolereactor.com?ref=${doc.referralCode}`,
+      shareUrl: `https://rolereactor.xyz?ref=${doc.referralCode}`,
       totalEarnedCores: doc.totalEarnedCores || 0,
       hasClaimedCode,
       stats: {

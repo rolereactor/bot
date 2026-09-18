@@ -3,6 +3,7 @@ import { THEME, UI_COMPONENTS, EMOJIS } from "../../../config/theme.js";
 import { emojiConfig } from "../../../config/emojis.js";
 import { WEBSITE_URL } from "../../../config/domains.js";
 import { PremiumFeatures } from "../../../features/premium/config.js";
+import { getMentionableCommand } from "../../../utils/commandUtils.js";
 
 /**
  * Creates Pro Engine status embed
@@ -27,13 +28,8 @@ export function createStatusEmbed({
   const coreEmoji = emojiConfig.core;
   const sparkEmoji = emojiConfig.spark;
 
-  const embed = new EmbedBuilder()
-    .setAuthor(
-      UI_COMPONENTS.createAuthor(
-        `${guild.name} • Pro Engine Status`,
-        guild.iconURL() || client?.user?.displayAvatarURL(),
-      ),
-    );
+  const fuelCmd = getMentionableCommand(client, "engine fuel", guild?.id);
+  const shopCmd = getMentionableCommand(client, "shop", guild?.id);
 
   // Determine which source is active
   const coreProActive = isPro && sub?.active;
@@ -42,136 +38,126 @@ export function createStatusEmbed({
   const coreOnly = coreProActive && !sparkProActive;
   const sparkOnly = sparkProActive && !coreProActive;
 
+  const vaultBalance = Number(vaultData?.balance) || 0;
+  const weeksFunded = Math.floor((vaultBalance / 20) * 100) / 100;
+
+  const embed = new EmbedBuilder()
+    .setAuthor(
+      UI_COMPONENTS.createAuthor(
+        `${guild.name} • Engine Status`,
+        guild.iconURL() || client?.user?.displayAvatarURL(),
+      ),
+    );
+
   if (coreOnly || sparkOnly || bothActive) {
-    // ── Determine color and title based on active source ──
+    // ── Pro Active ──
     if (sparkOnly) {
-      // Spark Pro only — blue/teal
       embed.setColor(THEME.INFO);
     } else if (bothActive) {
-      // Both active — purple (blend of gold + teal)
       embed.setColor(THEME.PRIMARY);
     } else {
-      // Core Pro only — gold
       embed.setColor(THEME.PRO);
     }
 
     // ── Title ──
     if (sparkOnly) {
-      embed.setTitle(`${sparkEmoji} Pro Engine is ACTIVE (Spark Pro)`);
+      embed.setTitle(`${sparkEmoji} Pro Engine Active`);
     } else if (bothActive) {
-      embed.setTitle(`${EMOJIS.ENGINE.ACTIVE} Pro Engine is ACTIVE (Core + Spark)`);
+      embed.setTitle(`${EMOJIS.ENGINE.ACTIVE} Pro Engine Active`);
     } else {
-      embed.setTitle(`${EMOJIS.ENGINE.ACTIVE} Pro Engine is ACTIVE`);
+      embed.setTitle(`${EMOJIS.ENGINE.ACTIVE} Pro Engine Active`);
     }
 
-    // ── Description ──
-    if (sparkOnly) {
-      embed.setDescription(
-        "This server has **temporary Pro access** purchased via the Spark Shop.\n" +
-          "⚠️ Spark Pro does **not auto-renew** — it will expire without Cores.",
-      );
-    } else if (bothActive) {
-      embed.setDescription(
-        "This server has **Core Pro** (subscription) with additional time from **Spark Pro**.",
-      );
-    } else {
-      embed.setDescription(
-        "This server is fueled with **Pro Engine**, unlocking max capacity for all members!",
-      );
-    }
+    // ── Source & Expiry ──
+    let sourceText = "";
+    let expiryText = "";
 
-    // ── Subscription Tier ──
-    let subscriptionInfo = "";
     if (coreOnly || bothActive) {
       const isTrial = !!sub?.isTrial;
-      subscriptionInfo = isTrial
-        ? "🎁 **Free Trial** (7 Days)"
-        : `${coreEmoji} **Core Pro** (${PremiumFeatures.PRO.cost} Cores/${PremiumFeatures.PRO.period})`;
+      sourceText = isTrial
+        ? "🎁 **Free Trial**"
+        : `${coreEmoji} **Pro Engine** (${PremiumFeatures.PRO.cost} ${coreEmoji}/${PremiumFeatures.PRO.period})`;
+
+      if (sub?.nextDeductionDate) {
+        const nextDate = new Date(sub.nextDeductionDate);
+        expiryText = sub?.cancelledAt
+          ? `❌ Cancelled — active until ${nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+          : `📅 Renews ${nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+      }
     } else if (sparkOnly) {
-      subscriptionInfo = `${sparkEmoji} **Spark Pro** (Purchased with Sparks)`;
+      sourceText = `${sparkEmoji} **Spark Pro**`;
+      if (sparkProSub?.expiresAt) {
+        const expires = new Date(sparkProSub.expiresAt);
+        const daysLeft = Math.ceil((expires - new Date()) / (1000 * 60 * 60 * 24));
+        expiryText = `📅 Expires ${expires.toLocaleDateString("en-US", { month: "short", day: "numeric" })} (${daysLeft}d left)`;
+      }
     }
 
-    // ── Expiry / Renewal ──
-    let expiryText = "";
-    if (sparkOnly && sparkProSub?.expiresAt) {
-      const expires = new Date(sparkProSub.expiresAt);
-      const daysLeft = Math.ceil((expires - new Date()) / (1000 * 60 * 60 * 24));
-      expiryText = `📅 **${expires.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}** (${daysLeft} day${daysLeft !== 1 ? "s" : ""} left)`;
-    } else if ((coreOnly || bothActive) && sub?.nextDeductionDate) {
-      const nextDate = new Date(sub.nextDeductionDate);
-      expiryText = sub?.cancelledAt
-        ? `${EMOJIS.STATUS.ERROR} Cancelled (Active until ${nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })})`
-        : `📅 **${nextDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}**`;
-    }
-
-    // ── Vault ──
-    const vaultBalance = vaultData?.balance || 0;
-    const weeksFunded = Math.floor((vaultBalance / 20) * 100) / 100;
-
-    // ── Build fields ──
     embed.addFields(
       {
-        name: "💳 Active Source",
-        value: subscriptionInfo,
+        name: "Source",
+        value: sourceText,
         inline: true,
       },
       {
-        name: "⏰ Renewal / Expiry",
+        name: "Renewal",
         value: expiryText || "Active",
         inline: true,
       },
       {
-        name: `${EMOJIS.ENGINE.VAULT} Guild Vault Reserve`,
-        value: `${coreEmoji} **${vaultBalance.toFixed(2)} Cores** *(≈ ${weeksFunded} weeks prepaid)*`,
+        name: "\u200B",
+        value: "\u200B",
+        inline: true,
+      },
+      {
+        name: "Guild Vault",
+        value: `${coreEmoji} **${vaultBalance.toFixed(2)}** *(≈ ${weeksFunded} weeks)*`,
         inline: false,
       },
     );
 
-    // ── Show Spark Pro details if both active ──
+    // ── Spark Pro bonus time ──
     if (bothActive && sparkProSub?.expiresAt) {
       const sparkExpiry = new Date(sparkProSub.expiresAt);
       const sparkDaysLeft = Math.ceil(
         (sparkExpiry - new Date()) / (1000 * 60 * 60 * 24),
       );
       embed.addFields({
-        name: `${sparkEmoji} Spark Pro (Bonus Time)`,
-        value: `Expires: **${sparkExpiry.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}** (${sparkDaysLeft} day${sparkDaysLeft !== 1 ? "s" : ""} left)\n_This is separate from your Core Pro subscription._`,
+        name: `${sparkEmoji} Spark Pro Bonus`,
+        value: `Expires ${sparkExpiry.toLocaleDateString("en-US", { month: "short", day: "numeric" })} (${sparkDaysLeft}d left)`,
         inline: false,
       });
     }
   } else {
     // ── Free Tier ──
-    const vaultBalance = vaultData?.balance || 0;
     const needsMore = (20 - vaultBalance).toFixed(2);
 
     embed
       .setColor(THEME.SECONDARY)
-      .setTitle(`${EMOJIS.ENGINE.FREE} Free Tier (Standard Limits)`)
+      .setTitle(`${EMOJIS.ENGINE.FREE} Free Tier`)
       .setDescription(
-        "This server is currently running on the **Free Tier**.\n\n" +
-          `Upgrade to **Pro Engine** (${PremiumFeatures.PRO.cost} Cores/${PremiumFeatures.PRO.period}) to unlock higher giveaway limits, HTML ticket transcripts, and 100 scheduled roles!`,
+        `Upgrade to **Pro Engine** (${PremiumFeatures.PRO.cost} ${coreEmoji}/${PremiumFeatures.PRO.period}) for higher limits and HTML transcripts.`,
       )
       .addFields(
         {
-          name: `${EMOJIS.ENGINE.VAULT} Guild Vault Reserve`,
-          value: `${coreEmoji} **${vaultBalance.toFixed(2)} Cores** ${
+          name: "Guild Vault",
+          value: `${coreEmoji} **${vaultBalance.toFixed(2)}** ${
             vaultBalance >= 20
-              ? "*(Enough to activate Pro Engine!)*"
-              : `*(Need ${needsMore} more Cores)*`
+              ? "*(Ready to activate!)*"
+              : `*(Need ${needsMore} more)*`
           }`,
           inline: false,
         },
         {
-          name: `${EMOJIS.ENGINE.SUCCESS} How to Activate Pro Engine`,
+          name: "How to Activate",
           value:
-            "1. **Fuel the Guild Vault:** Use `/engine fuel <cores>` to deposit Cores.\n" +
-            `2. **Activate via Web:** Visit **[Role Reactor Dashboard](${WEBSITE_URL})** to enable Pro Engine!`,
+            `1. Fuel the vault with ${fuelCmd}\n` +
+            `2. Enable on the **[Dashboard](${WEBSITE_URL})**`,
           inline: false,
         },
         {
-          name: `${sparkEmoji} Quick Pro via Spark Shop`,
-          value:
-            "Don't have Cores? Use `/shop` to purchase temporary Pro access with your earned Sparks!",
+          name: "No Cores?",
+          value: `Use ${shopCmd} to get temporary Pro with Sparks`,
           inline: false,
         },
       );
@@ -181,21 +167,20 @@ export function createStatusEmbed({
 }
 
 /**
- * Creates Guild Core Vault embed
+ * Creates Guild Vault embed
  * @param {Object} params
  * @param {import("discord.js").Guild} params.guild
  * @param {Object} params.vaultData
  * @param {import("discord.js").Client} params.client
  */
 export function createVaultEmbed({ guild, vaultData, client }) {
-  const balance = vaultData?.balance || 0;
+  const balance = Number(vaultData?.balance) || 0;
   const weeksFunded = (balance / 20).toFixed(1);
   const history = vaultData?.history || [];
   const coreEmoji = emojiConfig.core;
 
   const embed = new EmbedBuilder()
     .setColor(THEME.PRIMARY)
-    .setTitle(`${EMOJIS.ENGINE.VAULT} Guild Core Reserve`)
     .setAuthor(
       UI_COMPONENTS.createAuthor(
         `${guild.name} • Guild Vault`,
@@ -203,12 +188,19 @@ export function createVaultEmbed({ guild, vaultData, client }) {
       ),
     )
     .setDescription(
-      `The **Guild Core Vault** lets anyone in the community pool Cores ${coreEmoji} to keep Pro Engine active for **${guild.name}**!`,
+      `The **Guild Vault** lets anyone in the community pool Cores to keep Pro Engine active for **${guild.name}**!`,
+    )
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        client?.user?.displayAvatarURL(),
+      ),
     )
     .addFields(
       {
-        name: `${coreEmoji} Vault Balance`,
-        value: `**${balance.toFixed(2)} Cores**`,
+        name: "Vault Balance",
+        value: `${coreEmoji} **${balance.toFixed(2)}**`,
         inline: true,
       },
       {
@@ -218,38 +210,140 @@ export function createVaultEmbed({ guild, vaultData, client }) {
       },
     );
 
+  return embed;
+}
+
+/**
+ * Creates Guild Fuelers embed
+ * @param {Object} params
+ * @param {import("discord.js").Guild} params.guild
+ * @param {Object} params.vaultData
+ * @param {import("discord.js").Client} params.client
+ */
+export function createFuelersEmbed({ guild, vaultData, client }) {
+  const history = vaultData?.history || [];
+  const coreEmoji = emojiConfig.core;
+
+  const fuelCmd = getMentionableCommand(client, "engine fuel", guild?.id);
+
+  const embed = new EmbedBuilder()
+    .setColor(THEME.PRIMARY)
+    .setAuthor(
+      UI_COMPONENTS.createAuthor(
+        `${guild.name} • Guild Fuelers`,
+        guild.iconURL() || client?.user?.displayAvatarURL(),
+      ),
+    )
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        client?.user?.displayAvatarURL(),
+      ),
+    );
+
   if (history.length > 0) {
     const contributorTotals = {};
     for (const entry of history) {
       const name = entry.username || "Anonymous";
       contributorTotals[name] =
-        (contributorTotals[name] || 0) + (entry.amount || 0);
+        (Number(contributorTotals[name]) || 0) + (Number(entry.amount) || 0);
     }
 
     const sortedSponsors = Object.entries(contributorTotals)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
+      .sort((a, b) => Number(b[1]) - Number(a[1]))
+      .slice(0, 10);
 
     const sponsorList = sortedSponsors
       .map(([name, amount], index) => {
         const medal =
           index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🎖️";
-        return `${medal} **${name}**: ${amount.toFixed(2)} Cores`;
+        return `${medal} **${name}**: ${coreEmoji} ${amount.toFixed(2)}`;
       })
       .join("\n");
 
+    embed.setDescription(`Fuel this server with ${fuelCmd}`);
+
     embed.addFields({
-      name: "🏆 Top Community Sponsors",
+      name: "Top Contributors",
       value: sponsorList,
       inline: false,
     });
   } else {
+    embed.setDescription(
+      `No contributions yet.\n\nFuel this server with ${fuelCmd}`,
+    );
+  }
+
+  return embed;
+}
+
+/**
+ * Creates personal contribution summary embed
+ * @param {Object} params
+ * @param {import("discord.js").Guild} params.guild
+ * @param {import("discord.js").User} params.user
+ * @param {Object} params.vaultData
+ * @param {import("discord.js").Client} params.client
+ */
+export function createMeEmbed({ guild, user, vaultData, client }) {
+  const history = vaultData?.history || [];
+  const coreEmoji = emojiConfig.core;
+
+  const userHistory = history.filter(entry => entry.userId === user.id);
+  const totalContributed = userHistory.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+  const contributionCount = userHistory.length;
+
+  const embed = new EmbedBuilder()
+    .setColor(THEME.PRIMARY)
+    .setAuthor(
+      UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
+    )
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        client?.user?.displayAvatarURL(),
+      ),
+    );
+
+  if (contributionCount > 0) {
+    embed.addFields(
+      {
+        name: "Total Contributed",
+        value: `${coreEmoji} **${totalContributed.toFixed(2)}**`,
+        inline: true,
+      },
+      {
+        name: "Times Fueled",
+        value: `**${contributionCount}**`,
+        inline: true,
+      },
+      {
+        name: "\u200B",
+        value: "\u200B",
+        inline: true,
+      },
+    );
+
+    // Show last 5 contributions
+    const recent = userHistory.slice(-5).reverse();
+    const recentList = recent
+      .map(entry => {
+        const date = new Date(entry.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        return `• ${date}: ${coreEmoji} ${Number(entry.amount).toFixed(2)}`;
+      })
+      .join("\n");
+
     embed.addFields({
-      name: "🏆 Top Community Sponsors",
-      value:
-        "No contributions yet. Be the first to fuel this server with `/engine fuel`!",
+      name: "Recent Contributions",
+      value: recentList,
       inline: false,
     });
+  } else {
+    embed.setDescription(
+      `You haven't contributed to this vault yet.\nUse ${getMentionableCommand(client, "engine fuel", guild?.id)} to get started!`,
+    );
   }
 
   return embed;
@@ -275,32 +369,27 @@ export function createFuelConfirmationEmbed({
 
   const embed = new EmbedBuilder()
     .setColor(THEME.PRIMARY)
-    .setTitle(`${EMOJIS.ENGINE.CONFIRM} Confirm Guild Vault Fueling`)
+    .setTitle("⛽ Confirm Fueling")
     .setAuthor(
       UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
     )
     .setDescription(
-      `Deposit **${amount.toFixed(2)} Cores ${coreEmoji}** into the **${guild.name}** Guild Vault?`,
+      `Deposit **${coreEmoji} ${amount.toFixed(2)}** into **${guild.name}**?`,
     )
-    .addFields(
-      {
-        name: "Deposit Amount",
-        value: `${coreEmoji} **${amount.toFixed(2)} Cores**`,
-        inline: true,
-      },
-      {
-        name: "Target Server",
-        value: `${EMOJIS.ENGINE.VAULT} **${guild.name}**`,
-        inline: true,
-      },
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        _client?.user?.displayAvatarURL(),
+      ),
     );
 
   if (typeof userBalance === "number") {
     const remaining = userBalance - amount;
     embed.addFields({
-      name: "Core Balance",
-      value: `💳 **${userBalance.toFixed(2)}** ➔ **${remaining >= 0 ? remaining.toFixed(2) : "0.00"} Cores**`,
-      inline: true,
+      name: "Balance",
+      value: `${coreEmoji} **${userBalance.toFixed(2)}** → **${remaining >= 0 ? remaining.toFixed(2) : "0.00"}**`,
+      inline: false,
     });
   }
 
@@ -319,7 +408,14 @@ export function createFuelCancelledEmbed(user, _client) {
     .setAuthor(
       UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
     )
-    .setDescription("No Cores were deducted from your personal balance.");
+    .setDescription("No cores were deducted from your personal balance.")
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        _client?.user?.displayAvatarURL(),
+      ),
+    );
 }
 
 /**
@@ -348,12 +444,12 @@ export function createFuelSuccessEmbed({
       UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
     )
     .setDescription(
-      `**${user.username}** deposited **${amount.toFixed(2)} Cores ${coreEmoji}** into the Guild Core Reserve for **${guild.name}**!`,
+      `**${user.username}** deposited **${coreEmoji} ${amount.toFixed(2)}** into the Guild Vault for **${guild.name}**!`,
     )
     .addFields(
       {
         name: `${EMOJIS.ENGINE.VAULT} New Vault Balance`,
-        value: `**${newVaultBalance.toFixed(2)} Cores**`,
+        value: `${coreEmoji} **${newVaultBalance.toFixed(2)}**`,
         inline: true,
       },
       {
@@ -361,5 +457,12 @@ export function createFuelSuccessEmbed({
         value: `≈ **${weeksFunded} weeks** of Pro Engine`,
         inline: true,
       },
+    )
+    .setTimestamp()
+    .setFooter(
+      UI_COMPONENTS.createFooter(
+        "Engine",
+        _client?.user?.displayAvatarURL(),
+      ),
     );
 }

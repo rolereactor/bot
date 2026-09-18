@@ -9,7 +9,7 @@ export const metadata = {
   name: "engine",
   category: "general",
   description:
-    "Manage server Pro Engine status, Guild Core Reserve, and community fueling",
+    "Manage server Pro Engine status, Guild Vault, and community fueling",
   keywords: [
     "engine",
     "pro",
@@ -25,7 +25,7 @@ export const metadata = {
     {
       name: `How to Use`,
       value:
-        "• `/engine status` — View server Pro Engine status\n• `/engine vault` — View Guild Core Reserve balance & top sponsors\n• `/engine fuel <cores>` — Deposit personal Cores into server Vault",
+        "• `/engine status` — View server Pro Engine status\n• `/engine vault` — View Guild Vault balance\n• `/engine me` — View your total contributions\n• `/engine fuelers` — View top fuelers\n• `/engine fuel <cores>` — Deposit personal Cores into server Vault",
       inline: false,
     },
     {
@@ -59,8 +59,18 @@ export const data = new SlashCommandBuilder()
     subcommand
       .setName("vault")
       .setDescription(
-        "View Guild Core Reserve balance, funded weeks remaining, and top sponsors",
+        "View Guild Vault balance and funded weeks remaining",
       ),
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("me")
+      .setDescription("View your total contributions across all servers"),
+  )
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName("fuelers")
+      .setDescription("View top fuelers for this server's Guild Vault"),
   )
   .addSubcommand(subcommand =>
     subcommand
@@ -70,7 +80,7 @@ export const data = new SlashCommandBuilder()
         option
           .setName("cores")
           .setDescription(
-            "Amount of Paid Cores to deposit into Guild Vault (min 1)",
+            "Amount of Cores to deposit into Guild Vault (min 1)",
           )
           .setRequired(true)
           .setMinValue(1),

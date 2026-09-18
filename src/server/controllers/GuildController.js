@@ -128,6 +128,7 @@ const EDITABLE_GUILD_SETTING_FIELDS = new Set([
   "disabledCommands",
   "levelRewards",
   "levelRewardMode",
+  "autoDeductFromOwner",
 ]);
 
 function pickEditableGuildSettings(updates) {

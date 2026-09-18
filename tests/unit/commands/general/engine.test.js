@@ -42,6 +42,7 @@ describe("/engine Command", () => {
         },
         guildSettings: {
           getVaultData: mockGetVaultData,
+          getAutoDeductFromOwner: vi.fn().mockResolvedValue(false),
         },
       },
     });
@@ -77,14 +78,16 @@ describe("/engine Command", () => {
       expect(metadata.helpFields).toBeDefined();
     });
 
-    it("should build slash command data with status, vault, and fuel subcommands", () => {
+    it("should build slash command data with status, vault, me, fuelers, and fuel subcommands", () => {
       const json = data.toJSON();
       expect(json.name).toBe("engine");
-      expect(json.options).toHaveLength(3);
+      expect(json.options).toHaveLength(5);
 
       const subNames = json.options.map(opt => opt.name);
       expect(subNames).toContain("status");
       expect(subNames).toContain("vault");
+      expect(subNames).toContain("me");
+      expect(subNames).toContain("fuelers");
       expect(subNames).toContain("fuel");
     });
   });
@@ -96,6 +99,7 @@ describe("/engine Command", () => {
       vi.spyOn(PremiumManager.prototype, "getSubscriptionStatus").mockResolvedValue({
         nextDeductionDate: "2026-12-31T00:00:00Z",
         isTrial: false,
+        active: true,
       });
       mockGetVaultData.mockResolvedValue({ balance: 40, history: [] });
 
@@ -105,7 +109,7 @@ describe("/engine Command", () => {
       expect(mockInteraction.editReply).toHaveBeenCalled();
       const editCall = mockInteraction.editReply.mock.calls[0][0];
       expect(editCall.embeds).toBeDefined();
-      expect(editCall.embeds[0].data.title).toContain("Pro Engine is ACTIVE");
+      expect(editCall.embeds[0].data.title).toContain("Pro Engine Active");
     });
 
     it("should display Free Tier embed when Pro is inactive", async () => {
@@ -138,7 +142,7 @@ describe("/engine Command", () => {
       expect(mockInteraction.deferReply).toHaveBeenCalledWith({ flags: 64 });
       expect(mockInteraction.editReply).toHaveBeenCalled();
       const editCall = mockInteraction.editReply.mock.calls[0][0];
-      expect(editCall.embeds[0].data.title).toContain("Guild Core Reserve");
+      expect(editCall.embeds[0].data.description).toContain("Guild Vault");
     });
   });
 
@@ -194,7 +198,7 @@ describe("/engine Command", () => {
           embeds: expect.arrayContaining([
             expect.objectContaining({
               data: expect.objectContaining({
-                title: expect.stringContaining("Confirm Guild Vault Fueling"),
+                title: expect.stringContaining("Confirm Fueling"),
               }),
             }),
           ]),
@@ -276,11 +280,11 @@ describe("/engine Command", () => {
       const embed = createStatusEmbed({
         guild: mockInteraction.guild,
         isPro: true,
-        sub: { nextDeductionDate: "2026-10-01" },
+        sub: { nextDeductionDate: "2026-10-01", active: true },
         vaultData: { balance: 20 },
         client: mockClient,
       });
-      expect(embed.data.title).toContain("ACTIVE");
+      expect(embed.data.title).toContain("Pro Engine Active");
     });
 
     it("createVaultEmbed generates valid embed structure with fallback sponsor text", () => {
@@ -289,7 +293,7 @@ describe("/engine Command", () => {
         vaultData: { balance: 0, history: [] },
         client: mockClient,
       });
-      expect(embed.data.title).toContain("Guild Core Reserve");
+      expect(embed.data.description).toContain("Guild Vault");
     });
 
     it("createFuelConfirmationEmbed generates valid confirmation embed", () => {
@@ -300,7 +304,7 @@ describe("/engine Command", () => {
         userBalance: 50,
         client: mockClient,
       });
-      expect(embed.data.title).toContain("Confirm Guild Vault Fueling");
+      expect(embed.data.title).toContain("Confirm Fueling");
     });
 
     it("createFuelCancelledEmbed generates valid cancellation embed", () => {

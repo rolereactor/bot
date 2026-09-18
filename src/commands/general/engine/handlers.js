@@ -8,9 +8,12 @@ import {
 import { getLogger } from "../../../utils/logger.js";
 import { getStorageManager } from "../../../utils/storage/storageManager.js";
 import { PremiumManager } from "../../../features/premium/PremiumManager.js";
+import { getSparkShopManager } from "../../../features/spark-shop/SparkShopManager.js";
 import {
   createStatusEmbed,
   createVaultEmbed,
+  createMeEmbed,
+  createFuelersEmbed,
   createFuelConfirmationEmbed,
   createFuelCancelledEmbed,
   createFuelSuccessEmbed,
@@ -18,6 +21,7 @@ import {
 
 const logger = getLogger();
 const premiumManager = new PremiumManager();
+const sparkShopManager = getSparkShopManager();
 
 /**
  * Main execution handler for /engine command
@@ -51,6 +55,14 @@ export async function execute(interaction, client) {
 
       case "vault":
         await handleVault(interaction, client);
+        break;
+
+      case "me":
+        await handleMe(interaction, client);
+        break;
+
+      case "fuelers":
+        await handleFuelers(interaction, client);
         break;
 
       case "fuel":
@@ -95,6 +107,11 @@ async function handleStatus(interaction, client) {
 
   const isPro = await premiumManager.isFeatureActive(guildId, "pro_engine");
   const sub = await premiumManager.getSubscriptionStatus(guildId, "pro_engine");
+  const isSparkPro = await sparkShopManager.hasSparkPro(guildId);
+  const sparkProSub = await premiumManager.getSubscriptionStatus(
+    guildId,
+    "spark_pro",
+  );
   const vaultData = db?.guildSettings
     ? await db.guildSettings.getVaultData(guildId)
     : { balance: 0, history: [] };
@@ -105,6 +122,8 @@ async function handleStatus(interaction, client) {
     sub,
     vaultData,
     client,
+    isSparkPro,
+    sparkProSub,
   });
 
   await interaction.editReply({ embeds: [embed] });
@@ -123,6 +142,49 @@ async function handleVault(interaction, client) {
     : { balance: 0, history: [] };
 
   const embed = createVaultEmbed({
+    guild: interaction.guild,
+    vaultData,
+    client,
+  });
+
+  await interaction.editReply({ embeds: [embed] });
+}
+
+/**
+ * Handles /engine me
+ */
+async function handleMe(interaction, client) {
+  const guildId = interaction.guildId;
+  const storage = await getStorageManager();
+  const db = storage.dbManager;
+
+  const vaultData = db?.guildSettings
+    ? await db.guildSettings.getVaultData(guildId)
+    : { balance: 0, history: [] };
+
+  const embed = createMeEmbed({
+    guild: interaction.guild,
+    user: interaction.user,
+    vaultData,
+    client,
+  });
+
+  await interaction.editReply({ embeds: [embed] });
+}
+
+/**
+ * Handles /engine fuelers
+ */
+async function handleFuelers(interaction, client) {
+  const guildId = interaction.guildId;
+  const storage = await getStorageManager();
+  const db = storage.dbManager;
+
+  const vaultData = db?.guildSettings
+    ? await db.guildSettings.getVaultData(guildId)
+    : { balance: 0, history: [] };
+
+  const embed = createFuelersEmbed({
     guild: interaction.guild,
     vaultData,
     client,
@@ -258,7 +320,7 @@ async function handleFuel(interaction, client) {
     // Collector timed out or failed
     const cancelEmbed = createFuelCancelledEmbed(interaction.user, client);
     cancelEmbed.setDescription(
-      "⏱️ Confirmation timed out. Deposit was not processed.",
+      "⏱️ Confirmation timed out. Fueling was not processed.",
     );
     await interaction
       .editReply({

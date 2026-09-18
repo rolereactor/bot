@@ -51,14 +51,48 @@ export class PremiumManager {
       if (!db) return false;
 
       const settings = await db.guildSettings.getByGuild(guildId);
+
+      // For pro_engine, also check spark_pro (Spark Shop purchases)
+      if (featureId === "pro_engine") {
+        const corePro = settings?.premiumFeatures?.pro_engine;
+        const sparkPro = settings?.premiumFeatures?.spark_pro;
+
+        // Check Core Pro
+        if (corePro?.active && corePro.nextDeductionDate) {
+          // Trials: no grace period — expires exactly on trialEndsAt
+          if (corePro.isTrial && corePro.period === "trial") {
+            if (new Date(corePro.nextDeductionDate) >= new Date()) return true;
+          } else {
+            const graceDeadline = new Date(corePro.nextDeductionDate);
+            if (!isNaN(graceDeadline.getTime())) {
+              graceDeadline.setDate(graceDeadline.getDate() + GRACE_PERIOD_DAYS);
+              if (graceDeadline >= new Date()) return true;
+            }
+          }
+        }
+
+        // Check Spark Pro
+        if (sparkPro?.active && sparkPro.expiresAt) {
+          if (new Date(sparkPro.expiresAt) >= new Date()) return true;
+        }
+
+        return false;
+      }
+
       const sub = settings?.premiumFeatures?.[featureId];
       if (!sub?.active) return false;
 
       // If no valid expiry date, feature is not active
-      if (!sub.nextDeductionDate) return false;
+      if (!sub.nextDeductionDate && !sub.expiresAt) return false;
+
+      // For Spark Pro, check expiresAt directly (no grace period)
+      if (featureId === "spark_pro") {
+        return new Date(sub.expiresAt) >= new Date();
+      }
 
       // Allow access during grace period
-      const graceDeadline = new Date(sub.nextDeductionDate);
+      const expiryDate = sub.nextDeductionDate || sub.expiresAt;
+      const graceDeadline = new Date(expiryDate);
       if (isNaN(graceDeadline.getTime())) return false;
 
       graceDeadline.setDate(graceDeadline.getDate() + GRACE_PERIOD_DAYS);
@@ -82,8 +116,9 @@ export class PremiumManager {
   async checkProAndRespond(interaction, featureName) {
     const guildId = interaction.guildId;
     const isPro = await this.isFeatureActive(guildId, "pro_engine");
+    const isSparkPro = await this.isFeatureActive(guildId, "spark_pro");
 
-    if (isPro) {
+    if (isPro || isSparkPro) {
       return { isPro: true };
     }
 
@@ -95,7 +130,7 @@ export class PremiumManager {
     const response = errorEmbed({
       title: "Pro Engine Required",
       description: `${featureName} is a premium feature.`,
-      solution: `Enable ${CORE_STATUS.PRO.name} on our **[website](${WEBSITE_URL})** to unlock this feature!`,
+      solution: `Enable ${CORE_STATUS.PRO.name} on our **[website](${WEBSITE_URL})** to unlock this feature! You can also use \`/shop\` to purchase temporary Pro access with Sparks.`,
       emoji: CORE_STATUS.PRO.emoji,
       isPremium: true,
     });
@@ -362,6 +397,20 @@ export class PremiumManager {
       const sub = settings?.premiumFeatures?.[featureId];
       if (!sub) return null;
 
+      // For Spark Pro, check if it's active based on expiresAt
+      if (featureId === "spark_pro") {
+        const isActive = sub.active && sub.expiresAt && new Date(sub.expiresAt) >= new Date();
+        return {
+          active: isActive,
+          payerUserId: sub.payerUserId,
+          activatedAt: sub.activatedAt,
+          expiresAt: sub.expiresAt,
+          cost: sub.cost,
+          period: sub.period,
+          source: "spark_shop",
+        };
+      }
+
       return {
         active: sub.active,
         payerUserId: sub.payerUserId,
@@ -620,7 +669,71 @@ export class PremiumManager {
       return;
     }
 
-    // 2. Fallback to individual payer balance
+    // 2. Fallback to guild owner if auto-deduct is enabled
+    const autoDeductEnabled =
+      db.guildSettings &&
+      typeof db.guildSettings.getAutoDeductFromOwner === "function"
+        ? await db.guildSettings.getAutoDeductFromOwner(guildId)
+        : false;
+
+    if (autoDeductEnabled) {
+      try {
+        const guild = await this.client?.guilds?.fetch(guildId);
+        if (guild?.ownerId) {
+          const ownerCredits = await db.coreCredits.getByUserId(guild.ownerId);
+          const ownerBalance = Math.round(
+            (ownerCredits?.credits || 0) * 100,
+          ) / 100;
+
+          if (ownerBalance >= feature.cost) {
+            const ownerRenewal = await db.coreCredits.deductCredits(
+              guild.ownerId,
+              feature.cost,
+            );
+
+            if (ownerRenewal?.success) {
+              const nextDate = new Date(sub.nextDeductionDate);
+              nextDate.setDate(nextDate.getDate() + feature.periodDays);
+
+              sub.lastDeductionDate = now;
+              sub.nextDeductionDate = nextDate;
+              sub.cost = feature.cost;
+              await db.guildSettings.set(guildId, settings);
+
+              await this._logTransaction(db, {
+                guildId,
+                userId: guild.ownerId,
+                featureId,
+                featureName: feature.name,
+                type: "owner_auto_deduct",
+                amount: -feature.cost,
+              });
+
+              counts.renewed++;
+              logger.info(
+                `✅ Renewed feature ${featureId} for guild ${guildId} using owner auto-fuel`,
+              );
+
+              await this._notify(db, guild.ownerId, {
+                type: "pro_renewed",
+                title: `${feature.name} Renewed`,
+                message: `-${feature.cost} Cores auto-fueled from your balance (vault empty). Next renewal: ${nextDate.toLocaleDateString()}.`,
+                icon: "pro",
+                metadata: { guildId, featureId, cost: feature.cost },
+              });
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        logger.error(
+          `Error in owner auto-fuel for guild ${guildId}:`,
+          error,
+        );
+      }
+    }
+
+    // 3. Fallback to individual payer balance
     const credits = await db.coreCredits.getByUserId(sub.payerUserId);
     const balance = Math.round((credits?.credits || 0) * 100) / 100;
 
@@ -661,26 +774,27 @@ export class PremiumManager {
         icon: "pro",
         metadata: { guildId, featureId, cost: feature.cost },
       });
-    } else {
-      // Insufficient balance — check grace period
-      const graceDeadline = new Date(sub.nextDeductionDate);
-      graceDeadline.setDate(graceDeadline.getDate() + GRACE_PERIOD_DAYS);
+      return;
+    }
 
-      if (now < graceDeadline) {
-        await this._sendGracePeriodWarning(
-          guildId,
-          feature,
-          sub.payerUserId,
-          graceDeadline,
-          balance,
-        );
-        counts.warned++;
-      } else {
-        await this.disableFeature(guildId, featureId, {
-          reason: "insufficient_balance",
-        });
-        counts.disabled++;
-      }
+    // 4. Insufficient balance — check grace period
+    const graceDeadline = new Date(sub.nextDeductionDate);
+    graceDeadline.setDate(graceDeadline.getDate() + GRACE_PERIOD_DAYS);
+
+    if (now < graceDeadline) {
+      await this._sendGracePeriodWarning(
+        guildId,
+        feature,
+        sub.payerUserId,
+        graceDeadline,
+        balance,
+      );
+      counts.warned++;
+    } else {
+      await this.disableFeature(guildId, featureId, {
+        reason: "insufficient_balance",
+      });
+      counts.disabled++;
     }
   }
 
@@ -1200,10 +1314,12 @@ export class PremiumManager {
   async _logTransaction(db, transaction) {
     try {
       if (!db.payments) return;
+      // Use "vault" provider for vault deposits, "premium_system" for others
+      const provider = transaction.type === "vault_deposit" ? "vault" : "premium_system";
       await db.payments.create({
         paymentId: `premium_${transaction.type}_${transaction.guildId}_${Date.now()}`,
         discordId: transaction.userId,
-        provider: "premium_system",
+        provider,
         type: transaction.type,
         status: "completed",
         amount: 0,
