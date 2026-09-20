@@ -4,7 +4,12 @@ import {
   apiPendingPayments,
   apiGetAdminActionLogs,
 } from "../../controllers/PaymentAdminController.js";
-import { apiCreatePayment } from "../../controllers/PaymentProcessingController.js";
+import {
+  apiCreatePayment,
+  apiVerifyWeb3Payment,
+  apiGetTransactionHistory,
+  apiGetUserBalance,
+} from "../../controllers/PaymentProcessingController.js";
 import {
   apiGenerateBMACCode,
   apiCheckBMACCodeStatus,
@@ -37,8 +42,9 @@ router.get(
 router.post("/create", internalAuth, apiCreatePayment);
 
 // Web3 Verification - requires internal auth
-import { apiVerifyWeb3Payment } from "../../controllers/PaymentProcessingController.js";
+router.get("/history", internalAuth, requireAuth, apiGetTransactionHistory);
 router.post("/web3/verify", internalAuth, apiVerifyWeb3Payment);
+router.get("/balance", internalAuth, requireAuth, apiGetUserBalance);
 
 // Buy Me a Coffee code generation - requires internal auth
 router.post("/buymeacoffee/generate-code", internalAuth, apiGenerateBMACCode);

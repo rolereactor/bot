@@ -3,7 +3,7 @@ import { getLogger } from "../../../utils/logger.js";
 import { errorEmbed } from "../../../utils/discord/responseMessages.js";
 import { handleAvatarGeneration } from "./handlers.js";
 
-export const disabled = false;
+export const disabled = true;
 
 // ============================================================================
 // COMMAND METADATA

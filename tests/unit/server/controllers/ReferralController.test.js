@@ -138,7 +138,7 @@ describe("ReferralController", () => {
         expect.objectContaining({
           success: true,
           referralCode: "RR-XYZ789",
-          shareUrl: "https://rolereactor.com?ref=RR-XYZ789",
+          shareUrl: "https://rolereactor.xyz?ref=RR-XYZ789",
           totalEarnedCores: 15,
           hasClaimedCode: false,
           stats: {

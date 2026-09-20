@@ -19,8 +19,7 @@ export function createLeaderboardEmbed(
   const embed = new EmbedBuilder()
     .setColor(THEME_COLOR)
     .setTitle(getLeaderboardTitle(type))
-    .setDescription(`Top ${limit} users in ${interaction.guild.name}`)
-    .setTimestamp();
+    .setDescription(`Top ${limit} users in ${interaction.guild.name}`);
 
   // Add leaderboard entries
   const leaderboardText = leaderboardData
@@ -41,13 +40,6 @@ export function createLeaderboardEmbed(
       inline: false,
     },
   ]);
-
-  // Add footer with additional info
-  const totalUsers = leaderboardData.length;
-  embed.setFooter({
-    text: `Showing ${totalUsers} users • Use /leaderboard to see more`,
-    iconURL: interaction.guild.iconURL(),
-  });
 
   return embed;
 }

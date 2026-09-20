@@ -9,36 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Vote Rewards**: Voting for the bot on top.gg now earns **Sparks** ⚡ (earned currency) instead of Core credits — starting at 5 Sparks per vote and scaling with your voting streak up to 8 (12-hour cooldown).
-- **Balance Command**: Simplified to check-only — `/balance send` removed in favor of Power Cells + `/trade`.
-- **Role-Reaction Limits**: Free tier now supports 3 panels, 5 emojis per panel, 3 roles per emoji. Pro tier supports 15 panels, 20 emojis per emoji, 10 roles per emoji.
-- **Role Bundle Limits**: Free tier supports 3 roles per bundle and 5 bundles. Pro tier supports 10 roles per bundle and 20 bundles.
-- **Role-Reaction Deploy/Update**: Removed "Open Dashboard" button from success embeds. Backend now validates per-emoji role limits dynamically based on Pro tier.
+- **Vote Rewards**: Voting for the bot on top.gg now earns **Sparks** ⚡ — starting at 5 Sparks per vote and scaling with your voting streak up to 8 (12-hour cooldown).
+- **Balance Command**: `/core` renamed to `/balance` — shows Cores & Sparks balance.
 
 ### Added
 
 - **Live Reactor**: Connect your streaming channel to Discord with go-live alerts, real-time chat relay, customizable timers, stream commands, and quote system. Supports Twitch and YouTube.
 - **Shop System (Beta)**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and flash sales.
 - **Inventory System (Beta)**: New `/inventory` command to view and use purchased items.
-- **Trade System (Beta)**: New `/trade` command to gift items to other users (no tax).
-- **Referral System**: Claim a friend's referral code for a **+25 Sparks** ⚡ welcome bonus and **+10% bonus Cores** on your first $10+ purchase. Referrers earn **15% bonus Cores** on every qualifying purchase made by users they referred.
-- **Ticket Management Dashboard**: Build and manage ticket panels from the web dashboard.
-- **Goodbye System Dashboard**: Configure goodbye messages, channels, and settings from the web dashboard.
-- **Role Bundle Dashboard**: Create, view, and delete role bundles directly from the web dashboard. Use bundles in role-reaction panels to apply multiple roles with a single click.
-
-### Fixed
-
-- **Role-Reaction Unique Mode**: Added per-user mutex and task queue to prevent race conditions where Discord API updates hadn't propagated before the next event.
-- **Role-Reaction Self-Removal Loop**: Bot no longer accidentally removes its own reactions from role-reaction panels.
-- **Role-Reaction Premium Limits**: Backend deploy/update endpoints now correctly enforce Pro tier limits instead of always using Free tier values.
-
-### Dashboard
-
-- **Dynamic Pro Engine Benefits**: Pro Engine benefits table now fetches limits from the API — always up to date with the latest tier values.
-- **Role-Reaction Panels**: All dashboard text standardized to "panels" (previously "messages" or "menus").
-- **Per-Emoji Role Limits**: Role builder now enforces per-emoji role limits (Free: 3, Pro: 10) pulled from the API.
-- **Bundle Validation**: Applying a role bundle now checks if it would exceed the per-emoji role limit before adding.
-- **Pro Engine Pricing**: All pricing displays (benefits table, donate page, BMAC payment) now fetch from the API instead of using hardcoded values.
+- **Trade System (Beta)**: New `/trade` command to gift items to other users.
+- **Engine Command**: New `/engine` command to manage Pro Engine status, view Guild Core Reserve, and deposit Cores into server vault.
+- **Dashboard Command**: New `/dashboard` admin command to open the web dashboard.
+- **Referral System**: Claim a friend's referral code on the dashboard for +25 Sparks ⚡ and 10% bonus Cores on your first $10+ purchase. Referrers earn 15% bonus Cores on referred purchases of $10+.
+- **Web Dashboard**: New panels for ticket management, goodbye system configuration, and role bundle management.
 
 ## [1.8.0] - 2026-07-23
 

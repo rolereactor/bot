@@ -1,6 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { THEME, EMOJIS } from "../../../config/theme.js";
 import { emojiConfig } from "../../../config/emojis.js";
+import { getMentionableCommand } from "../../../utils/commandUtils.js";
 
 const CORE_EMOJI = emojiConfig.customEmojis.core;
 
@@ -23,29 +24,21 @@ export function createErrorEmbed(interaction, title, description) {
     .setTitle(`${EMOJIS.STATUS.ERROR} ${title}`)
     .setDescription(
       `**Prompt**\n${truncatePrompt(prompt)}\n\n**Details**\n${description}`,
-    )
-    .setFooter({
-      text: `Generated for ${interaction.user.tag} • Role Reactor`,
-    })
-    .setTimestamp();
+    );
 }
 
 /**
  * Create warning embed for avatar generation warnings
- * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {import('discord.js').ChatInputCommandInteraction} _interaction
  * @param {string} title - Warning title
  * @param {string} description - Warning description
  * @returns {import('discord.js').EmbedBuilder}
  */
-export function createWarningEmbed(interaction, title, description) {
+export function createWarningEmbed(_interaction, title, description) {
   return new EmbedBuilder()
     .setColor(THEME.WARNING)
     .setTitle(`${EMOJIS.STATUS.WARNING} ${title}`)
-    .setDescription(description)
-    .setFooter({
-      text: `Generated for ${interaction.user.tag} • Role Reactor`,
-    })
-    .setTimestamp();
+    .setDescription(description);
 }
 
 /**
@@ -110,19 +103,12 @@ export function createLoadingEmbed(
     );
   }
 
-  // Always use consistent footer format matching chat command
-  embed
-    .setFooter({
-      text: `Generated for ${interaction.user.tag} • Role Reactor`,
-    })
-    .setTimestamp();
-
   return embed;
 }
 
 /**
  * Create success embed for avatar generation
- * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ * @param {import('discord.js').ChatInputCommandInteraction} _interaction
  * @param {string} prompt - User's prompt
  * @param {string|null} artStyle - Selected art style
  * @param {Object|null} _deductionBreakdown - Credit deduction breakdown
@@ -130,7 +116,7 @@ export function createLoadingEmbed(
  * @returns {import('discord.js').EmbedBuilder}
  */
 export function createSuccessEmbed(
-  interaction,
+  _interaction,
   prompt,
   artStyle = null,
   _deductionBreakdown = null,
@@ -152,13 +138,6 @@ export function createSuccessEmbed(
     ]);
   }
 
-  // Always use consistent footer format matching chat command
-  embed
-    .setFooter({
-      text: `Generated for ${interaction.user.tag} • Role Reactor`,
-    })
-    .setTimestamp();
-
   return embed;
 }
 
@@ -175,6 +154,7 @@ export function createCoreEmbed(interaction, userData, creditsNeeded, prompt) {
   const totalCredits = userData.credits || 0;
 
   const coreBreakdown = `**Your Balance**: ${totalCredits} ${CORE_EMOJI}`;
+  const balanceCommand = getMentionableCommand(interaction.client, "balance", interaction.guildId);
 
   return new EmbedBuilder()
     .setColor(THEME.WARNING)
@@ -185,14 +165,10 @@ export function createCoreEmbed(interaction, userData, creditsNeeded, prompt) {
     .addFields([
       {
         name: "Get Cores",
-        value: `Buy Core packages with crypto • Use \`/balance check\``,
+        value: `Buy Core packages with crypto • Use ${balanceCommand} check`,
         inline: false,
       },
-    ])
-    .setFooter({
-      text: `Generated for ${interaction.user.tag} • Role Reactor`,
-    })
-    .setTimestamp();
+    ]);
 }
 
 /**
@@ -216,11 +192,7 @@ export function createHelpEmbed() {
         value: `Optional: Choose an artistic style (manga, modern, retro, realistic, chibi, lofi)`,
         inline: false,
       },
-    ])
-    .setFooter({
-      text: "Avatar Generator • Role Reactor",
-    })
-    .setTimestamp();
+    ]);
 }
 
 /**
@@ -232,9 +204,5 @@ export function createAvatarValidationEmbed(reason) {
   return new EmbedBuilder()
     .setColor(THEME.WARNING)
     .setTitle(`${EMOJIS.STATUS.WARNING} Check your prompt`)
-    .setDescription(reason)
-    .setFooter({
-      text: "Avatar Generator • Role Reactor",
-    })
-    .setTimestamp();
+    .setDescription(reason);
 }

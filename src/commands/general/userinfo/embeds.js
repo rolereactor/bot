@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
+import { THEME } from "../../../config/theme.js";
 import {
   formatUserFlags,
   formatRoles,
@@ -22,8 +22,7 @@ export function createUserInfoEmbed(user, memberData, guild, warnCount = null) {
     .setDescription(
       `**${user.displayName || user.username}**${user.bot ? " [BOT]" : ""}`,
     )
-    .setThumbnail(user.displayAvatarURL({ size: 256 }))
-    .setTimestamp();
+    .setThumbnail(user.displayAvatarURL({ size: 256 }));
 
   const fields = [];
 
@@ -58,23 +57,16 @@ export function createUserInfoEmbed(user, memberData, guild, warnCount = null) {
   }
 
   // Status (if member is in guild)
-  // If intent is enabled, presence will show real-time status
-  // If intent is not enabled or presence is not cached, status field is omitted
   if (memberData) {
-    // Check if presence data is available (intent enabled and cached)
-    // In Discord.js, presence object might exist but status could be undefined/null
-    // For offline users, presence might be null even with intent enabled
     const hasPresence =
       memberData.presence &&
       memberData.presence.status !== undefined &&
       memberData.presence.status !== null;
 
     if (hasPresence) {
-      // User has valid presence data (online, idle, dnd, or offline with cached presence)
       const status = formatUserStatus(memberData.presence);
       const activity = formatUserActivity(memberData.presence);
 
-      // Truncate activity text if too long (Discord field value limit is 1024)
       let activityText = activity;
       if (activity && activity.length > 200) {
         activityText = `${activity.substring(0, 197)}...`;
@@ -93,17 +85,12 @@ export function createUserInfoEmbed(user, memberData, guild, warnCount = null) {
       memberData.presence === null ||
       memberData.presence === undefined
     ) {
-      // Presence is null/undefined - user is likely offline and not cached
-      // Show "Offline" as fallback when user is a member but presence unavailable
-      // This provides consistent UX even when presence data isn't cached
       row2Fields.push({
         name: "Status",
         value: "⚫ Offline",
         inline: true,
       });
     }
-    // If presence exists but has no status, the field is not shown
-    // This is an edge case that shouldn't normally happen
   }
 
   // Badges
@@ -184,24 +171,17 @@ export function createUserInfoEmbed(user, memberData, guild, warnCount = null) {
     });
   }
 
-  embed
-    .addFields(fields)
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        `User ID: ${user.id}`,
-        user.displayAvatarURL(),
-      ),
-    );
+  embed.addFields(fields);
 
   return embed;
 }
 
 /**
  * Create error embed
- * @param {import('discord.js').User} user - User who triggered the error
+ * @param {import('discord.js').User} _user - User who triggered the error
  * @returns {EmbedBuilder}
  */
-export function createErrorEmbed(user) {
+export function createErrorEmbed(_user) {
   return new EmbedBuilder()
     .setColor(THEME.ERROR)
     .setTitle("Error")
@@ -212,12 +192,5 @@ export function createErrorEmbed(user) {
         "• Network connectivity problems\n" +
         "• Bot maintenance\n\n" +
         "Please try again in a few moments!",
-    )
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "If this problem persists, contact support",
-        user.displayAvatarURL(),
-      ),
-    )
-    .setTimestamp();
+    );
 }

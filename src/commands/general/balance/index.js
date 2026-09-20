@@ -14,19 +14,18 @@ import { execute } from "./handlers.js";
 export const metadata = {
   name: "balance",
   category: "general",
-  description: "Check your Paid Cores & Reward Sparks balance",
+  description: "Check your Cores & Sparks balance",
   keywords: ["balance", "core", "sparks", "credits", "wallet", "currency"],
   emoji: "🔮",
   helpFields: [
     {
       name: `How to Use`,
-      value: "```/balance check```\n```/balance send user:@user cores:10```",
+      value: "```/balance```",
       inline: false,
     },
     {
       name: `What You Need`,
-      value:
-        "• `/balance check` - No parameters\n• `/balance send` - Target user & amount of Cores",
+      value: "No parameters required",
       inline: false,
     },
     {
@@ -37,7 +36,7 @@ export const metadata = {
     {
       name: `What You'll See`,
       value:
-        "Your Paid Cores & Reward Sparks balance, or send Cores to another user.",
+        "Your Cores & Sparks balance. Use Power Cells to transfer Cores to other users!",
       inline: false,
     },
   ],
@@ -49,36 +48,11 @@ export const metadata = {
 
 /**
  * Core command definition
- * Allows users to check their Core balance or send Cores to another user
+ * Allows users to check their Core & Spark balance
  */
 export const data = new SlashCommandBuilder()
   .setName(metadata.name)
   .setDescription(metadata.description)
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("check")
-      .setDescription("View your Paid Cores & Reward Sparks balance"),
-  )
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("send")
-      .setDescription(
-        "Send Paid Cores to another user (10% burn tax applies, Sparks cannot be sent)",
-      )
-      .addUserOption(option =>
-        option
-          .setName("user")
-          .setDescription("The user to send Paid Cores to")
-          .setRequired(true),
-      )
-      .addNumberOption(option =>
-        option
-          .setName("cores")
-          .setDescription("How many Paid Cores to send (min 1)")
-          .setRequired(true)
-          .setMinValue(1),
-      ),
-  )
   .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages);
 
 export { execute };

@@ -27,7 +27,7 @@ vi.mock("src/config/config.js", () => ({
 }));
 
 vi.mock("src/commands/general/balance/embeds.js", () => ({
-  createBalanceEmbed: vi.fn().mockReturnValue({ data: { title: "Balance" } }),
+  createBalanceEmbed: vi.fn().mockReturnValue({ embeds: [{ data: { title: "Balance" } }], components: [] }),
   createErrorEmbed: vi.fn().mockReturnValue({ data: { title: "Error" } }),
   createValidationErrorEmbed: vi.fn().mockReturnValue({ data: { title: "Validation Error" } }),
 }));
@@ -91,9 +91,22 @@ describe("Core Command", () => {
         getRole: vi.fn().mockReturnValue(null),
         getChannel: vi.fn().mockReturnValue(null),
       },
+      isRepliable: vi.fn().mockReturnValue(true),
+      isChatInputCommand: vi.fn().mockReturnValue(true),
+      isCommand: vi.fn().mockReturnValue(true),
       deferReply: vi.fn().mockResolvedValue(undefined),
       editReply: vi.fn().mockResolvedValue(undefined),
       reply: vi.fn().mockResolvedValue(undefined),
+      channel: {
+        id: "channel123",
+        name: "test-channel",
+        type: 0,
+        send: vi.fn().mockResolvedValue({}),
+        createMessageComponentCollector: vi.fn().mockReturnValue({
+          on: vi.fn(),
+          stop: vi.fn(),
+        }),
+      },
     });
   });
 

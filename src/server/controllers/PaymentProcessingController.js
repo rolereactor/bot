@@ -6,6 +6,7 @@ import {
 import { logRequest } from "../utils/apiShared.js";
 import { plisioPay } from "../../utils/payments/plisio.js";
 import { config } from "../../config/config.js";
+import { getStorageManager } from "../../utils/storage/storageManager.js";
 
 const logger = getLogger();
 
@@ -152,6 +153,9 @@ const getRpcUrl = (chainId) => {
   }
 };
 
+// Configurable timeout for transaction receipt (ms). Allows faster test cycles or longer waits in prod.
+const TX_RECEIPT_TIMEOUT_MS = process.env.WEB3_TX_TIMEOUT ? parseInt(process.env.WEB3_TX_TIMEOUT, 10) : 45000;
+
 /**
  * Verify Direct Web3 Stablecoin Payment
  */
@@ -212,14 +216,36 @@ export async function apiVerifyWeb3Payment(req, res) {
     const publicClient = createPublicClient({ transport: http(rpcUrl) });
     // confirmations: guard against reorgs (esp. Polygon/Optimism) wiping the
     // transfer after Cores were already granted
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash: txHash,
-      confirmations: 3,
-      timeout: 45000,
-    }).catch((err) => {
-      logger.warn(`Transaction receipt not found or timed out: ${err.message}`);
-      return null;
-    });
+    let receipt = null;
+    try {
+      receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+        confirmations: 3,
+        timeout: TX_RECEIPT_TIMEOUT_MS,
+      });
+    } catch (err) {
+      // Handle connection errors (e.g., downstream node unreachable)
+      if (err.code === 'ECONNREFUSED' || err.message?.includes('fetch failed')) {
+        logger.error(`Web3 node unreachable: ${err.message}`);
+        const { statusCode, response } = createErrorResponse(
+          "Bot service unreachable",
+          503,
+        );
+        return res.status(statusCode).json(response);
+      }
+      // Timeout specific handling
+      if (err.message?.toLowerCase()?.includes('timeout')) {
+        logger.warn(`Transaction receipt timeout for ${txHash}: ${err.message}`);
+        const { statusCode, response } = createErrorResponse(
+          "Transaction receipt timeout, please try again later",
+          504,
+        );
+        return res.status(statusCode).json(response);
+      }
+      logger.warn(`Transaction receipt not found or other error: ${err.message}`);
+      // Fallback to null to trigger generic not found response
+      receipt = null;
+    }
 
     if (!receipt) {
       const { statusCode, response } = createErrorResponse("Transaction not found", 404);
@@ -292,3 +318,71 @@ export async function apiVerifyWeb3Payment(req, res) {
     return res.status(statusCode).json(response);
   }
 }
+
+/**
+ * Get transaction history for a user
+ * Supports pagination and optional status/provider filters
+ */
+export async function apiGetTransactionHistory(req, res) {
+  logRequest('Get transaction history', req);
+
+  try {
+    const userId = req.session?.discordUser?.id || req.query.discordId;
+    if (!userId) {
+      const { statusCode, response } = createErrorResponse('Authentication required', 401);
+      return res.status(statusCode).json(response);
+    }
+
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
+    const skip = (page - 1) * limit;
+    const status = req.query.status || null;
+    const provider = req.query.provider || null;
+
+    const { getDatabaseManager } = await import('../../utils/storage/databaseManager.js');
+    const dbManager = await getDatabaseManager();
+    if (!dbManager?.payments) {
+      const { statusCode, response } = createErrorResponse('PaymentRepository not available', 503);
+      return res.status(statusCode).json(response);
+    }
+
+    const payments = await dbManager.payments.findByDiscordId(userId, { limit, skip, status, provider });
+    return res.json(createSuccessResponse({ payments, pagination: { limit, page, count: payments.length } }));
+  } catch (error) {
+    logger.error('❌ Error fetching transaction history:', error);
+    const { statusCode, response } = createErrorResponse('Failed to fetch transaction history', 500, error.message);
+    return res.status(statusCode).json(response);
+  }
+}
+
+/**
+ * Get user core balance
+ * Returns current credits and total generated cores
+ */
+export async function apiGetUserBalance(req, res) {
+  logRequest('Get user balance', req);
+  try {
+    const userId = req.session?.discordUser?.id || req.query.discordId;
+    if (!userId) {
+      const { statusCode, response } = createErrorResponse('Authentication required', 401);
+      return res.status(statusCode).json(response);
+    }
+    const storageManager = await getStorageManager();
+    const coreData = await storageManager.getCoreCredits(userId);
+    if (!coreData) {
+      const { statusCode, response } = createErrorResponse('User balance not found', 404);
+      return res.status(statusCode).json(response);
+    }
+    return res.json(createSuccessResponse({
+      userId,
+      credits: coreData.credits ?? 0,
+      totalGenerated: coreData.totalGenerated ?? 0,
+      lastUpdated: coreData.lastUpdated ?? null,
+    }));
+  } catch (error) {
+    logger.error('❌ Error fetching user balance:', error);
+    const { statusCode, response } = createErrorResponse('Failed to fetch user balance', 500, error.message);
+    return res.status(statusCode).json(response);
+  }
+}
+

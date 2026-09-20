@@ -644,20 +644,27 @@ class GiveawayManager extends EventEmitter {
       return [];
     }
 
+    // Fisher-Yates shuffle to pick unique winners in O(n)
+    // Avoids coupon-collector degeneration when pool is heavily weighted
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Deduplicate: pick first N unique users from shuffled pool
+    const seen = new Set();
     const winners = [];
-    const winnerSet = new Set();
+    const maxWinners = Math.min(winnerCount, shuffled.length);
 
-    while (winners.length < winnerCount && winners.length < pool.length) {
-      const randomIndex = Math.floor(Math.random() * pool.length);
-      const winnerId = pool[randomIndex];
-
-      if (!winnerSet.has(winnerId)) {
+    for (let i = 0; i < shuffled.length && winners.length < maxWinners; i++) {
+      if (!seen.has(shuffled[i])) {
+        seen.add(shuffled[i]);
         winners.push({
-          userId: winnerId,
+          userId: shuffled[i],
           selectedAt: new Date(),
           claimed: false,
         });
-        winnerSet.add(winnerId);
       }
     }
 

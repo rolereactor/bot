@@ -39,6 +39,7 @@ import {
   TwitchQuoteRepository,
   TwitchTimerRepository,
   ReferralRepository,
+  FlashSaleRepository,
 } from "./repositories/index.js";
 import { CacheManager } from "../cache/CacheManager.js";
 import { ConnectionManager } from "./ConnectionManager.js";
@@ -88,6 +89,7 @@ class DatabaseManager {
     this.streamBotAccount = null;
     this.twitchCommands = null;
     this.referrals = null;
+    this.flashSales = null;
     // Initialize connection manager asynchronously (non-blocking)
     this._initializeConnectionManager().catch(err => {
       this.logger?.warn(
@@ -334,6 +336,11 @@ class DatabaseManager {
           this.logger,
         );
         this.twitchTimers = new TwitchTimerRepository(
+          db,
+          this.cacheManager,
+          this.logger,
+        );
+        this.flashSales = new FlashSaleRepository(
           db,
           this.cacheManager,
           this.logger,

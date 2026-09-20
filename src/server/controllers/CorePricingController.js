@@ -84,14 +84,24 @@ export async function apiPricing(req, res) {
         const { getStorageManager } = await import(
           "../../utils/storage/storageManager.js"
         );
+        const { getDatabaseManager } = await import(
+          "../../utils/storage/databaseManager.js"
+        );
         const storage = await getStorageManager();
+        const dbManager = await getDatabaseManager();
         const userData = await storage.getCoreCredits(requestedUserId);
-        const hasPayments = userData?.cryptoPayments?.length > 0;
+
+        // cryptoPayments was migrated to PaymentRepository — query it directly
+        let hasPayments = false;
+        if (dbManager?.payments) {
+          const stats = await dbManager.payments.getUserStats(requestedUserId);
+          hasPayments = stats.totalPayments > 0;
+        }
 
         // Check if user has active Pro on any guild
         let hasActivePro = false;
-        if (storage.dbManager?.guildSettings) {
-          const guildsWithPro = await storage.dbManager.guildSettings.collection
+        if (dbManager?.guildSettings) {
+          const guildsWithPro = await dbManager.guildSettings.collection
             .find({
               "premiumFeatures.pro_engine.payerUserId": requestedUserId,
               "premiumFeatures.pro_engine.active": true,
@@ -200,15 +210,30 @@ export async function apiUserBalance(req, res) {
       );
     }
 
+    // cryptoPayments was migrated to PaymentRepository — query it for the count
+    let cryptoPaymentCount = 0;
+    try {
+      const { getDatabaseManager } = await import(
+        "../../utils/storage/databaseManager.js"
+      );
+      const dbManager = await getDatabaseManager();
+      if (dbManager?.payments) {
+        const stats = await dbManager.payments.getUserStats(requestedUserId);
+        cryptoPaymentCount = stats.byProvider?.crypto?.count || stats.totalPayments || 0;
+      }
+    } catch {
+      // Non-critical — paymentHistory is informational only
+    }
+
     res.json(
       createSuccessResponse({
         requestedUserId: requestedUserId,
-        credits: Math.round((userData.credits || 0) * 100) / 100, // Round to 2 decimal places
+        credits: Math.round((userData.credits || 0) * 100) / 100,
         sparks: Math.round((userData.sparks || 0) * 100) / 100,
         hasAccount: true,
         lastUpdated: userData.lastUpdated || null,
         paymentHistory: {
-          crypto: userData.cryptoPayments?.length || 0,
+          crypto: cryptoPaymentCount,
         },
       }),
     );
@@ -263,23 +288,12 @@ export async function apiUserPayments(req, res) {
     const dbManager = await getDatabaseManager();
 
     if (!dbManager?.payments) {
-      const { getStorageManager } = await import(
-        "../../utils/storage/storageManager.js"
-      );
-      const storage = await getStorageManager();
-      const coreCredits = (await storage.get("core_credit")) || {};
-      const userData = coreCredits[requestedUserId];
-      const payments = [];
-      if (userData?.cryptoPayments) payments.push(...userData.cryptoPayments);
-      payments.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      );
+      // cryptoPayments was migrated away from core_credits — no legacy fallback data available
       return res.json(
         createSuccessResponse({
           requestedUserId,
-          payments,
-          total: payments.length,
+          payments: [],
+          total: 0,
           source: "legacy",
         }),
       );
@@ -305,9 +319,11 @@ export async function apiUserPayments(req, res) {
           amount: p.amount,
           currency: p.currency,
           coresGranted: p.coresGranted,
+          sparksGranted: p.sparksGranted || 0,
           tier: p.tier,
           status: p.status,
           createdAt: p.createdAt,
+          metadata: p.metadata || null,
         })),
         total: stats.totalPayments,
         stats: {

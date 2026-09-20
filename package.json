@@ -6,9 +6,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "start:safe": "pkill -f 'node src/index.js' 2>/dev/null; lsof -ti:3030 | xargs kill -9 2>/dev/null; sleep 1 && node src/index.js",
+    "start:safe": "pkill -f 'node src/index.js' 2>/dev/null || true; lsof -ti:3030 | xargs kill -9 2>/dev/null || true; sleep 1 && node src/index.js",
     "dev": "nodemon src/index.js",
-    "dev:safe": "pkill -f 'node src/index.js' 2>/dev/null; lsof -ti:3030 | xargs kill -9 2>/dev/null; sleep 1 && nodemon src/index.js",
+    "dev:safe": "pkill -f 'node src/index.js' 2>/dev/null || true; lsof -ti:3030 | xargs kill -9 2>/dev/null || true; sleep 1 && nodemon src/index.js",
     "type-check": "tsc --noEmit -p jsconfig.json 2>&1 | grep -v 'node_modules/' || true",
     "deploy:dev": "NODE_ENV=development node scripts/deploy-commands.js",
     "deploy:prod": "NODE_ENV=production node scripts/deploy-commands.js",

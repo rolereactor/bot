@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
-import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
+import { THEME } from "../../../config/theme.js";
 
-export function createSupportEmbed(user) {
+export function createSupportEmbed(_user) {
   return new EmbedBuilder()
     .setColor(THEME.PRIMARY)
     .setTitle("Support")
@@ -27,14 +27,7 @@ export function createSupportEmbed(user) {
         ].join("\n"),
         inline: false,
       },
-    )
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        `Requested by ${user.username}`,
-        user.displayAvatarURL(),
-      ),
-    )
-    .setTimestamp();
+    );
 }
 
 export function createErrorEmbed() {

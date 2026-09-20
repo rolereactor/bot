@@ -15,11 +15,20 @@ class EmojiConfig {
     // Different emoji IDs for different environments
     const emojiConfigs = {
       development: {
-        core: "1427264796276817950",
-        spark: "", // TODO: Upload spark_icon.png to dev server and paste ID here
+        core: "1548258466735329280",
+        spark: "1548258526831321098",
         coreBasicBadge: "1427982373244637244",
         corePremiumBadge: "1427982777466359859",
         coreEliteBadge: "1427983161513607288",
+        // Power Cells
+        powerCellAaa: "", // TODO: Upload emoji
+        powerCellAa: "",  // TODO: Upload emoji
+        powerCellC: "",   // TODO: Upload emoji
+        powerCellD: "",   // TODO: Upload emoji
+        // Engine Modules
+        piston: "",       // TODO: Upload emoji
+        turbocharger: "", // TODO: Upload emoji
+        supercharger: "", // TODO: Upload emoji
       },
       production: {
         core: "1427267639457222737",
@@ -27,6 +36,15 @@ class EmojiConfig {
         coreBasicBadge: "1427984193756987452",
         corePremiumBadge: "1427984335377793136",
         coreEliteBadge: "1427984418420555906",
+        // Power Cells
+        powerCellAaa: "", // TODO: Upload emoji
+        powerCellAa: "",  // TODO: Upload emoji
+        powerCellC: "",   // TODO: Upload emoji
+        powerCellD: "",   // TODO: Upload emoji
+        // Engine Modules
+        piston: "",       // TODO: Upload emoji
+        turbocharger: "", // TODO: Upload emoji
+        supercharger: "", // TODO: Upload emoji
       },
     };
 
@@ -76,6 +94,37 @@ class EmojiConfig {
    */
   get spark() {
     return this.get("spark", "⚡");
+  }
+
+  /**
+   * Get Power Cell emoji by size
+   * @param {string} size - Power cell size ('aaa', 'aa', 'c', 'd')
+   * @returns {string} Custom or fallback emoji
+   */
+  getPowerCellEmoji(size) {
+    const sizeMap = {
+      aaa: { name: "powerCellAaa", fallback: "🔋" },
+      aa: { name: "powerCellAa", fallback: "🔋" },
+      c: { name: "powerCellC", fallback: "🔋" },
+      d: { name: "powerCellD", fallback: "🔋" },
+    };
+    const config = sizeMap[size] || sizeMap.aaa;
+    return this.get(config.name, config.fallback);
+  }
+
+  /**
+   * Get Engine Module emoji
+   * @param {string} type - Engine module type ('piston', 'turbocharger', 'supercharger')
+   * @returns {string} Custom or fallback emoji
+   */
+  getEngineModuleEmoji(type) {
+    const typeMap = {
+      piston: { name: "piston", fallback: "⚙️" },
+      turbocharger: { name: "turbocharger", fallback: "⚙️" },
+      supercharger: { name: "supercharger", fallback: "⚙️" },
+    };
+    const config = typeMap[type] || typeMap.piston;
+    return this.get(config.name, config.fallback);
   }
 
   /**

@@ -23,7 +23,7 @@ export function requireAuth(req, res, next) {
   }
 
   // Standard session-based authentication
-  if (!req.session || !req.session.discordUser) {
+  if (!req?.session || !req.session.discordUser) {
     logger.debug("Authentication failed", {
       path: req.path,
       method: req.method,

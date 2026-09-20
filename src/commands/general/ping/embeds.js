@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
+import { THEME } from "../../../config/theme.js";
 import { getLatencyIndicator } from "./utils.js";
 
 export function createPingEmbed(
@@ -11,7 +11,7 @@ export function createPingEmbed(
   latency,
   uptimeString,
   client,
-  user,
+  _user,
 ) {
   const embed = new EmbedBuilder()
     .setColor(statusColor)
@@ -33,14 +33,7 @@ export function createPingEmbed(
         value: `\`${uptimeString}\``,
         inline: true,
       },
-    )
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        `Requested by ${user.username}`,
-        user.displayAvatarURL(),
-      ),
-    )
-    .setTimestamp();
+    );
 
   // Add helpful tips based on status
   if (apiLatency >= 400) {
@@ -87,7 +80,7 @@ export function createPingEmbed(
   return embed;
 }
 
-export function createErrorEmbed(user) {
+export function createErrorEmbed(_user) {
   return new EmbedBuilder()
     .setColor(THEME.ERROR)
     .setTitle("Connection Check Failed")
@@ -98,12 +91,5 @@ export function createErrorEmbed(user) {
         "• Network connectivity problems\n" +
         "• Bot maintenance\n\n" +
         "Please try again in a few moments!",
-    )
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "If this problem persists, contact support",
-        user.displayAvatarURL(),
-      ),
-    )
-    .setTimestamp();
+    );
 }

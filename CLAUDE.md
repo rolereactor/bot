@@ -105,6 +105,7 @@ Internet → nginx (SSL, api.rolereactor.xyz) → 127.0.0.1:3030 → PM2 process
 - **Error handling** — always handle errors at command/event boundaries; let utilities throw
 - **MongoDB** — use helpers in `src/utils/storage/` rather than direct collection access
 - **Command structure** — each command exports `{ data, execute }` where `data` is a `SlashCommandBuilder`
+- **Clickable commands** — ALWAYS use `getMentionableCommand(client, "command", guildId)` from `src/utils/commandUtils.js` instead of plain text `/command`. This creates clickable command mentions that auto-fill the message input when clicked. Import from `../../../utils/commandUtils.js` (adjust path as needed).
 
 ## Behavioral Guidelines
 

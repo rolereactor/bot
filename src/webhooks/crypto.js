@@ -98,6 +98,7 @@ export async function handleCryptoWebhook(req, res) {
       sourceCurrency,
       email,
       metadata,
+      "plisio",
     );
     return res.status(200).json(result);
   } catch (error) {
@@ -151,14 +152,15 @@ async function storePaymentRecord(body, discordId = null) {
 /**
  * Atomic processing of Crypto payment
  *
- * @param {string} userId         Discord user ID
- * @param {string} paymentId      Plisio order_number
+ * @param {string} userId        Discord user ID
+ * @param {string} paymentId      Plisio order_number or Web3 txHash
  * @param {string} cryptoAmount   Amount in cryptocurrency (e.g. "0.00001511")
  * @param {string} sourceAmount   Amount in fiat currency  (e.g. "1.00")
  * @param {string} currency       Crypto currency code     (e.g. "BTC")
  * @param {string} sourceCurrency Fiat currency code       (e.g. "USD")
  * @param {string} _email
  * @param {Object} _metadata
+ * @param {string} _provider      Payment provider (e.g. "plisio", "web3")
  */
 export async function processCryptoPayment(
   userId,
@@ -169,6 +171,7 @@ export async function processCryptoPayment(
   sourceCurrency,
   _email,
   _metadata,
+  _provider = "plisio",
 ) {
   const storage = await getStorageManager();
   const configModule = await import("../config/config.js").catch(() => null);
@@ -242,7 +245,7 @@ export async function processCryptoPayment(
     await storage.completePayment({
       paymentId: paymentId,
       discordId: userId,
-      provider: "plisio",
+      provider: _provider,
       type: "one_time",
       status: "completed",
       amount: paymentAmount,

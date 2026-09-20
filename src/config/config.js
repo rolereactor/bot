@@ -348,7 +348,7 @@ class Config {
         hidden: true,
       },
       $5: {
-        name: "Starter",
+        name: "1 Coffee",
         baseCores: 75,
         bonusCores: 0,
         description: "Perfect for trying AI features",
@@ -356,7 +356,7 @@ class Config {
         popular: false,
       },
       $10: {
-        name: "Basic",
+        name: "2 Coffees",
         baseCores: 150,
         bonusCores: 15,
         description: "Most popular choice for regular users",
@@ -364,7 +364,7 @@ class Config {
         popular: true,
       },
       $25: {
-        name: "Pro",
+        name: "5 Coffees",
         baseCores: 375,
         bonusCores: 60,
         description: "Best value for power users",
@@ -372,7 +372,7 @@ class Config {
         popular: false,
       },
       $50: {
-        name: "Ultimate",
+        name: "10 Coffees",
         baseCores: 750,
         bonusCores: 150,
         description: "Maximum value for heavy usage",
@@ -381,7 +381,7 @@ class Config {
         popular: false,
       },
       $100: {
-        name: "Premium",
+        name: "20 Coffees",
         baseCores: 1800,
         bonusCores: 400,
         description: "Best value for serious creators",
