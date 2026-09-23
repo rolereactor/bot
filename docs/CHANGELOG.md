@@ -14,10 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Live Reactor**: Connect your streaming channel to Discord with go-live alerts, real-time chat relay, customizable timers, stream commands, and quote system. Supports Twitch and YouTube.
-- **Shop System (Beta)**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and flash sales.
-- **Inventory System (Beta)**: New `/inventory` command to view and use purchased items.
-- **Trade System (Beta)**: New `/trade` command to gift items to other users.
+- **Shop System**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and flash sales.
+- **Inventory System**: New `/inventory` command to view and use purchased items.
+- **Gift System**: New `/gift` command to gift items to other users.
 - **Engine Command**: New `/engine` command to manage Pro Engine status, view Guild Core Reserve, and deposit Cores into server vault.
 - **Dashboard Command**: New `/dashboard` admin command to open the web dashboard.
 - **Referral System**: Claim a friend's referral code on the dashboard for +25 Sparks ⚡ and 10% bonus Cores on your first $10+ purchase. Referrers earn 15% bonus Cores on referred purchases of $10+.
