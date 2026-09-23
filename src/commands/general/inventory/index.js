@@ -8,7 +8,7 @@ import { execute } from "./handlers.js";
 export const metadata = {
   name: "inventory",
   category: "general",
-  description: "[Beta] View and use your purchased items",
+  description: "View and use your purchased items",
   keywords: ["inventory", "items", "power cell", "engine module", "shop"],
   emoji: "🎒",
   helpFields: [

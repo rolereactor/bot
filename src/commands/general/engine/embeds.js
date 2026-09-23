@@ -190,13 +190,6 @@ export function createVaultEmbed({ guild, vaultData, client }) {
     .setDescription(
       `The **Guild Vault** lets anyone in the community pool Cores to keep Pro Engine active for **${guild.name}**!`,
     )
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        client?.user?.displayAvatarURL(),
-      ),
-    )
     .addFields(
       {
         name: "Vault Balance",
@@ -232,13 +225,6 @@ export function createFuelersEmbed({ guild, vaultData, client }) {
       UI_COMPONENTS.createAuthor(
         `${guild.name} • Guild Fuelers`,
         guild.iconURL() || client?.user?.displayAvatarURL(),
-      ),
-    )
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        client?.user?.displayAvatarURL(),
       ),
     );
 
@@ -298,13 +284,6 @@ export function createMeEmbed({ guild, user, vaultData, client }) {
     .setColor(THEME.PRIMARY)
     .setAuthor(
       UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
-    )
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        client?.user?.displayAvatarURL(),
-      ),
     );
 
   if (contributionCount > 0) {
@@ -375,13 +354,6 @@ export function createFuelConfirmationEmbed({
     )
     .setDescription(
       `Deposit **${coreEmoji} ${amount.toFixed(2)}** into **${guild.name}**?`,
-    )
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        _client?.user?.displayAvatarURL(),
-      ),
     );
 
   if (typeof userBalance === "number") {
@@ -408,14 +380,7 @@ export function createFuelCancelledEmbed(user, _client) {
     .setAuthor(
       UI_COMPONENTS.createAuthor(user.username, user.displayAvatarURL()),
     )
-    .setDescription("No cores were deducted from your personal balance.")
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        _client?.user?.displayAvatarURL(),
-      ),
-    );
+    .setDescription("No cores were deducted from your personal balance.");
 }
 
 /**
@@ -457,12 +422,5 @@ export function createFuelSuccessEmbed({
         value: `≈ **${weeksFunded} weeks** of Pro Engine`,
         inline: true,
       },
-    )
-    .setTimestamp()
-    .setFooter(
-      UI_COMPONENTS.createFooter(
-        "Engine",
-        _client?.user?.displayAvatarURL(),
-      ),
     );
 }

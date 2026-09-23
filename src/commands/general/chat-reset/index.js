@@ -10,7 +10,7 @@ import { THEME, UI_COMPONENTS } from "../../../config/theme.js";
 
 const logger = getLogger();
 
-export const disabled = false;
+export const disabled = true;
 
 // ============================================================================
 // COMMAND METADATA

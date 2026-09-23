@@ -8,7 +8,7 @@ import { execute } from "./handlers.js";
 export const metadata = {
   name: "shop",
   category: "general",
-  description: "[Beta] Buy Power Cells and Engine Modules with Cores or Sparks",
+  description: "Buy Power Cells and Engine Modules with Cores or Sparks",
   keywords: ["shop", "buy", "purchase", "power cell", "engine module", "cores", "sparks"],
   emoji: "🛒",
   helpFields: [
