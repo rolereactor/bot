@@ -76,7 +76,7 @@ export async function handleTicketCreate(interaction, customId) {
       });
     }
 
-    // Check if user already has an open ticket
+    // Check if user already has open tickets
     let openTickets = await ticketManager.getUserTickets(
       userId,
       guildId,
@@ -105,15 +105,24 @@ export async function handleTicketCreate(interaction, customId) {
       openTickets = activeTickets;
     }
 
-    if (openTickets.length > 0) {
+    // Get max tickets per user from settings (default: 1)
+    const settings =
+      await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
+    const maxTicketsPerUser = settings?.ticketSettings?.maxTicketsPerUser ?? 1;
+
+    if (openTickets.length >= maxTicketsPerUser) {
       const existingTicket = openTickets[0];
       return interaction.editReply({
         embeds: [
           createErrorEmbed(
-            `You already have an open ticket!\n\n` +
-              `Ticket: \`#${existingTicket.ticketId.split("-").pop()}\`\n` +
-              `Channel: <#${existingTicket.channelId}>\n\n` +
-              `Please close your existing ticket before creating a new one.`,
+            maxTicketsPerUser === 1
+              ? `You already have an open ticket!\n\n` +
+                `Ticket: \`#${existingTicket.ticketId.split("-").pop()}\`\n` +
+                `Channel: <#${existingTicket.channelId}>\n\n` +
+                `Please close your existing ticket before creating a new one.`
+              : `You have reached the maximum of **${maxTicketsPerUser}** open tickets.\n\n` +
+                `Oldest: \`#${existingTicket.ticketId.split("-").pop()}\` — <#${existingTicket.channelId}>\n\n` +
+                `Please close an existing ticket before creating a new one.`,
             "Ticket Limit Reached",
             interaction.client,
           ),

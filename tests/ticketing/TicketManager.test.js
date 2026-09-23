@@ -40,23 +40,23 @@ describe("TicketManager", () => {
 
   describe("Configuration", () => {
     it("should initialize with correct free tier limits", () => {
-      expect(FREE_TIER.MAX_TICKETS_PER_MONTH).toBe(50);
-      expect(FREE_TIER.MAX_PANELS).toBe(3);
+      expect(FREE_TIER.MAX_TICKETS_PER_MONTH).toBe(25);
+      expect(FREE_TIER.MAX_PANELS).toBe(2);
       expect(FREE_TIER.MAX_CATEGORIES).toBe(3);
       expect(FREE_TIER.TRANSCRIPT_RETENTION_DAYS).toBe(30);
     });
 
     it("should initialize with correct pro engine limits", () => {
       expect(PRO_ENGINE.MAX_TICKETS_PER_MONTH).toBe(500);
-      expect(PRO_ENGINE.MAX_PANELS).toBe(10);
-      expect(PRO_ENGINE.MAX_CATEGORIES).toBe(20);
+      expect(PRO_ENGINE.MAX_PANELS).toBe(5);
+      expect(PRO_ENGINE.MAX_CATEGORIES).toBe(10);
       expect(PRO_ENGINE.TRANSCRIPT_RETENTION_DAYS).toBe(-1);
     });
 
-    it("should have 10x multiplier from free to pro", () => {
+    it("should have 20x multiplier from free to pro (tickets)", () => {
       expect(
         PRO_ENGINE.MAX_TICKETS_PER_MONTH / FREE_TIER.MAX_TICKETS_PER_MONTH,
-      ).toBe(10);
+      ).toBe(20);
     });
   });
 

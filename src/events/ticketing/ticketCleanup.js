@@ -141,12 +141,14 @@ async function cleanupGuild(guildId, storageManager, client) {
         continue;
       }
 
-      // Get settings to determine tier limits
+      // Get settings to determine tier limits and auto-close days
       const isPro = await ticketManager.premiumManager.isFeatureActive(
         guildId,
         "pro_engine",
       );
-      const inactiveDays = isPro ? 30 : 7;
+      const settings = await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
+      const autoCloseDays = settings?.ticketSettings?.autoCloseDays ?? (isPro ? 30 : 7);
+      const inactiveDays = autoCloseDays || (isPro ? 30 : 7);
       const inactiveMs = inactiveDays * 24 * 60 * 60 * 1000;
 
       // Check last message activity

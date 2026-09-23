@@ -411,15 +411,11 @@ export async function apiUpdateTicketSettings(req, res) {
     staffRoleId,
     transcriptChannelId,
     notificationChannelId,
-    allowUserTranscripts,
-    enabled,
     autoCloseDays,
     maxTicketsPerUser,
-    allowStaffClaim,
-    allowUserClose,
+    allowUserTranscripts,
     welcomeMessage,
     closeMessage,
-    supportCategoryId,
   } = req.body;
   logRequest(`Update ticket settings: ${guildId}`, req);
 
@@ -446,24 +442,16 @@ export async function apiUpdateTicketSettings(req, res) {
       settings.ticketSettings.transcriptChannelId = transcriptChannelId;
     if (notificationChannelId !== undefined)
       settings.ticketSettings.notificationChannelId = notificationChannelId;
-    if (allowUserTranscripts !== undefined)
-      settings.ticketSettings.allowUserTranscripts = allowUserTranscripts;
-    if (enabled !== undefined)
-      settings.ticketSettings.enabled = Boolean(enabled);
     if (autoCloseDays !== undefined)
       settings.ticketSettings.autoCloseDays = autoCloseDays;
     if (maxTicketsPerUser !== undefined)
       settings.ticketSettings.maxTicketsPerUser = maxTicketsPerUser;
-    if (allowStaffClaim !== undefined)
-      settings.ticketSettings.allowStaffClaim = allowStaffClaim;
-    if (allowUserClose !== undefined)
-      settings.ticketSettings.allowUserClose = allowUserClose;
+    if (allowUserTranscripts !== undefined)
+      settings.ticketSettings.allowUserTranscripts = allowUserTranscripts;
     if (welcomeMessage !== undefined)
       settings.ticketSettings.welcomeMessage = welcomeMessage;
     if (closeMessage !== undefined)
       settings.ticketSettings.closeMessage = closeMessage;
-    if (supportCategoryId !== undefined)
-      settings.ticketSettings.supportCategoryId = supportCategoryId;
 
     await storage.dbManager.guildSettings.set(guildId, settings);
 
