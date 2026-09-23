@@ -115,7 +115,7 @@ export const SHOP_CATEGORIES = {
   power_cells: {
     name: "Power Cells",
     emoji: "🔋",
-    description: "Store and trade Cores between users",
+    description: "Store and gift Cores between users",
   },
   engine_modules: {
     name: "Engine Modules",

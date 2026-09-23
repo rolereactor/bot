@@ -3,8 +3,8 @@ import { THEME } from "../../../config/theme.js";
 import { getMentionableCommand } from "../../../utils/commandUtils.js";
 
 /**
- * Creates a trade confirmation embed
- * @param {Object} item - Item to trade
+ * Creates a gift confirmation embed
+ * @param {Object} item - Item to gift
  * @param {Object} targetUser - User receiving the item
  * @param {Object} _client - Discord client
  * @param {Object} [options={}] - Additional options
@@ -12,13 +12,13 @@ import { getMentionableCommand } from "../../../utils/commandUtils.js";
  * @param {string} [options.avatarURL] - Sender's avatar URL
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createTradeConfirmEmbed(item, targetUser, _client, options = {}) {
+export function createGiftConfirmEmbed(item, targetUser, _client, options = {}) {
   const { username, avatarURL } = options;
 
   const embed = new EmbedBuilder()
     .setColor(THEME.PRIMARY)
-    .setTitle("⚠️ Confirm Trade")
-    .setDescription(`Are you sure you want to trade **${item.name}** to **${targetUser.username}**?`);
+    .setTitle("🎁 Confirm Gift")
+    .setDescription(`Are you sure you want to gift **${item.name}** to **${targetUser.username}**?`);
 
   if (username && avatarURL) {
     embed.setAuthor({
@@ -58,8 +58,8 @@ export function createTradeConfirmEmbed(item, targetUser, _client, options = {})
 }
 
 /**
- * Creates a trade success embed
- * @param {Object} item - Item traded
+ * Creates a gift success embed
+ * @param {Object} item - Item gifted
  * @param {Object} targetUser - User receiving the item
  * @param {Object} client - Discord client
  * @param {Object} [options={}] - Additional options
@@ -68,15 +68,15 @@ export function createTradeConfirmEmbed(item, targetUser, _client, options = {})
  * @param {string} [options.guildId] - Guild ID for command lookup
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createTradeSuccessEmbed(item, targetUser, client, options = {}) {
+export function createGiftSuccessEmbed(item, targetUser, client, options = {}) {
   const { username, avatarURL, guildId } = options;
 
   const inventoryCommand = getMentionableCommand(client, "inventory", guildId);
 
   const embed = new EmbedBuilder()
     .setColor(THEME.SUCCESS)
-    .setTitle("✅ Trade Successful!")
-    .setDescription(`Successfully traded **${item.name}** to **${targetUser.username}**!`);
+    .setTitle("✅ Gift Successful!")
+    .setDescription(`Successfully gifted **${item.name}** to **${targetUser.username}**!`);
 
   if (username && avatarURL) {
     embed.setAuthor({

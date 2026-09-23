@@ -385,13 +385,13 @@ export class SparkShopManager {
   }
 
   /**
-   * Trade an item to another user
+   * Gift an item to another user
    * @param {string} fromUserId - Sender's user ID
    * @param {string} toUserId - Recipient's user ID
-   * @param {string} itemId - Item ID to trade
-   * @returns {Promise<Object>} Trade result
+   * @param {string} itemId - Item ID to gift
+   * @returns {Promise<Object>} Gift result
    */
-  async tradeItem(fromUserId, toUserId, itemId) {
+  async giftItem(fromUserId, toUserId, itemId) {
     try {
       const storage = await getStorageManager();
       if (!storage.dbManager) {
@@ -429,16 +429,16 @@ export class SparkShopManager {
       const recipientData = await db.coreCredits.getByUserId(toUserId);
       const recipientInventory = recipientData?.sparkInventory || [];
 
-      const tradedItem = {
+      const giftedItem = {
         itemId: item.itemId,
         purchasedAt: new Date(),
         used: false,
         usedAt: null,
         activatedInGuild: null,
-        tradedBy: fromUserId,
+        giftedBy: fromUserId,
       };
 
-      recipientInventory.push(tradedItem);
+      recipientInventory.push(giftedItem);
       await db.coreCredits.collection.updateOne(
         { userId: toUserId },
         { $set: { sparkInventory: recipientInventory } },
@@ -446,17 +446,17 @@ export class SparkShopManager {
       );
 
       logger.info(
-        `🔄 Trade: User ${fromUserId} traded ${shopItem?.name || itemId} to user ${toUserId}`,
+        `🎁 Gift: User ${fromUserId} gifted ${shopItem?.name || itemId} to user ${toUserId}`,
       );
 
       return {
         success: true,
-        item: tradedItem,
+        item: giftedItem,
         shopItem,
       };
     } catch (error) {
-      logger.error(`Failed to trade item:`, error);
-      return { success: false, message: "Failed to trade item." };
+      logger.error(`Failed to gift item:`, error);
+      return { success: false, message: "Failed to gift item." };
     }
   }
 

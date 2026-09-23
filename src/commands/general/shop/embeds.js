@@ -24,7 +24,7 @@ export function createShopItemEmbed(item, index, total, status, client, options 
   const canAfford = balance >= item.cost;
   const costStatus = canAfford ? "✅ Can Afford" : "❌ Not Enough";
 
-  const tradeCmd = getMentionableCommand(client, "trade", options.guildId);
+  const giftCmd = getMentionableCommand(client, "gift", options.guildId);
   const inventoryCmd = getMentionableCommand(client, "inventory", options.guildId);
 
   const embed = new EmbedBuilder()
@@ -47,12 +47,12 @@ export function createShopItemEmbed(item, index, total, status, client, options 
     embed.addFields(
       {
         name: "What It Does",
-        value: `Stores **${item.storedAmount} Cores** that can be activated later or traded to other users.`,
+        value: `Stores **${item.storedAmount} Cores** that can be activated later or gifted to other users.`,
         inline: false,
       },
       {
         name: "How to Use",
-        value: "1. Buy this item → goes to your inventory\n2. Trade it to another user via " + tradeCmd + "\n3. Recipient activates it → gets **" + item.storedAmount + " Cores** added to their balance",
+        value: "1. Buy this item → goes to your inventory\n2. Gift it to another user via " + giftCmd + "\n3. Recipient activates it → gets **" + item.storedAmount + " Cores** added to their balance",
         inline: false,
       },
       {
@@ -168,7 +168,7 @@ export function createShopListEmbed(items, status, page, totalPages, client, opt
     }
 
     if (item.type === "power_cell") {
-      return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Stores **${item.storedAmount} Cores** — trade or activate later`;
+      return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Stores **${item.storedAmount} Cores** — gift or activate later`;
     } else {
       const durationText = item.durationDays === 1 ? "1 day" : `${item.durationDays} days`;
       return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Activates **${durationText}** of Pro Engine`;

@@ -10,8 +10,8 @@ import { getSparkShopManager } from "../../../features/spark-shop/SparkShopManag
 import { getShopItem } from "../../../config/shopConfig.js";
 import { getMentionableCommand } from "../../../utils/commandUtils.js";
 import {
-  createTradeConfirmEmbed,
-  createTradeSuccessEmbed,
+  createGiftConfirmEmbed,
+  createGiftSuccessEmbed,
   createErrorEmbed,
 } from "./embeds.js";
 
@@ -19,7 +19,7 @@ const logger = getLogger();
 const sparkShopManager = getSparkShopManager();
 
 /**
- * Main execution handler for /trade command
+ * Main execution handler for /gift command
  * @param {import("discord.js").ChatInputCommandInteraction} interaction
  * @param {import("discord.js").Client} _client
  */
@@ -32,19 +32,19 @@ export async function execute(interaction, _client) {
     const targetUser = interaction.options.getUser("user");
     const itemId = interaction.options.getString("item", true);
 
-    // Cannot trade with yourself
+    // Cannot gift to yourself
     if (targetUser.id === interaction.user.id) {
       await interaction.editReply({
-        embeds: [createErrorEmbed("You cannot trade with yourself.", interaction.client)],
+        embeds: [createErrorEmbed("You cannot gift to yourself.", interaction.client)],
         components: [],
       });
       return;
     }
 
-    // Cannot trade with bots
+    // Cannot gift to bots
     if (targetUser.bot) {
       await interaction.editReply({
-        embeds: [createErrorEmbed("You cannot trade with bot accounts.", interaction.client)],
+        embeds: [createErrorEmbed("You cannot gift to bot accounts.", interaction.client)],
         components: [],
       });
       return;
@@ -84,7 +84,7 @@ export async function execute(interaction, _client) {
     };
 
     // Show confirmation
-    const confirmEmbed = createTradeConfirmEmbed(
+    const confirmEmbed = createGiftConfirmEmbed(
       item,
       targetUser,
       interaction.client,
@@ -94,13 +94,13 @@ export async function execute(interaction, _client) {
       },
     );
 
-    const confirmId = `confirm_trade_${interaction.id}`;
-    const cancelId = `cancel_trade_${interaction.id}`;
+    const confirmId = `confirm_gift_${interaction.id}`;
+    const cancelId = `cancel_gift_${interaction.id}`;
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(confirmId)
-        .setLabel("Confirm Trade")
+        .setLabel("Confirm Gift")
         .setStyle(ButtonStyle.Success)
         .setEmoji("✅"),
       new ButtonBuilder()
@@ -129,14 +129,14 @@ export async function execute(interaction, _client) {
 
       if (confirmation.customId === cancelId) {
         await interaction.editReply({
-          embeds: [createErrorEmbed("Trade cancelled.", interaction.client)],
+          embeds: [createErrorEmbed("Gift cancelled.", interaction.client)],
           components: [],
         });
         return;
       }
 
-      // Process trade
-      const result = await sparkShopManager.tradeItem(
+      // Process gift
+      const result = await sparkShopManager.giftItem(
         interaction.user.id,
         targetUser.id,
         itemId,
@@ -150,7 +150,7 @@ export async function execute(interaction, _client) {
         return;
       }
 
-      const successEmbed = createTradeSuccessEmbed(
+      const successEmbed = createGiftSuccessEmbed(
         item,
         targetUser,
         interaction.client,
@@ -167,7 +167,7 @@ export async function execute(interaction, _client) {
       });
 
       logger.info(
-        `🔄 Trade: ${interaction.user.username} traded ${item.name} to ${targetUser.username}`,
+        `🎁 Gift: ${interaction.user.username} gifted ${item.name} to ${targetUser.username}`,
       );
     } catch (_e) {
       await interaction.editReply({
@@ -176,8 +176,8 @@ export async function execute(interaction, _client) {
       });
     }
   } catch (error) {
-    logger.error(`Error in /trade command:`, error);
-    const errorMsg = "An unexpected error occurred while processing `/trade`.";
+    logger.error(`Error in /gift command:`, error);
+    const errorMsg = "An unexpected error occurred while processing `/gift`.";
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply({
         embeds: [createErrorEmbed(errorMsg, interaction.client)],

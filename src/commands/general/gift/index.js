@@ -6,22 +6,22 @@ import { execute } from "./handlers.js";
 // ============================================================================
 
 export const metadata = {
-  name: "trade",
+  name: "gift",
   category: "general",
-  description: "[Beta] Trade items with another user",
-  keywords: ["trade", "transfer", "item", "power cell", "engine module"],
-  emoji: "🔄",
+  description: "Gift items to another user",
+  keywords: ["gift", "give", "send", "transfer", "item", "power cell", "engine module"],
+  emoji: "🎁",
   helpFields: [
     {
       name: "How to Use",
       value: [
-        "```/trade @user item:<id>``` — Trade an item to another user",
+        "```/gift @user item:<id>``` — Gift an item to another user",
       ].join("\n"),
       inline: false,
     },
     {
       name: "What You'll See",
-      value: "Trade confirmation with item details. No tax on trades!",
+      value: "Gift confirmation with item details. No tax on gifts!",
       inline: false,
     },
     {
@@ -42,13 +42,13 @@ export const data = new SlashCommandBuilder()
   .addUserOption(option =>
     option
       .setName("user")
-      .setDescription("The user to trade with")
+      .setDescription("The user to gift to")
       .setRequired(true),
   )
   .addStringOption(option =>
     option
       .setName("item")
-      .setDescription("The item to trade")
+      .setDescription("The item to gift")
       .setRequired(true)
       .addChoices(
         { name: "AAA Power Cell", value: "power-cell-aaa" },
