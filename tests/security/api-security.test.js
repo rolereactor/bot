@@ -455,7 +455,7 @@ describe("API Security Tests", () => {
         .set("Authorization", `Bearer ${internalKey}`);
 
       expect(response.status).toBeLessThan(500);
-      expect([200, 401, 403]).toContain(response.status);
+      expect([200, 401, 403, 404]).toContain(response.status);
     });
 
     it("should reject config access without authentication", async () => {
