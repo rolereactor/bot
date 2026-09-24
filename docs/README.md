@@ -10,9 +10,8 @@ Welcome to the comprehensive documentation for Role Reactor Bot - a powerful Dis
 - **[Deployment Guide](./setup/deployment.md)** - Production deployment instructions
 - **[Docker Guide](./integrations/docker/README.md)** - Docker deployment and container management
 
-### 🛠️ Development & Testing
+### 🛠️ Development
 
-- **[Payment Testing Guide](./development/payment-testing.md)** - Payment flow testing procedures
 - **[Contributing Guidelines](./CONTRIBUTING.md)** - How to contribute to the project
 
 ### 🔌 API & Authentication
@@ -34,7 +33,6 @@ Welcome to the comprehensive documentation for Role Reactor Bot - a powerful Dis
 
 ### For Developers
 
-- **Testing payments?** Read the [Payment Testing Guide](./development/payment-testing.md)
 - **Building a dashboard?** Use the [Auth Integration](./api/auth.md) and [API Reference](./api/reference.md)
 - **Contributing?** See [How to Contribute](./CONTRIBUTING.md)
 
@@ -52,8 +50,6 @@ docs/
 ├── setup/
 │   ├── README.md                   # Installation & initial setup
 │   └── deployment.md               # Production deployment guide
-├── development/
-│   └── payment-testing.md          # Payment flow testing procedures
 ├── api/
 │   ├── reference.md                # Core API documentation
 │   └── auth.md                     # Website Discord login guide
