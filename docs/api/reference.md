@@ -1,26 +1,29 @@
 # Role Reactor Bot API Documentation
 
 > **Base URL:** `https://your-domain.com` (or `http://localhost:3030` for development)
+>
+> All versioned endpoints are mounted under **`/api/v1`**. Auth endpoints use `/auth/*` (unversioned). Health is available at `/health`.
 
 ## Table of Contents
 
 - [Authentication](#authentication)
 - [Core API Endpoints](#core-api-endpoints)
-  - [Server Info](#get-apiinfo)
-  - [Bot Statistics](#get-apistats)
-  - [Pricing](#get-apipricing)
+  - [Server Info](#get-apiv1info)
+  - [Bot Statistics](#get-apiv1stats)
+  - [Pricing](#get-apiv1pricing)
 - [Payment Endpoints](#payment-endpoints)
-  - [Create Payment](#post-apipaymentscreate)
-  - [User Balance](#get-apiuseruseridbalance)
-  - [User Payments](#get-apiuseruseridpayments)
-  - [Payment Stats](#get-apipaymentsstats)
-  - [Pending Payments](#get-apipaymentspending)
+  - [Create Payment](#post-apiv1paymentscreate)
+  - [User Balance](#get-apiv1useruseridbalance)
+  - [User Payments](#get-apiv1useruseridpayments)
+  - [Payment Stats](#get-apiv1paymentsstats)
+  - [Pending Payments](#get-apiv1paymentspending)
 - [Authentication Endpoints](#authentication-endpoints)
   - [Discord OAuth](#get-authdiscord)
   - [OAuth Callback](#get-authdiscordcallback)
   - [Current User](#get-authme)
   - [Logout](#post-authlogout)
 - [Webhook Endpoints](#webhook-endpoints)
+- [Health Endpoints](#health-endpoints)
 - [Response Format](#response-format)
 - [Error Codes](#error-codes)
 
@@ -28,7 +31,7 @@
 
 ## Authentication
 
-Most read endpoints are public. Payment creation and user-specific endpoints require Discord OAuth authentication.
+Most read endpoints are public. Payment creation and user-specific endpoints require Discord OAuth authentication. Admin endpoints additionally require internal API key + admin role.
 
 ### Session-Based Authentication
 
@@ -39,7 +42,7 @@ Most read endpoints are public. Payment creation and user-specific endpoints req
 
 ```javascript
 // Example authenticated request
-fetch("/api/payments/create", {
+fetch("/api/v1/payments/create", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   credentials: "include", // Required for session auth
@@ -47,11 +50,20 @@ fetch("/api/payments/create", {
 });
 ```
 
+### Internal Service Authentication
+
+Service-to-service calls (website → bot) use:
+
+```
+Authorization: Bearer <INTERNAL_API_KEY>
+X-User-ID: <discordUserId>
+```
+
 ---
 
 ## Core API Endpoints
 
-### GET `/api/info`
+### GET `/api/v1/info`
 
 Returns server information and capabilities.
 
@@ -62,28 +74,27 @@ Returns server information and capabilities.
 ```json
 {
   "success": true,
-  "data": {
-    "message": "Unified API Server Information",
-    "server": {
-      "name": "Role Reactor Bot API Server",
-      "version": "1.7.1",
-      "description": "A powerful Discord bot..."
-    },
-    "features": {
-      "webhooks": true,
-      "healthChecks": true,
-      "cors": true,
-      "requestLogging": true,
-      "errorHandling": true
-    }
+  "status": "success",
+  "message": "Unified API Server Information",
+  "server": {
+    "name": "Role Reactor Bot API Server",
+    "version": "1.8.0",
+    "description": "A powerful Discord bot..."
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "features": {
+    "webhooks": true,
+    "healthChecks": true,
+    "cors": true,
+    "requestLogging": true,
+    "errorHandling": true
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
 ---
 
-### GET `/api/stats`
+### GET `/api/v1/stats`
 
 Returns bot statistics including guild and user counts.
 
@@ -94,28 +105,26 @@ Returns bot statistics including guild and user counts.
 ```json
 {
   "success": true,
-  "data": {
-    "bot": {
-      "id": "123456789012345678",
-      "username": "Role Reactor",
-      "tag": "Role Reactor#0001"
-    },
-    "statistics": {
-      "guilds": 150,
-      "users": 50000
-    }
+  "status": "success",
+  "bot": {
+    "id": "123456789012345678",
+    "username": "Role Reactor"
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "statistics": {
+    "guilds": 150,
+    "users": 50000
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
 ---
 
-### GET `/api/pricing`
+### GET `/api/v1/pricing`
 
 Returns Core credit packages and current promotions.
 
-**Authentication:** None required (optional user_id for personalized data)
+**Authentication:** None required (optional `user_id` for personalized data)
 
 **Query Parameters:**
 | Parameter | Type | Description |
@@ -125,145 +134,73 @@ Returns Core credit packages and current promotions.
 **Request:**
 
 ```
-GET /api/pricing?user_id=YOUR_DISCORD_USER_ID
+GET /api/v1/pricing?user_id=YOUR_DISCORD_USER_ID
 ```
 
-**Response:**
+**Response (shape):**
 
 ```json
 {
   "success": true,
-  "data": {
-    "packages": [
-      {
-        "id": "$1",
-        "name": "Test",
-        "price": 1,
-        "currency": "USD",
-        "baseCores": 15,
-        "bonusCores": 0,
-        "totalCores": 15,
-        "rate": 15.0,
-        "valuePerDollar": "15.0 Cores/$1",
-        "description": "Developer testing package",
-        "estimatedUsage": "~300 chat messages or 7 images",
-        "popular": false,
-        "features": []
-      },
-      {
-        "id": "$5",
-        "name": "Starter",
-        "price": 5,
-        "currency": "USD",
-        "baseCores": 75,
-        "bonusCores": 0,
-        "totalCores": 75,
-        "rate": 15.0,
-        "valuePerDollar": "15.0 Cores/$1",
-        "description": "Perfect for trying AI features",
-        "estimatedUsage": "~1,500 chat messages or 35 images",
-        "popular": false,
-        "features": []
-      },
-      {
-        "id": "$10",
-        "name": "Basic",
-        "price": 10,
-        "currency": "USD",
-        "baseCores": 150,
-        "bonusCores": 15,
-        "totalCores": 165,
-        "rate": 16.5,
-        "valuePerDollar": "16.5 Cores/$1",
-        "description": "Most popular choice for regular users",
-        "estimatedUsage": "~3,300 chat messages or 78 images",
-        "popular": true,
-        "features": []
-      },
-      {
-        "id": "$25",
-        "name": "Pro",
-        "price": 25,
-        "currency": "USD",
-        "baseCores": 375,
-        "bonusCores": 60,
-        "totalCores": 435,
-        "rate": 17.4,
-        "valuePerDollar": "17.4 Cores/$1",
-        "description": "Best value for power users",
-        "estimatedUsage": "~8,700 chat messages or 207 images",
-        "popular": false,
-        "features": []
-      },
-      {
-        "id": "$50",
-        "name": "Ultimate",
-        "price": 50,
-        "currency": "USD",
-        "baseCores": 750,
-        "bonusCores": 150,
-        "totalCores": 900,
-        "rate": 18.0,
-        "valuePerDollar": "18.0 Cores/$1",
-        "description": "Maximum value for heavy usage",
-        "estimatedUsage": "~18,000 chat messages or 428 images",
-        "popular": false,
-        "features": ["Priority processing", "Dedicated support"]
-      }
-    ],
-    "minimumPayment": 10,
-    "currency": "USD",
-    "paymentMethods": {
-      "crypto": true
-    },
-    "promotions": [
-      {
-        "name": "First Purchase Bonus",
-        "type": "first_purchase",
-        "bonus": "25%",
-        "maxBonus": 50,
-        "description": "Get 25% bonus Cores on your first purchase (up to 50 bonus Cores)"
-      },
-      {
-        "name": "Weekend Special",
-        "type": "weekend",
-        "bonus": "15%",
-        "description": "Weekend special: 15% bonus Cores on all purchases!",
-        "active": true
-      }
-    ],
-    "referralSystem": {
-      "enabled": true,
-      "referrerBonus": "15%",
-      "refereeBonus": "10%",
-      "minimumPurchase": 10
-    },
-    "user": {
-      "userId": "YOUR_DISCORD_USER_ID",
-      "isFirstPurchase": true,
-      "currentCredits": 0,
-      "eligibleForFirstPurchaseBonus": true
+  "status": "success",
+  "packages": [
+    {
+      "id": "$10",
+      "name": "string",
+      "price": 10,
+      "currency": "USD",
+      "baseCores": 150,
+      "bonusCores": 15,
+      "totalCores": 165,
+      "rate": 16.5,
+      "valuePerDollar": "16.5 Cores/$1",
+      "description": "string",
+      "estimatedUsage": "string",
+      "popular": false,
+      "features": []
     }
+  ],
+  "minimumPayment": 1,
+  "currency": "USD",
+  "paymentMethods": {
+    "crypto": true
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "promotions": [],
+  "referralSystem": {
+    "enabled": true,
+    "referrerBonus": "15%",
+    "refereeBonus": "10%",
+    "minimumPurchase": 10
+  },
+  "user": {
+    "requestedUserId": "YOUR_DISCORD_USER_ID",
+    "isFirstPurchase": true,
+    "currentCredits": 0,
+    "sparks": 0,
+    "eligibleForFirstPurchaseBonus": true,
+    "hasActivePro": false
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
+
+> Package amounts, descriptions, and promotions are server-configured — do not hardcode them client-side.
 
 ---
 
 ## Payment Endpoints
 
-### POST `/api/payments/create`
+### POST `/api/v1/payments/create`
 
 Creates a new payment invoice using Plisio. **Email is automatically pre-filled from Discord OAuth.**
 
-**Authentication:** Required (Discord OAuth session)
+**Authentication:** Required (internal auth + user session)
 
 **Request Body:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `amount` | number | Yes | Payment amount in USD (minimum $10) |
-| `packageId` | string | No | Package identifier (e.g., "$10", "$25") |
+| `amount` | number | Yes | Payment amount in USD (minimum from server config) |
+| `packageId` | string | No | Package identifier (e.g., `"$10"`, `"$25"`) |
 
 **Request:**
 
@@ -279,20 +216,13 @@ Creates a new payment invoice using Plisio. **Email is automatically pre-filled 
 ```json
 {
   "success": true,
-  "data": {
-    "invoiceUrl": "https://plisio.net/invoice/abc123xyz",
-    "orderId": "YOUR_DISCORD_USER_ID_1705234567890",
-    "amount": 10,
-    "currency": "USD",
-    "packageId": "$10",
-    "user": {
-      "discordId": "YOUR_DISCORD_USER_ID",
-      "username": "your_username",
-      "emailPrefilled": true
-    },
-    "message": "Payment invoice created successfully. Redirect user to invoiceUrl."
-  },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "success",
+  "invoiceUrl": "https://plisio.net/invoice/abc123xyz",
+  "orderId": "YOUR_DISCORD_USER_ID_1705234567890",
+  "amount": 10,
+  "currency": "USD",
+  "packageId": "$10",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -309,7 +239,7 @@ Creates a new payment invoice using Plisio. **Email is automatically pre-filled 
 
 ```javascript
 async function createPayment(packageId, amount) {
-  const response = await fetch("/api/payments/create", {
+  const response = await fetch("/api/v1/payments/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
@@ -320,72 +250,49 @@ async function createPayment(packageId, amount) {
 
   if (data.success) {
     // Redirect to payment page (email pre-filled!)
-    window.location.href = data.data.invoiceUrl;
+    window.location.href = data.invoiceUrl || data.data?.invoiceUrl;
   } else {
-    console.error("Payment failed:", data.error);
+    console.error("Payment failed:", data.message || data.error);
   }
 }
 ```
 
 ---
 
-### GET `/api/user/:userId/balance`
+### GET `/api/v1/user/:userId/balance`
 
 Returns a user's Core credit balance.
 
-**Authentication:** None required
+**Authentication:** Required (internal auth + session; user may only access their own balance)
 
 **Path Parameters:**
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `userId` | string | Discord user ID |
 
-**Alternative:** `GET /api/balance?user_id=:userId`
+**Alternative:** `GET /api/v1/balance` (authenticated)
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "data": {
-    "userId": "YOUR_DISCORD_USER_ID",
-    "credits": 165,
-    "totalGenerated": 50,
-    "hasAccount": true,
-    "lastUpdated": "2026-01-14T09:30:00.000Z",
-    "paymentHistory": {
-      "crypto": 1
-    }
-  },
-  "timestamp": "2026-01-14T10:00:00.000Z"
-}
-```
-
-**New User Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "userId": "YOUR_DISCORD_USER_ID",
-    "credits": 0,
-    "totalGenerated": 0,
-    "hasAccount": false,
-    "paymentHistory": {
-      "crypto": 0
-    }
-  },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "success",
+  "userId": "YOUR_DISCORD_USER_ID",
+  "credits": 165,
+  "sparks": 25,
+  "hasAccount": true,
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
 ---
 
-### GET `/api/user/:userId/payments`
+### GET `/api/v1/user/:userId/payments`
 
 Returns a user's payment history.
 
-**Authentication:** None required
+**Authentication:** Required (internal auth + session; user may only access their own history)
 
 **Path Parameters:**
 | Parameter | Type | Description |
@@ -399,52 +306,44 @@ Returns a user's payment history.
 | `skip` | number | 0 | Results to skip (pagination) |
 | `provider` | string | null | Filter by provider (plisio) |
 
-**Alternative:** `GET /api/payments?user_id=:userId`
+**Alternative:** `GET /api/v1/payments` (authenticated)
 
-**Response:**
+**Response (shape):**
 
 ```json
 {
   "success": true,
-  "data": {
-    "userId": "YOUR_DISCORD_USER_ID",
-    "payments": [
-      {
-        "paymentId": "YOUR_DISCORD_USER_ID_1705234567890",
-        "provider": "plisio",
-        "amount": 10,
-        "currency": "USD",
-        "coresGranted": 165,
-        "tier": "$10",
-        "status": "completed",
-        "createdAt": "2026-01-14T09:00:00.000Z"
-      }
-    ],
-    "total": 1,
-    "stats": {
-      "totalAmount": 10,
-      "totalCores": 165,
-      "byProvider": {
-        "plisio": 1
-      }
-    },
-    "pagination": {
-      "limit": 50,
-      "skip": 0,
-      "hasMore": false
+  "status": "success",
+  "userId": "YOUR_DISCORD_USER_ID",
+  "payments": [
+    {
+      "paymentId": "YOUR_DISCORD_USER_ID_1705234567890",
+      "provider": "plisio",
+      "amount": 10,
+      "currency": "USD",
+      "coresGranted": 165,
+      "tier": "$10",
+      "status": "completed",
+      "createdAt": "2026-09-24T09:00:00.000Z"
     }
+  ],
+  "total": 1,
+  "pagination": {
+    "limit": 50,
+    "skip": 0,
+    "hasMore": false
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
 ---
 
-### GET `/api/payments/stats`
+### GET `/api/v1/payments/stats`
 
 Returns global payment statistics. (Admin endpoint)
 
-**Authentication:** None required (consider adding auth for production)
+**Authentication:** Required (internal auth + session + admin role)
 
 **Query Parameters:**
 | Parameter | Type | Description |
@@ -452,77 +351,48 @@ Returns global payment statistics. (Admin endpoint)
 | `start_date` | string | Optional. ISO date string for range start |
 | `end_date` | string | Optional. ISO date string for range end |
 
-**Response:**
+**Response (shape):**
 
 ```json
 {
   "success": true,
-  "data": {
-    "overview": {
-      "totalPayments": 150,
-      "totalRevenue": 2500.0,
-      "totalCoresGranted": 45000,
-      "uniqueCustomers": 85
-    },
-    "recentPayments": [
-      {
-        "paymentId": "123456_1705234567890",
-        "discordId": "123456789012345678",
-        "provider": "plisio",
-        "amount": 25,
-        "coresGranted": 425,
-        "createdAt": "2026-01-14T09:30:00.000Z"
-      }
-    ],
-    "dateRange": {
-      "start": null,
-      "end": null
-    }
+  "status": "success",
+  "overview": {
+    "totalPayments": 0,
+    "totalRevenue": 0,
+    "totalCoresGranted": 0,
+    "uniqueCustomers": 0
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "recentPayments": [],
+  "dateRange": {
+    "start": null,
+    "end": null
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
 ---
 
-### GET `/api/payments/pending`
+### GET `/api/v1/payments/pending`
 
 Returns pending payments awaiting processing. (Admin endpoint)
 
-**Authentication:** None required (consider adding auth for production)
+**Authentication:** Required (internal auth + session + admin role)
 
-**Response:**
+**Response (shape):**
 
 ```json
 {
   "success": true,
-  "data": {
-    "pending": [
-      {
-        "paymentId": "abc123",
-        "provider": "plisio",
-        "amount": 10,
-        "currency": "USD",
-        "email": "user@example.com",
-        "status": "pending",
-        "createdAt": "2026-01-14T09:00:00.000Z"
-      }
-    ],
-    "awaitingUserLink": [
-      {
-        "paymentId": "xyz789",
-        "provider": "plisio",
-        "amount": 25,
-        "email": "unknown@example.com",
-        "createdAt": "2026-01-14T08:00:00.000Z"
-      }
-    ],
-    "totals": {
-      "pending": 1,
-      "awaitingLink": 1
-    }
+  "status": "success",
+  "pending": [],
+  "awaitingUserLink": [],
+  "totals": {
+    "pending": 0,
+    "awaitingLink": 0
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -574,16 +444,17 @@ Returns the currently authenticated user's information.
 ```json
 {
   "success": true,
-  "data": {
-    "user": {
-      "id": "YOUR_DISCORD_USER_ID",
-      "username": "your_username",
-      "discriminator": "0",
-      "avatar": "abc123def456",
-      "email": "user@example.com"
-    }
+  "status": "success",
+  "user": {
+    "id": "YOUR_DISCORD_USER_ID",
+    "username": "your_username",
+    "discriminator": "0",
+    "avatar": "abc123def456",
+    "email": "user@example.com",
+    "credits": 0,
+    "role": "user"
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -591,12 +462,9 @@ Returns the currently authenticated user's information.
 
 ```json
 {
-  "success": false,
-  "error": {
-    "message": "Not authenticated",
-    "code": 401
-  },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "error",
+  "message": "Not authenticated",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -613,10 +481,9 @@ Logs out the current user and destroys the session.
 ```json
 {
   "success": true,
-  "data": {
-    "message": "Logged out successfully"
-  },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "success",
+  "message": "Logged out successfully",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -666,7 +533,7 @@ Returns server health status.
     "memory": { "status": "healthy" },
     "discord_api": { "status": "healthy", "ping": 45 }
   },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -675,36 +542,38 @@ Returns server health status.
 ```json
 {
   "status": "unhealthy",
-  "service": "Unified API Server",
-  ...
+  "service": "Unified API Server"
 }
 ```
+
+Also available: `GET /api/v1/health`, `GET /health/docker`
 
 ---
 
 ## Response Format
 
-All API responses follow a consistent format:
-
-### Success Response
+Successful responses include `success: true`, `status: "success"`, payload fields at the top level, and a `timestamp`:
 
 ```json
 {
   "success": true,
-  "data": { ... },
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "success",
+  "...payload": "...",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
-### Error Response
+Error responses use `status: "error"` with a human-readable `message`:
 
 ```json
 {
-  "success": false,
-  "error": "Human-readable error message",
-  "timestamp": "2026-01-14T10:00:00.000Z"
+  "status": "error",
+  "message": "Human-readable error message",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
+
+Some endpoints may also include `success: false` and an `error` field — check the specific endpoint docs above.
 
 ---
 
@@ -787,24 +656,24 @@ class RoleReactorAPI {
   // Pricing
   async getPricing(userId = null) {
     const query = userId ? `?user_id=${userId}` : "";
-    return this.request(`/api/pricing${query}`);
+    return this.request(`/api/v1/pricing${query}`);
   }
 
   // Payments
   async createPayment(amount, packageId = null) {
-    return this.request("/api/payments/create", {
+    return this.request("/api/v1/payments/create", {
       method: "POST",
       body: JSON.stringify({ amount, packageId }),
     });
   }
 
   async getUserBalance(userId) {
-    return this.request(`/api/user/${userId}/balance`);
+    return this.request(`/api/v1/user/${userId}/balance`);
   }
 
   async getUserPayments(userId, options = {}) {
     const params = new URLSearchParams(options);
-    return this.request(`/api/user/${userId}/payments?${params}`);
+    return this.request(`/api/v1/user/${userId}/payments?${params}`);
   }
 }
 
@@ -812,14 +681,10 @@ class RoleReactorAPI {
 const api = new RoleReactorAPI("https://api.rolereactor.xyz");
 
 // Get current user
-const {
-  data: { user },
-} = await api.getCurrentUser();
+const { user } = await api.getCurrentUser();
 
 // Create payment
-const {
-  data: { invoiceUrl },
-} = await api.createPayment(10, "$10");
+const { invoiceUrl } = await api.createPayment(10, "$10");
 window.location.href = invoiceUrl;
 ```
 
@@ -844,9 +709,5 @@ PLISIO_SECRET_KEY=your_plisio_key
 # Server
 PUBLIC_URL=https://your-domain.com
 API_PORT=3030
-ALLOWED_ORIGINS=https://your-domain.com,https://www.your-domain.com
+CORS_ALLOWED_ORIGINS=https://your-domain.com,https://www.your-domain.com
 ```
-
----
-
-_Last updated: 2026-01-14_

@@ -88,10 +88,10 @@ Expected response:
 
 ```bash
 # Public - no auth needed
-curl http://localhost:3030/api/pricing
+curl http://localhost:3030/api/v1/pricing
 
 # With user ID for personalized data
-curl "http://localhost:3030/api/pricing?user_id=YOUR_DISCORD_USER_ID"
+curl "http://localhost:3030/api/v1/pricing?user_id=YOUR_DISCORD_USER_ID"
 ```
 
 ---
@@ -100,7 +100,7 @@ curl "http://localhost:3030/api/pricing?user_id=YOUR_DISCORD_USER_ID"
 
 ```bash
 # First login via browser, then:
-curl -X POST http://localhost:3030/api/payments/create \
+curl -X POST http://localhost:3030/api/v1/payments/create \
   -H "Content-Type: application/json" \
   -b cookies.txt \
   -d '{"packageId": "$10", "amount": 10}'
@@ -185,12 +185,12 @@ Expected response:
 ### Via API
 
 ```bash
-curl http://localhost:3030/api/user/YOUR_DISCORD_USER_ID/balance
+curl http://localhost:3030/api/v1/user/YOUR_DISCORD_USER_ID/balance
 ```
 
 ### Via Discord Bot
 
-Use the `/core balance` command in Discord.
+Use the `/balance` command in Discord.
 
 ### Via Database
 
@@ -225,7 +225,7 @@ Before going live:
 - [ ] Set `NODE_ENV=production`
 - [ ] Set a secure `SESSION_SECRET`
 - [ ] Set `CORS_ALLOWED_ORIGINS` to your frontend domain
-- [ ] Test with real small payment ($5)
+- [ ] Test with a small package (e.g. $5)
 - [ ] Monitor logs for first few transactions
 
 ---
@@ -238,6 +238,6 @@ Before going live:
 | Start ngrok (dev) | `ngrok http 3030` |
 | Login | `http://localhost:3030/auth/discord` |
 | Check user | `curl http://localhost:3030/auth/me -b cookies.txt` |
-| Get pricing | `curl http://localhost:3030/api/pricing` |
-| Check balance | `curl http://localhost:3030/api/user/USER_ID/balance` |
+| Get pricing | `curl http://localhost:3030/api/v1/pricing` |
+| Check balance | `curl http://localhost:3030/api/v1/user/USER_ID/balance` |
 | Bot logs | `pnpm run docker:logs` |

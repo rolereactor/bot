@@ -48,7 +48,6 @@ Welcome to the comprehensive documentation for Role Reactor Bot - a powerful Dis
 docs/
 ├── README.md                       # Documentation index
 ├── CHANGELOG.md                    # Version history
-├── CORE_ENERGY.md                  # Core Energy & Pro Engine guide
 ├── CONTRIBUTING.md                 # Contribution guidelines
 ├── setup/
 │   ├── README.md                   # Installation & initial setup
@@ -78,7 +77,3 @@ docs/
 1. **Check the Docs**: Most answers are right here!
 2. **Issues**: Search existing [GitHub issues](https://github.com/rolereactor/bot/issues) or create a new one.
 3. **Community**: Join our [Support Server](https://discord.gg/D8tYkU75Ry) for direct assistance.
-
----
-
-_Last Updated: June 18, 2026_

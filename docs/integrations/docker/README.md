@@ -64,7 +64,7 @@ Caddy fetches and renews the SSL certificate automatically on first startup. No 
 ### Logs
 
 ```bash
-pnpm run docker:prod:logs
+pnpm run docker:logs
 ```
 
 ---

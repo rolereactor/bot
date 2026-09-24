@@ -6,35 +6,6 @@ import {
   ProTrialConfig,
 } from "../../../src/features/premium/config.js";
 import { PREMIUM_FEATURES } from "../../../src/commands/general/premium/premiumData.js";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-
-const coreEnergyMd = readFileSync(
-  resolve(import.meta.dirname, "../../../docs/CORE_ENERGY.md"),
-  "utf-8",
-);
-
-// Extract the benefits table from CORE_ENERGY.md
-function parseBenefitsTable() {
-  const lines = coreEnergyMd.split("\n");
-  const rows = [];
-  for (const line of lines) {
-    if (line.startsWith("| **") && !line.startsWith("| Feature")) {
-      const cells = line
-        .split("|")
-        .map(c => c.trim())
-        .filter(Boolean);
-      if (cells.length >= 3) {
-        rows.push({
-          feature: cells[0].replace(/\*\*/g, ""),
-          free: cells[1],
-          pro: cells[2].replace(/\*\*/g, ""),
-        });
-      }
-    }
-  }
-  return rows;
-}
 
 describe("Pro Engine Benefits", () => {
   describe("Config limits — free tier is always less than pro tier", () => {
@@ -198,83 +169,6 @@ describe("Pro Engine Benefits", () => {
         expect(f.free).toBeTruthy();
         expect(f.pro).toBeTruthy();
       }
-    });
-  });
-
-  describe("CORE_ENERGY.md table matches config", () => {
-    const table = parseBenefitsTable();
-
-    it("has rows for all key features", () => {
-      const featureNames = table.map(r => r.feature);
-      expect(featureNames).toContain("Giveaway Entries");
-      expect(featureNames).toContain("Giveaway Winners");
-      expect(featureNames).toContain("Scheduled Roles");
-      expect(featureNames).toContain("Ticket Panels");
-      expect(featureNames).toContain("Ticket Capacity");
-      expect(featureNames).toContain("Bulk Actions");
-      expect(featureNames).toContain("Level Rewards");
-      expect(featureNames).toContain("Role Reaction Panels");
-      expect(featureNames).toContain("Role Reaction Emojis");
-    });
-
-    it("Giveaway Entries matches config", () => {
-      const row = table.find(r => r.feature === "Giveaway Entries");
-      expect(row.free.replace(/,/g, "")).toBe(String(FREE_TIER.GIVEAWAY_MAX_ENTRIES));
-      expect(row.pro.replace(/,/g, "")).toBe(String(PRO_TIER.GIVEAWAY_MAX_ENTRIES));
-    });
-
-    it("Giveaway Winners matches config", () => {
-      const row = table.find(r => r.feature === "Giveaway Winners");
-      expect(row.free).toBe(String(FREE_TIER.GIVEAWAY_MAX_WINNERS));
-      expect(row.pro).toBe(String(PRO_TIER.GIVEAWAY_MAX_WINNERS));
-    });
-
-    it("Scheduled Roles matches config", () => {
-      const row = table.find(r => r.feature === "Scheduled Roles");
-      expect(row.free).toContain(String(FREE_TIER.SCHEDULE_MAX_ACTIVE));
-      expect(row.pro).toContain(String(PRO_TIER.SCHEDULE_MAX_ACTIVE));
-    });
-
-    it("Ticket Panels matches config", () => {
-      const row = table.find(r => r.feature === "Ticket Panels");
-      expect(row.free).toContain(String(FREE_TIER.TICKET_MAX_PANELS));
-      expect(row.pro).toContain(String(PRO_TIER.TICKET_MAX_PANELS));
-    });
-
-    it("Ticket Capacity matches config", () => {
-      const row = table.find(r => r.feature === "Ticket Capacity");
-      expect(row.free).toContain(String(FREE_TIER.TICKET_MAX_TICKETS_PER_MONTH));
-      expect(row.pro).toContain(String(PRO_TIER.TICKET_MAX_TICKETS_PER_MONTH));
-    });
-
-    it("Transcript Storage matches config", () => {
-      const row = table.find(r => r.feature === "Transcript Storage");
-      expect(row.free).toContain(String(FREE_TIER.TICKET_TRANSCRIPT_DAYS));
-      expect(row.pro).toContain("Unlimited");
-    });
-
-    it("Bulk Actions matches config", () => {
-      const row = table.find(r => r.feature === "Bulk Actions");
-      expect(row.free).toContain(String(FREE_TIER.BULK_ACTION_MAX_MEMBERS));
-      expect(row.pro).toContain(String(PRO_TIER.BULK_ACTION_MAX_MEMBERS));
-    });
-
-    it("Level Rewards matches config", () => {
-      const row = table.find(r => r.feature === "Level Rewards");
-      expect(row.free).toContain(String(FREE_TIER.LEVEL_REWARDS_MAX));
-      expect(row.pro).toContain("Unlimited");
-    });
-
-    it("Role Reaction Panels matches config", () => {
-      const row = table.find(r => r.feature === "Role Reaction Panels");
-      expect(row.free).toBe(String(FREE_TIER.ROLE_REACTION_MAX_MESSAGES));
-      expect(row.pro).toBe(String(PRO_TIER.ROLE_REACTION_MAX_MESSAGES));
-    });
-
-    it("Role Reaction Emojis matches config", () => {
-      const row = table.find(r => r.feature === "Role Reaction Emojis");
-      expect(row.free).toBe(String(FREE_TIER.ROLE_REACTION_MAX_EMOJIS));
-      expect(row.pro).toBe(String(PRO_TIER.ROLE_REACTION_MAX_EMOJIS));
     });
   });
 

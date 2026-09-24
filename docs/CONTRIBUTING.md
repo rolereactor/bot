@@ -30,7 +30,7 @@ Thank you for your interest in contributing to Role Reactor Bot! This document p
 6. **Commit your changes**: Use [Conventional Commits](https://www.conventionalcommits.org/)
    - Example: `git commit -m "feat(commands): add amazing feature"`
 7. **Push to your branch**: `git push origin feature/amazing-feature`
-8. **Open a Pull Request** or merge when ready (see Git Workflow Guide)
+8. **Open a Pull Request** against `dev`
 
 ## 🛠️ Development Setup
 
@@ -52,7 +52,7 @@ cd bot
 pnpm install
 
 # Copy environment file
-cp env.example .env
+cp .env.example .env
 
 # Edit .env with your Discord bot token
 # DISCORD_TOKEN=your_bot_token_here
@@ -211,7 +211,6 @@ Brief description of changes
 
 Contributors will be recognized in:
 
-- **README.md** contributors section
 - **GitHub** contributors page
 - **Release notes** for significant contributions
 

@@ -14,12 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Shop System**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and flash sales.
+- **Shop System**: New `/shop` command to purchase tradable items with Cores or Sparks. Includes monthly guild stock limits and limited-time sales.
 - **Inventory System**: New `/inventory` command to view and use purchased items.
 - **Gift System**: New `/gift` command to gift items to other users.
-- **Engine Command**: New `/engine` command to manage Pro Engine status, view Guild Core Reserve, and deposit Cores into server vault.
+- **Engine Command**: New `/engine` command to manage Pro Engine status, view Guild Vault, and deposit Cores into the server vault.
 - **Dashboard Command**: New `/dashboard` admin command to open the web dashboard.
-- **Referral System**: Claim a friend's referral code on the dashboard for +25 Sparks ⚡ and 10% bonus Cores on your first $10+ purchase. Referrers earn 15% bonus Cores on referred purchases of $10+.
+- **Referral System**: Claim a friend's referral code on the dashboard for bonus Sparks and Cores on qualifying purchases.
 - **Web Dashboard**: New panels for ticket management, goodbye system configuration, and role bundle management.
 
 ## [1.8.0] - 2026-07-23
@@ -274,7 +274,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Avatar Content Filter**: Advanced content filtering with 97.6% accuracy for inappropriate content detection.
 - **Avatar Style Options**: Multiple style choices including color_style, mood, and art_style parameters.
 - **Core Credit System**: New credit-based economy for avatar generation with Ko-fi integration.
-- **Core Command**: New `/core` command with clean UI and Core Energy branding.
+- **Core Command**: New `/core` command with a clean interactive UI.
 - **Core Tier Benefits**: Priority processing and increased rate limits for Core subscribers.
 - **Poll System**: Create and manage native Discord polls with `/poll` command.
 - **Poll Commands**: `/poll create`, `/poll list`, `/poll end`, `/poll delete` for full poll management.

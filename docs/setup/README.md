@@ -25,16 +25,7 @@ MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB=role-reactor-bot
 ```
 
-#### Advanced Setup (Separate Files)
-
-If using separate development and production files, copy `.env.example` to create them:
-
-```bash
-cp .env.example .env.development
-cp .env.example .env.production
-```
-
-Then edit each file with appropriate values. For development, include `DISCORD_GUILD_ID` for faster guild-specific command deployment. For production, omit `DISCORD_GUILD_ID` to deploy commands globally.
+Environment variables are loaded from a single `.env` file (there is no separate `.env.production` — secrets are never baked into images). For development, include `DISCORD_GUILD_ID` for faster guild-specific command deployment. For production, omit `DISCORD_GUILD_ID` to deploy commands globally.
 
 ### 3. Start the Bot
 

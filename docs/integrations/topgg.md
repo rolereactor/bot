@@ -1,6 +1,6 @@
 # Voting System Setup
 
-Guide for integrating top.gg voting rewards. Users earn **1 Core Credit** per vote every 12 hours.
+Guide for integrating top.gg voting rewards. Users earn **Sparks** ⚡ per vote — starting at 5 and scaling with vote streak up to 8 (12-hour cooldown).
 
 ## 🚀 Quick Start
 
@@ -45,7 +45,7 @@ pnpm start
 Run `/vote` in Discord. You should see:
 
 - Vote link to top.gg
-- Reward information (1 Core per vote)
+- Reward information (5–8 Sparks per vote, based on streak)
 - Cooldown info (12 hours)
 
 ### Test the Webhook
@@ -68,11 +68,11 @@ curl -X POST https://your-bot-url.com/webhook/topgg \
 {
   "success": true,
   "message": "Vote processed successfully",
-  "reward": 1
+  "sparksGranted": 5
 }
 ```
 
-**Verify:** You should receive a DM from the bot, your Core balance should increase by 1, and bot logs should show `✅ top.gg: Rewarded [user-id] with 1 Core`.
+**Verify:** You should receive a DM from the bot, your Sparks balance should increase, and bot logs should show `✅ top.gg: Rewarded [user-id] with N Sparks`.
 
 ## 🎯 How It Works
 
@@ -81,10 +81,21 @@ User votes on top.gg
   → top.gg sends POST to /webhook/topgg
   → Bot verifies token
   → Bot checks 12h cooldown
-  → Bot adds 1 Core to user's balance
+  → Bot awards 5–8 Sparks based on vote streak
   → Bot sends thank you DM
   → Bot logs the vote
 ```
+
+### Reward Scaling
+
+| Vote streak | Sparks |
+|-------------|--------|
+| 1–2 | 5 |
+| 3–6 | 6 |
+| 7–13 | 7 |
+| 14+ | 8 (cap) |
+
+Streak is maintained with a 36-hour grace window between votes.
 
 ## 🔧 Troubleshooting
 
@@ -95,7 +106,7 @@ User votes on top.gg
 3. Ensure your server is publicly accessible
 4. Check bot logs for errors
 
-### Users Not Receiving Core
+### Users Not Receiving Sparks
 
 1. Check database connection is working
 2. Look for `✅ top.gg: Rewarded...` in logs
@@ -103,40 +114,33 @@ User votes on top.gg
 
 ```javascript
 // Manual check in MongoDB
-db.credits.findOne({ userId: "USER_ID" });
+db.storage.findOne({ key: "core_credit_USER_ID" });
 ```
 
 ### Users Not Receiving DM
 
-This is normal if the user has DMs disabled or blocked the bot. Core is still awarded even if the DM fails.
+This is normal if the user has DMs disabled or blocked the bot. Sparks are still awarded even if the DM fails.
 
 ## 📊 Monitoring
 
 ### Vote Statistics
 
 ```javascript
-db.credits.aggregate([
-  { $match: { lastVote: { $exists: true } } },
+db.storage.aggregate([
+  { $match: { key: /^core_credit_/ } },
   {
-    $group: {
-      _id: null,
-      totalVoters: { $sum: 1 },
-      totalVotes: { $sum: "$totalVotes" },
+    $project: {
+      userId: 1,
+      totalVotes: 1,
+      lastVote: 1,
+      voteStreak: 1,
+      sparks: 1,
     },
   },
+  { $match: { lastVote: { $exists: true } } },
+  { $sort: { lastVote: -1 } },
+  { $limit: 10 },
 ]);
-```
-
-### Recent Votes
-
-```javascript
-db.credits
-  .find(
-    { lastVote: { $exists: true } },
-    { userId: 1, totalVotes: 1, lastVote: 1 },
-  )
-  .sort({ lastVote: -1 })
-  .limit(10);
 ```
 
 ## 🔐 Security
@@ -159,5 +163,5 @@ TOPGG_WEBHOOK_AUTH=your_topgg_authorization_token
 - [ ] Configured webhook URL on top.gg
 - [ ] Deployed bot with `/vote` command
 - [ ] Tested webhook manually
-- [ ] Verified Core rewards working
+- [ ] Verified Spark rewards working
 - [ ] Checked logs for errors

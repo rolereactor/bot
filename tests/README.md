@@ -8,48 +8,35 @@ This directory contains comprehensive tests for the Role Reactor Bot, covering u
 tests/
 ├── README.md                 # This file
 ├── setup.js                  # Vitest setup and global mocks
-├── unit/                     # Unit tests for individual modules
-│   ├── commands/             # Command-specific tests
-│   │   ├── admin/            # Admin command tests
-│   │   │   ├── welcome.test.js
-│   │   │   ├── goodbye.test.js
-│   │   │   ├── moderation.test.js
-│   │   │   ├── role-reactions.test.js
-│   │   │   ├── temp-roles.test.js
-│   │   │   ├── schedule-role.test.js
-│   │   │   └── xp.test.js
-│   │   ├── developer/        # Developer command tests
-│   │   │   ├── core-management.test.js
-│   │   │   ├── health.test.js
-│   │   │   └── performance.test.js
-│   │   └── general/          # General command tests
-│   │       ├── help.test.js
-│   │       ├── level.test.js
-│   │       ├── leaderboard.test.js
-│   │       ├── poll.test.js
-│   │       ├── serverinfo.test.js
-│   │       └── userinfo.test.js
-│   ├── events/               # Event handler tests
-│   │   ├── guildMemberUpdate.test.js
-│   │   └── voiceStateUpdate.test.js
-│   ├── utils/                # Utility tests
-│   │   ├── core/             # Core utility tests
-│   │   │   ├── commandHandler.test.js
-│   │   │   └── eventHandler.test.js
-│   │   ├── discord/          # Discord utility tests
-│   │   │   └── roleManagerParseRoleString.test.js
-│   │   ├── storage/          # Storage utility tests
-│   │   │   └── storage.test.js
-│   │   └── ai/               # AI utility tests
-│   │       └── conversationManager.test.js
-│   └── features/             # Feature-specific tests
-│       └── databaseReconnection.test.js
-├── integration/              # Integration tests for API interactions
-│   ├── discord-api.test.js
-│   ├── database.test.js
-│   └── setup-roles.test.js
-└── e2e/                      # End-to-end workflow tests
-    └── role-management.test.js
+├── api/                      # API configuration & endpoint tests
+├── e2e/                      # End-to-end workflow tests
+├── integration/              # Integration tests (Discord API, database, AI)
+│   └── ai/                   # AI integration tests
+├── security/                 # API security & auth tests
+├── ticketing/                # Ticket system tests
+├── utils/                    # Shared test utilities
+│   └── rateLimit/            # Rate limit helpers
+├── validation/               # Input validation tests
+└── unit/                     # Unit tests for individual modules
+    ├── commands/
+    │   ├── admin/            # Admin command tests
+    │   │   └── role-reactions/
+    │   └── general/          # General command tests
+    ├── config/               # Config tests
+    │   └── prompts/
+    ├── events/               # Event handler tests
+    ├── features/             # Feature-specific tests
+    │   ├── starboard/
+    │   └── streaming/
+    ├── server/               # API server tests
+    │   └── controllers/
+    ├── utils/                # Utility tests
+    │   ├── ai/
+    │   ├── core/
+    │   ├── discord/
+    │   ├── security/
+    │   └── storage/
+    └── webhooks/             # Webhook tests (topgg, crypto, BMAC)
 ```
 
 ## 🧪 Test Types
@@ -67,6 +54,10 @@ tests/
 - **Coverage**: API calls, authentication, error handling
 - **Mocking**: Mock external services while testing real logic
 - **Speed**: Medium execution time
+
+### Security Tests (`tests/security/`)
+
+- **Purpose**: Verify auth, rate limiting, and input validation on API routes
 
 ### End-to-End Tests (`tests/e2e/`)
 
@@ -89,6 +80,7 @@ pnpm test
 # Run specific test categories
 pnpm test tests/unit/
 pnpm test tests/integration/
+pnpm test tests/security/
 pnpm test tests/e2e/
 
 # Run specific test subdirectories
@@ -96,11 +88,6 @@ pnpm test tests/unit/commands/
 pnpm test tests/unit/events/
 pnpm test tests/unit/utils/
 pnpm test tests/unit/features/
-
-# Run specific command category tests
-pnpm test tests/unit/commands/admin/
-pnpm test tests/unit/commands/developer/
-pnpm test tests/unit/commands/general/
 ```
 
 ### Development Mode
@@ -109,58 +96,36 @@ pnpm test tests/unit/commands/general/
 # Watch mode for development
 pnpm test:watch
 
-# Coverage report
-pnpm test:coverage
-
 # CI mode (no watch, with coverage)
 pnpm test:ci
 ```
 
 ## 📊 Current Test Coverage
 
-### ✅ Covered (41+ test files, 1184+ tests)
+### ✅ Covered (92 test files, 1588 tests)
 
 **Unit Tests:**
-- ✅ Admin Commands: welcome, goodbye, moderation, role-reactions, temp-roles, schedule-role, voice-roles, xp, **ticket**
-- ✅ General Commands: help, level, leaderboard, poll, serverinfo, userinfo, rps, 8ball
-- ✅ Events: guildMemberUpdate, voiceStateUpdate, **eventHandlers (file structure)**
-- ✅ Utils: commandHandler, eventHandler, roleParser, **rateLimiter**
-- ✅ Features: databaseReconnection
+- ✅ Admin Commands: welcome, goodbye, moderation, role-reactions, role-bundle, temp-roles, schedule-role, voice-roles, xp, ticket, giveaway, automod
+- ✅ General Commands: help, level, leaderboard, poll, serverinfo, userinfo, rps, 8ball, wyr, avatar, balance, engine, premium, vote, ping, invite, support, chat, imagine
+- ✅ Events: guildMemberUpdate, voiceStateUpdate, automod filters, role reaction workflows, unique selection
+- ✅ Features: premium/Pro Engine, starboard, streaming, role scheduler, analytics gating
+- ✅ Webhooks: topgg votes, crypto payments, Buy Me a Coffee
+- ✅ Server controllers & notification tests
 
 **Integration Tests:**
 - ✅ Discord API integration
 - ✅ Database operations
-- ✅ Setup roles command
-- ✅ Payment system
+- ✅ AI integration
+
+**Security Tests:**
+- ✅ API security & auth
+- ✅ Role bundles API
+
+**API Tests:**
+- ✅ API configuration & endpoint definitions
 
 **E2E Tests:**
 - ✅ Role management workflows
-
-### ❌ Missing Tests (Priority Order)
-
-**High Priority:**
-- ❌ **Event Handler Functionality** - Need functional tests for:
-  - guildMemberAdd (welcome messages)
-  - guildMemberRemove (goodbye messages)
-  - messageReactionAdd/Remove (role reactions)
-  - interactionCreate (command routing)
-  - messageCreate (XP tracking)
-
-**Medium Priority:**
-- ❌ **Feature Modules**
-  - features/experience/ (XP system core)
-  - features/premium/ (Pro Engine)
-  - features/scheduledRoles/
-  - features/temporaryRoles/
-  - features/analytics/
-
-**Low Priority:**
-- ❌ **Utility Modules**
-  - utils/ai/ (29 files, only 1 tested)
-  - utils/cache/
-  - utils/payments/
-  - utils/validation/
-
 
 ## 🛠️ Test Utilities
 
@@ -221,7 +186,7 @@ describe("ModuleName", () => {
     test("should handle success case", async () => {
       const input = "test input";
       const result = await functionUnderTest(input);
-      expect(result).toBe("expected output");
+      expect(result).toBe("expected result");
     });
 
     test("should handle error case", async () => {
@@ -311,11 +276,4 @@ node --inspect-brk node_modules/.bin/vitest --run
 
 # Run specific test with debugging
 NODE_OPTIONS='--inspect-brk' pnpm test tests/unit/commandHandler.test.js
-```
-
-### Coverage Analysis
-
-```bash
-# Generate detailed coverage report
-pnpm test:coverage
 ```

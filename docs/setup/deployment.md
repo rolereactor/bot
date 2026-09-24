@@ -201,7 +201,7 @@ docker logs role-reactor-caddy
 git tag -l
 
 # 2. Checkout specific version
-git checkout v1.7.0
+git checkout v1.8.0
 
 # 3. Deploy that version
 pnpm run docker:deploy
@@ -220,7 +220,3 @@ pnpm run dev
 ```
 
 For full Docker documentation, see the [Docker Integration Guide](../integrations/docker/README.md).
-
----
-
-**Last Updated:** 2026-05-21

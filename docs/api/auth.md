@@ -34,16 +34,18 @@ Call this endpoint to check if the user is logged in and get their profile.
 
 ```json
 {
+  "success": true,
   "status": "success",
-  "data": {
-    "user": {
-      "id": "123456789",
-      "username": "username",
-      "discriminator": "0",
-      "avatar": "avatar_hash",
-      "email": "user@example.com"
-    }
-  }
+  "user": {
+    "id": "123456789",
+    "username": "username",
+    "discriminator": "0",
+    "avatar": "avatar_hash",
+    "email": "user@example.com",
+    "credits": 0,
+    "role": "user"
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -52,8 +54,8 @@ Call this endpoint to check if the user is logged in and get their profile.
 ```json
 {
   "status": "error",
-  "code": 401,
-  "message": "Not authenticated"
+  "message": "Not authenticated",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -67,10 +69,10 @@ Call this endpoint to end the session.
 
 ```json
 {
+  "success": true,
   "status": "success",
-  "data": {
-    "message": "Logged out successfully"
-  }
+  "message": "Logged out successfully",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -108,7 +110,7 @@ Here is a complete, minimal example using vanilla JavaScript.
 
           if (response.ok) {
             const data = await response.json();
-            showLoggedIn(data.data.user);
+            showLoggedIn(data.user);
           } else {
             showLoginButton();
           }
@@ -186,7 +188,7 @@ export default function AuthComponent() {
         if (res.ok) return res.json();
         throw new Error("Not authenticated");
       })
-      .then(data => setUser(data.data.user))
+      .then(data => setUser(data.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
