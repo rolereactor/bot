@@ -362,15 +362,21 @@ router.get("/callback/youtube", async (req, res) => {
     // Calculate expiry time
     const expiresAt = Date.now() + tokens.expiresIn * 1000;
 
-    await streamingManager.connectAccount(guildId, userId, "youtube", {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      expiresAt,
-    }, {
-      id: validation.id,
-      login: validation.name,
-      displayName: channelInfo?.title || validation.name,
-    });
+    await streamingManager.connectAccount(
+      guildId,
+      userId,
+      "youtube",
+      {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresAt,
+      },
+      {
+        id: validation.id,
+        login: validation.name,
+        displayName: channelInfo?.title || validation.name,
+      },
+    );
 
     // Return to dashboard
     const targetDomain =

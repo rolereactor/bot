@@ -12,7 +12,9 @@ export const POWER_CELLS = {
     id: "power-cell-aaa",
     name: "AAA Power Cell",
     description: "Small energy storage — stores 25 Cores",
-    get emoji() { return emojiConfig.getPowerCellEmoji("aaa"); },
+    get emoji() {
+      return emojiConfig.getPowerCellEmoji("aaa");
+    },
     currency: "cores",
     cost: 28,
     storedAmount: 25,
@@ -24,7 +26,9 @@ export const POWER_CELLS = {
     id: "power-cell-aa",
     name: "AA Power Cell",
     description: "Medium energy storage — stores 75 Cores",
-    get emoji() { return emojiConfig.getPowerCellEmoji("aa"); },
+    get emoji() {
+      return emojiConfig.getPowerCellEmoji("aa");
+    },
     currency: "cores",
     cost: 83,
     storedAmount: 75,
@@ -36,7 +40,9 @@ export const POWER_CELLS = {
     id: "power-cell-c",
     name: "C Power Cell",
     description: "Large energy storage — stores 200 Cores",
-    get emoji() { return emojiConfig.getPowerCellEmoji("c"); },
+    get emoji() {
+      return emojiConfig.getPowerCellEmoji("c");
+    },
     currency: "cores",
     cost: 220,
     storedAmount: 200,
@@ -48,7 +54,9 @@ export const POWER_CELLS = {
     id: "power-cell-d",
     name: "D Power Cell",
     description: "Extra large energy storage — stores 500 Cores",
-    get emoji() { return emojiConfig.getPowerCellEmoji("d"); },
+    get emoji() {
+      return emojiConfig.getPowerCellEmoji("d");
+    },
     currency: "cores",
     cost: 550,
     storedAmount: 500,
@@ -63,33 +71,39 @@ export const POWER_CELLS = {
 // ============================================================================
 
 export const ENGINE_MODULES = {
-  "piston": {
+  piston: {
     id: "piston",
     name: "Piston",
     description: "Pro Engine access for 1 day",
-    get emoji() { return emojiConfig.getEngineModuleEmoji("piston"); },
+    get emoji() {
+      return emojiConfig.getEngineModuleEmoji("piston");
+    },
     currency: "sparks",
     cost: 75,
     durationDays: 1,
     type: "engine_module",
     category: "engine_modules",
   },
-  "turbocharger": {
+  turbocharger: {
     id: "turbocharger",
     name: "Turbocharger",
     description: "Pro Engine access for 3 days",
-    get emoji() { return emojiConfig.getEngineModuleEmoji("turbocharger"); },
+    get emoji() {
+      return emojiConfig.getEngineModuleEmoji("turbocharger");
+    },
     currency: "sparks",
     cost: 175,
     durationDays: 3,
     type: "engine_module",
     category: "engine_modules",
   },
-  "supercharger": {
+  supercharger: {
     id: "supercharger",
     name: "Supercharger",
     description: "Pro Engine access for 7 days",
-    get emoji() { return emojiConfig.getEngineModuleEmoji("supercharger"); },
+    get emoji() {
+      return emojiConfig.getEngineModuleEmoji("supercharger");
+    },
     currency: "sparks",
     cost: 350,
     durationDays: 7,
@@ -142,9 +156,9 @@ export const MONTHLY_STOCK = {
   "power-cell-aa": 300,
   "power-cell-c": 150,
   "power-cell-d": 50,
-  "piston": 3,
-  "turbocharger": 2,
-  "supercharger": 1,
+  piston: 3,
+  turbocharger: 2,
+  supercharger: 1,
 };
 
 // ============================================================================

@@ -23,7 +23,9 @@ router.get("/verify/:guildId/:widget", (req, res) => {
   }
 
   if (!token || !verifyOverlayToken(guildId, widget, token)) {
-    return res.status(403).json({ valid: false, error: "Invalid or expired token" });
+    return res
+      .status(403)
+      .json({ valid: false, error: "Invalid or expired token" });
   }
 
   return res.json({ valid: true, guildId, widget });

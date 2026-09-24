@@ -9,7 +9,15 @@ export const metadata = {
   name: "shop",
   category: "general",
   description: "Buy Power Cells and Engine Modules with Cores or Sparks",
-  keywords: ["shop", "buy", "purchase", "power cell", "engine module", "cores", "sparks"],
+  keywords: [
+    "shop",
+    "buy",
+    "purchase",
+    "power cell",
+    "engine module",
+    "cores",
+    "sparks",
+  ],
   emoji: "🛒",
   helpFields: [
     {

@@ -1,5 +1,9 @@
 import express from "express";
-import { FREE_TIER, PRO_TIER, PremiumFeatures } from "../../../features/premium/config.js";
+import {
+  FREE_TIER,
+  PRO_TIER,
+  PremiumFeatures,
+} from "../../../features/premium/config.js";
 import config from "../../../config/config.js";
 
 const router = express.Router();
@@ -91,7 +95,8 @@ const BENEFITS = [
     name: "Replace Role Mode",
     free: false,
     pro: true,
-    tooltip: "Swap out lower roles when a higher one is earned, instead of stacking all of them",
+    tooltip:
+      "Swap out lower roles when a higher one is earned, instead of stacking all of them",
     type: "feature",
     category: "Leveling",
   },
@@ -127,7 +132,8 @@ const BENEFITS = [
     name: "Categories per Panel",
     freeKey: "TICKET_MAX_PANELS",
     proKey: "TICKET_MAX_PANELS",
-    tooltip: "Separate topic channels within a ticket panel (e.g. Billing, Tech Support)",
+    tooltip:
+      "Separate topic channels within a ticket panel (e.g. Billing, Tech Support)",
     type: "limit",
     category: "Ticketing",
   },
@@ -214,7 +220,7 @@ function formatLimit(value, def, side) {
   if (value === -1) return "Unlimited";
   if (typeof value === "number") {
     if (def.format === "number") return value.toLocaleString();
-    const suffix = side === "free" ? (def.freeSuffix || "") : (def.proSuffix || "");
+    const suffix = side === "free" ? def.freeSuffix || "" : def.proSuffix || "";
     return `${value}${suffix}`;
   }
   return String(value);
@@ -222,14 +228,18 @@ function formatLimit(value, def, side) {
 
 // GET /api/v1/premium/benefits — public, no auth required
 router.get("/benefits", (_req, res) => {
-  const benefits = BENEFITS.map((def) => {
+  const benefits = BENEFITS.map(def => {
     const free = formatLimit(resolveValue(def, FREE_TIER, "free"), def, "free");
     const pro = formatLimit(resolveValue(def, PRO_TIER, "pro"), def, "pro");
 
     // Handle merged limits (e.g., "3 bundles × 3 roles each")
     if (def.freeSub) {
-      const freeSubVal = resolveValue(def, FREE_TIER, "freeSub") ?? resolveValue(def, FREE_TIER, "proSub");
-      const proSubVal = resolveValue(def, PRO_TIER, "proSub") ?? resolveValue(def, PRO_TIER, "freeSub");
+      const freeSubVal =
+        resolveValue(def, FREE_TIER, "freeSub") ??
+        resolveValue(def, FREE_TIER, "proSub");
+      const proSubVal =
+        resolveValue(def, PRO_TIER, "proSub") ??
+        resolveValue(def, PRO_TIER, "freeSub");
       return {
         name: def.name,
         category: def.category,
@@ -252,7 +262,8 @@ router.get("/benefits", (_req, res) => {
 
   const proFeature = PremiumFeatures.PRO;
   const packages = config.corePricing?.packages || {};
-  const bmacMultiplier = config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
+  const bmacMultiplier =
+    config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
 
   const rateCard = Object.entries(packages)
     .filter(([, pkg]) => !pkg.hidden)

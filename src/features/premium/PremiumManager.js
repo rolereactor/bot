@@ -65,7 +65,9 @@ export class PremiumManager {
           } else {
             const graceDeadline = new Date(corePro.nextDeductionDate);
             if (!isNaN(graceDeadline.getTime())) {
-              graceDeadline.setDate(graceDeadline.getDate() + GRACE_PERIOD_DAYS);
+              graceDeadline.setDate(
+                graceDeadline.getDate() + GRACE_PERIOD_DAYS,
+              );
               if (graceDeadline >= new Date()) return true;
             }
           }
@@ -399,7 +401,8 @@ export class PremiumManager {
 
       // For Spark Pro, check if it's active based on expiresAt
       if (featureId === "spark_pro") {
-        const isActive = sub.active && sub.expiresAt && new Date(sub.expiresAt) >= new Date();
+        const isActive =
+          sub.active && sub.expiresAt && new Date(sub.expiresAt) >= new Date();
         return {
           active: isActive,
           payerUserId: sub.payerUserId,
@@ -681,9 +684,8 @@ export class PremiumManager {
         const guild = await this.client?.guilds?.fetch(guildId);
         if (guild?.ownerId) {
           const ownerCredits = await db.coreCredits.getByUserId(guild.ownerId);
-          const ownerBalance = Math.round(
-            (ownerCredits?.credits || 0) * 100,
-          ) / 100;
+          const ownerBalance =
+            Math.round((ownerCredits?.credits || 0) * 100) / 100;
 
           if (ownerBalance >= feature.cost) {
             const ownerRenewal = await db.coreCredits.deductCredits(
@@ -726,10 +728,7 @@ export class PremiumManager {
           }
         }
       } catch (error) {
-        logger.error(
-          `Error in owner auto-fuel for guild ${guildId}:`,
-          error,
-        );
+        logger.error(`Error in owner auto-fuel for guild ${guildId}:`, error);
       }
     }
 
@@ -1315,7 +1314,8 @@ export class PremiumManager {
     try {
       if (!db.payments) return;
       // Use "vault" provider for vault deposits, "premium_system" for others
-      const provider = transaction.type === "vault_deposit" ? "vault" : "premium_system";
+      const provider =
+        transaction.type === "vault_deposit" ? "vault" : "premium_system";
       await db.payments.create({
         paymentId: `premium_${transaction.type}_${transaction.guildId}_${Date.now()}`,
         discordId: transaction.userId,

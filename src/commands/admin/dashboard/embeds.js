@@ -1,4 +1,9 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} from "discord.js";
 import { THEME } from "../../../config/theme.js";
 
 /**
@@ -12,9 +17,7 @@ export function createDashboardEmbed(guildId, client) {
 
   const embed = new EmbedBuilder()
     .setTitle("Server Dashboard")
-    .setDescription(
-      "Click the button below to access your server's dashboard."
-    )
+    .setDescription("Click the button below to access your server's dashboard.")
     .setColor(THEME.PRIMARY)
     .setTimestamp()
     .setFooter({
@@ -26,7 +29,7 @@ export function createDashboardEmbed(guildId, client) {
     new ButtonBuilder()
       .setURL(dashboardUrl)
       .setLabel("Open Dashboard")
-      .setStyle(ButtonStyle.Link)
+      .setStyle(ButtonStyle.Link),
   );
 
   return { embed, components: [row] };

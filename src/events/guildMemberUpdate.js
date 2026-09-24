@@ -23,9 +23,11 @@ export async function execute(oldMember, newMember, _client) {
     const oldRoleIds = new Set(oldMember.roles.cache.keys());
     const newRoleIds = new Set(newMember.roles.cache.keys());
 
-    if (oldRoleIds.size !== newRoleIds.size ||
-        [...oldRoleIds].some(id => !newRoleIds.has(id)) ||
-        [...newRoleIds].some(id => !oldRoleIds.has(id))) {
+    if (
+      oldRoleIds.size !== newRoleIds.size ||
+      [...oldRoleIds].some(id => !newRoleIds.has(id)) ||
+      [...newRoleIds].some(id => !oldRoleIds.has(id))
+    ) {
       userMutex.unlock(newMember.id);
     }
 

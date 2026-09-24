@@ -434,7 +434,11 @@ export async function apiUpdateGuildSettings(req, res) {
       typeof updates.goodbyeSystem === "object" &&
       !Array.isArray(updates.goodbyeSystem);
 
-    if (!hasWelcomeUpdate && !hasGoodbyeUpdate && Object.keys(editableUpdates).length === 0) {
+    if (
+      !hasWelcomeUpdate &&
+      !hasGoodbyeUpdate &&
+      Object.keys(editableUpdates).length === 0
+    ) {
       return res
         .status(400)
         .json(

@@ -18,6 +18,7 @@
     "format": "prettier --write src/ scripts/",
     "format:check": "prettier --check src/ scripts/",
     "test": "vitest run",
+    "test:ci": "vitest run --coverage --reporter=default",
     "test:watch": "vitest",
     "pre-commit": "lint-staged",
     "docker:build": "docker build -t role-reactor-bot .",

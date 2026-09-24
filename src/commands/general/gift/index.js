@@ -9,7 +9,15 @@ export const metadata = {
   name: "gift",
   category: "general",
   description: "Gift items to another user",
-  keywords: ["gift", "give", "send", "transfer", "item", "power cell", "engine module"],
+  keywords: [
+    "gift",
+    "give",
+    "send",
+    "transfer",
+    "item",
+    "power cell",
+    "engine module",
+  ],
   emoji: "🎁",
   helpFields: [
     {

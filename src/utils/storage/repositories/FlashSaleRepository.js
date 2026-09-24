@@ -50,10 +50,12 @@ export class FlashSaleRepository extends BaseRepository {
     };
 
     if (guildId) {
-      return this.collection.find({
-        ...query,
-        $or: [{ guildId }, { guildId: null }],
-      }).toArray();
+      return this.collection
+        .find({
+          ...query,
+          $or: [{ guildId }, { guildId: null }],
+        })
+        .toArray();
     }
 
     return this.collection.find(query).toArray();

@@ -41,13 +41,12 @@ export function createStatusEmbed({
   const vaultBalance = Number(vaultData?.balance) || 0;
   const weeksFunded = Math.floor((vaultBalance / 20) * 100) / 100;
 
-  const embed = new EmbedBuilder()
-    .setAuthor(
-      UI_COMPONENTS.createAuthor(
-        `${guild.name} • Engine Status`,
-        guild.iconURL() || client?.user?.displayAvatarURL(),
-      ),
-    );
+  const embed = new EmbedBuilder().setAuthor(
+    UI_COMPONENTS.createAuthor(
+      `${guild.name} • Engine Status`,
+      guild.iconURL() || client?.user?.displayAvatarURL(),
+    ),
+  );
 
   if (coreOnly || sparkOnly || bothActive) {
     // ── Pro Active ──
@@ -88,7 +87,9 @@ export function createStatusEmbed({
       sourceText = `${sparkEmoji} **Spark Pro**`;
       if (sparkProSub?.expiresAt) {
         const expires = new Date(sparkProSub.expiresAt);
-        const daysLeft = Math.ceil((expires - new Date()) / (1000 * 60 * 60 * 24));
+        const daysLeft = Math.ceil(
+          (expires - new Date()) / (1000 * 60 * 60 * 24),
+        );
         expiryText = `📅 Expires ${expires.toLocaleDateString("en-US", { month: "short", day: "numeric" })} (${daysLeft}d left)`;
       }
     }
@@ -176,7 +177,6 @@ export function createStatusEmbed({
 export function createVaultEmbed({ guild, vaultData, client }) {
   const balance = Number(vaultData?.balance) || 0;
   const weeksFunded = (balance / 20).toFixed(1);
-  const history = vaultData?.history || [];
   const coreEmoji = emojiConfig.core;
 
   const embed = new EmbedBuilder()
@@ -277,7 +277,10 @@ export function createMeEmbed({ guild, user, vaultData, client }) {
   const coreEmoji = emojiConfig.core;
 
   const userHistory = history.filter(entry => entry.userId === user.id);
-  const totalContributed = userHistory.reduce((sum, entry) => sum + (Number(entry.amount) || 0), 0);
+  const totalContributed = userHistory.reduce(
+    (sum, entry) => sum + (Number(entry.amount) || 0),
+    0,
+  );
   const contributionCount = userHistory.length;
 
   const embed = new EmbedBuilder()
@@ -309,7 +312,10 @@ export function createMeEmbed({ guild, user, vaultData, client }) {
     const recent = userHistory.slice(-5).reverse();
     const recentList = recent
       .map(entry => {
-        const date = new Date(entry.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const date = new Date(entry.timestamp).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
         return `• ${date}: ${coreEmoji} ${Number(entry.amount).toFixed(2)}`;
       })
       .join("\n");

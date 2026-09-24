@@ -87,7 +87,7 @@ async function handleBrowse(interaction) {
   const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
   let currentPage = 0;
 
-  const createComponents = (page) => {
+  const createComponents = page => {
     const navRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId("shop_prev")
@@ -104,18 +104,25 @@ async function handleBrowse(interaction) {
     return [navRow];
   };
 
-  const getEmbed = (page) => {
+  const getEmbed = page => {
     const start = page * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
     const pageItems = items.slice(start, end);
 
-    return createShopListEmbed(pageItems, status, page + 1, totalPages, interaction.client, {
-      username: interaction.user.username,
-      avatarURL: interaction.user.displayAvatarURL(),
-      stock,
-      sales,
-      guildId: interaction.guildId,
-    });
+    return createShopListEmbed(
+      pageItems,
+      status,
+      page + 1,
+      totalPages,
+      interaction.client,
+      {
+        username: interaction.user.username,
+        avatarURL: interaction.user.displayAvatarURL(),
+        stock,
+        sales,
+        guildId: interaction.guildId,
+      },
+    );
   };
 
   const response = await interaction.editReply({
@@ -139,18 +146,27 @@ async function handleBrowse(interaction) {
       currentPage++;
     }
 
-    const updatedStatus = await sparkShopManager.getUserStatus(interaction.user.id);
-    const updatedStock = await sparkShopManager.getGuildStock(interaction.guildId);
+    const updatedStatus = await sparkShopManager.getUserStatus(
+      interaction.user.id,
+    );
+    const updatedStock = await sparkShopManager.getGuildStock(
+      interaction.guildId,
+    );
 
     // Refresh sales data
-    const updatedActiveSales = await saleManager.getActiveSales(interaction.guildId);
+    const updatedActiveSales = await saleManager.getActiveSales(
+      interaction.guildId,
+    );
     const updatedSales = {};
     for (const sale of updatedActiveSales) {
       updatedSales[sale.itemId] = sale;
     }
 
     const updatedEmbed = createShopListEmbed(
-      items.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE),
+      items.slice(
+        currentPage * ITEMS_PER_PAGE,
+        (currentPage + 1) * ITEMS_PER_PAGE,
+      ),
       updatedStatus,
       currentPage + 1,
       totalPages,
@@ -212,10 +228,15 @@ async function processPurchase(interaction, itemId) {
   }
 
   // Show confirmation
-  const confirmEmbed = createPurchaseConfirmEmbed(item, status, interaction.client, {
-    username: interaction.user.username,
-    avatarURL: interaction.user.displayAvatarURL(),
-  });
+  const confirmEmbed = createPurchaseConfirmEmbed(
+    item,
+    status,
+    interaction.client,
+    {
+      username: interaction.user.username,
+      avatarURL: interaction.user.displayAvatarURL(),
+    },
+  );
 
   const confirmId = `confirm_shop_${interaction.id}`;
   const cancelId = `cancel_shop_${interaction.id}`;

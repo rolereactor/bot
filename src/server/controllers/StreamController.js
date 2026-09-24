@@ -564,7 +564,11 @@ export async function apiGenerateOverlayToken(req, res) {
   logRequest("Generate Overlay Token", req, {}, "🔗");
 
   if (!widget) {
-    return err(res, "widget parameter required (alerts, chat, activity, stats)", 400);
+    return err(
+      res,
+      "widget parameter required (alerts, chat, activity, stats)",
+      400,
+    );
   }
 
   try {
@@ -575,9 +579,12 @@ export async function apiGenerateOverlayToken(req, res) {
       expiresIn ? parseInt(expiresIn, 10) * 1000 : undefined,
     );
 
-    const baseUrl = process.env.BOT_WEBSITE_URL || process.env.WEBSITE_URL || "";
+    const baseUrl =
+      process.env.BOT_WEBSITE_URL || process.env.WEBSITE_URL || "";
     const overlayPath = `/overlay/${guildId}/${widget}`;
-    const url = baseUrl ? `${baseUrl}${overlayPath}?token=${token}` : overlayPath;
+    const url = baseUrl
+      ? `${baseUrl}${overlayPath}?token=${token}`
+      : overlayPath;
 
     return ok(res, { token, url, expiresAt, widget });
   } catch (error) {

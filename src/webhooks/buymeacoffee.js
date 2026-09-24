@@ -257,35 +257,35 @@ export async function handleBMACWebhook(req, res) {
                 paymentAmount *
                   (config.corePricing?.coreSystem?.conversionRate || 15),
               );
-        const bmacMultiplier = config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
+        const bmacMultiplier =
+          config.corePricing?.coreSystem?.bmacFeeMultiplier || 0.85;
         const coresToAdd = Math.floor(baseCores * bmacMultiplier);
 
         // Atomic credit — $inc + $push in one op; no stale-read, no
         // whole-doc replaceOne that could overwrite concurrent writers.
-        const updated =
-          await dbManager.coreCredits.collection.findOneAndUpdate(
-            { userId },
-            {
-              $inc: { credits: coresToAdd, totalGenerated: coresToAdd },
-              $push: {
-                bmacPayments: {
-                  code,
-                  type: "payment",
-                  fiatAmount: paymentAmount,
-                  currency,
-                  cores: coresToAdd,
-                  provider: "buymeacoffee",
-                  supporterName,
-                  transactionId,
-                  bmacPaymentId,
-                  timestamp: new Date().toISOString(),
-                  processed: true,
-                },
+        const updated = await dbManager.coreCredits.collection.findOneAndUpdate(
+          { userId },
+          {
+            $inc: { credits: coresToAdd, totalGenerated: coresToAdd },
+            $push: {
+              bmacPayments: {
+                code,
+                type: "payment",
+                fiatAmount: paymentAmount,
+                currency,
+                cores: coresToAdd,
+                provider: "buymeacoffee",
+                supporterName,
+                transactionId,
+                bmacPaymentId,
+                timestamp: new Date().toISOString(),
+                processed: true,
               },
-              $set: { lastUpdated: new Date().toISOString() },
             },
-            { upsert: true, returnDocument: "after" },
-          );
+            $set: { lastUpdated: new Date().toISOString() },
+          },
+          { upsert: true, returnDocument: "after" },
+        );
 
         return { coresToAdd, newBalance: updated?.credits ?? coresToAdd };
       } catch (creditError) {

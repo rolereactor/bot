@@ -146,8 +146,10 @@ async function cleanupGuild(guildId, storageManager, client) {
         guildId,
         "pro_engine",
       );
-      const settings = await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
-      const autoCloseDays = settings?.ticketSettings?.autoCloseDays ?? (isPro ? 30 : 7);
+      const settings =
+        await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
+      const autoCloseDays =
+        settings?.ticketSettings?.autoCloseDays ?? (isPro ? 30 : 7);
       const inactiveDays = autoCloseDays || (isPro ? 30 : 7);
       const inactiveMs = inactiveDays * 24 * 60 * 60 * 1000;
 

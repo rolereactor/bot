@@ -46,7 +46,8 @@ export async function execute(interaction, _client) {
     }
   } catch (error) {
     logger.error(`Error in /inventory command (${subcommand}):`, error);
-    const errorMsg = "An unexpected error occurred while processing `/inventory`.";
+    const errorMsg =
+      "An unexpected error occurred while processing `/inventory`.";
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply({
         embeds: [createErrorEmbed(errorMsg, interaction.client)],
@@ -162,7 +163,10 @@ async function handleView(interaction) {
 
     if (customId === "inv_prev" && currentIndex > 0) {
       currentIndex--;
-    } else if (customId === "inv_next" && currentIndex < enrichedItems.length - 1) {
+    } else if (
+      customId === "inv_next" &&
+      currentIndex < enrichedItems.length - 1
+    ) {
       currentIndex++;
     } else if (customId === "inv_use") {
       const item = enrichedItems[currentIndex];
@@ -241,14 +245,10 @@ async function handleUse(interaction) {
  * Process using an item with confirmation
  */
 async function processUse(interaction, item) {
-  const confirmEmbed = createUseConfirmEmbed(
-    item,
-    interaction.client,
-    {
-      username: interaction.user.username,
-      avatarURL: interaction.user.displayAvatarURL(),
-    },
-  );
+  const confirmEmbed = createUseConfirmEmbed(item, interaction.client, {
+    username: interaction.user.username,
+    avatarURL: interaction.user.displayAvatarURL(),
+  });
 
   const confirmId = `confirm_use_${interaction.id}`;
   const cancelId = `cancel_use_${interaction.id}`;

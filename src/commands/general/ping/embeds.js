@@ -10,7 +10,7 @@ export function createPingEmbed(
   apiLatency,
   latency,
   uptimeString,
-  client,
+  _client,
   _user,
 ) {
   const embed = new EmbedBuilder()

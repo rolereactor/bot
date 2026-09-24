@@ -20,10 +20,12 @@ export function createInventoryEmbed(items, client, options = {}) {
     .setTitle("🎒 Inventory");
 
   if (items.length === 0) {
-    embed.setDescription(`... nothing in inventory ! buy something now in the shop — ${shopCommand}`);
+    embed.setDescription(
+      `... nothing in inventory ! buy something now in the shop — ${shopCommand}`,
+    );
   } else {
     const itemList = items
-      .map((item) => {
+      .map(item => {
         const status = item.used ? "✅" : "⏳";
         return `${status} ${item.emoji} **${item.name}**`;
       })
@@ -47,7 +49,14 @@ export function createInventoryEmbed(items, client, options = {}) {
  * @param {string} [options.avatarURL] - User's avatar URL
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createItemDetailEmbed(item, index, total, inventory, _client, options = {}) {
+export function createItemDetailEmbed(
+  item,
+  index,
+  total,
+  inventory,
+  _client,
+  options = {},
+) {
   const { username, avatarURL } = options;
 
   const status = item.used ? "✅ Used" : "⏳ Ready";
@@ -129,9 +138,13 @@ export function createUseConfirmEmbed(item, _client, options = {}) {
   }
 
   if (item.type === "power_cell") {
-    embed.setDescription(`Costs **${item.cost} Cores** — adds ${item.storedAmount} Cores to balance`);
+    embed.setDescription(
+      `Costs **${item.cost} Cores** — adds ${item.storedAmount} Cores to balance`,
+    );
   } else if (item.type === "engine_module") {
-    embed.setDescription(`Costs **${item.cost} Sparks** — activates ${item.durationDays} day${item.durationDays !== 1 ? "s" : ""} of Pro Engine`);
+    embed.setDescription(
+      `Costs **${item.cost} Sparks** — activates ${item.durationDays} day${item.durationDays !== 1 ? "s" : ""} of Pro Engine`,
+    );
   }
 
   return embed;
@@ -162,7 +175,9 @@ export function createUseSuccessEmbed(item, result, _client, options = {}) {
   }
 
   if (result.type === "power_cell") {
-    embed.setDescription(`**${result.coresAdded} Cores** added to your balance`);
+    embed.setDescription(
+      `**${result.coresAdded} Cores** added to your balance`,
+    );
   } else if (result.type === "engine_module") {
     const expiryText = result.expiresAt
       ? `Expires: <t:${Math.floor(result.expiresAt.getTime() / 1000)}:R>`

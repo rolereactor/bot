@@ -1,4 +1,9 @@
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
+import {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+} from "discord.js";
 import { THEME } from "../../../config/theme.js";
 import { emojiConfig } from "../../../config/emojis.js";
 import { getMentionableCommand } from "../../../utils/commandUtils.js";
@@ -36,7 +41,7 @@ export function createBalanceEmbed(
     .setColor(THEME.PRIMARY)
     .setAuthor({ name: username, iconURL: avatarURL })
     .setDescription(
-      `Earn Cores with ${voteCmd} and ${shopCmd} • Use ${engineCmd} for Pro features`
+      `Earn Cores with ${voteCmd} and ${shopCmd} • Use ${engineCmd} for Pro features`,
     )
     .addFields(
       {

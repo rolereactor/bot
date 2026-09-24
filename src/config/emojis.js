@@ -22,11 +22,11 @@ class EmojiConfig {
         coreEliteBadge: "1427983161513607288",
         // Power Cells
         powerCellAaa: "", // TODO: Upload emoji
-        powerCellAa: "",  // TODO: Upload emoji
-        powerCellC: "",   // TODO: Upload emoji
-        powerCellD: "",   // TODO: Upload emoji
+        powerCellAa: "", // TODO: Upload emoji
+        powerCellC: "", // TODO: Upload emoji
+        powerCellD: "", // TODO: Upload emoji
         // Engine Modules
-        piston: "",       // TODO: Upload emoji
+        piston: "", // TODO: Upload emoji
         turbocharger: "", // TODO: Upload emoji
         supercharger: "", // TODO: Upload emoji
       },
@@ -38,11 +38,11 @@ class EmojiConfig {
         coreEliteBadge: "1427984418420555906",
         // Power Cells
         powerCellAaa: "", // TODO: Upload emoji
-        powerCellAa: "",  // TODO: Upload emoji
-        powerCellC: "",   // TODO: Upload emoji
-        powerCellD: "",   // TODO: Upload emoji
+        powerCellAa: "", // TODO: Upload emoji
+        powerCellC: "", // TODO: Upload emoji
+        powerCellD: "", // TODO: Upload emoji
         // Engine Modules
-        piston: "",       // TODO: Upload emoji
+        piston: "", // TODO: Upload emoji
         turbocharger: "", // TODO: Upload emoji
         supercharger: "", // TODO: Upload emoji
       },

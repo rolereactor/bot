@@ -100,9 +100,7 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(sub =>
     sub
       .setName("setup")
-      .setDescription(
-        "Create a role-reaction panel for self-assignable roles",
-      )
+      .setDescription("Create a role-reaction panel for self-assignable roles")
       .addStringOption(opt =>
         opt
           .setName("title")

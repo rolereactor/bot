@@ -117,12 +117,12 @@ export async function handleTicketCreate(interaction, customId) {
           createErrorEmbed(
             maxTicketsPerUser === 1
               ? `You already have an open ticket!\n\n` +
-                `Ticket: \`#${existingTicket.ticketId.split("-").pop()}\`\n` +
-                `Channel: <#${existingTicket.channelId}>\n\n` +
-                `Please close your existing ticket before creating a new one.`
+                  `Ticket: \`#${existingTicket.ticketId.split("-").pop()}\`\n` +
+                  `Channel: <#${existingTicket.channelId}>\n\n` +
+                  `Please close your existing ticket before creating a new one.`
               : `You have reached the maximum of **${maxTicketsPerUser}** open tickets.\n\n` +
-                `Oldest: \`#${existingTicket.ticketId.split("-").pop()}\` — <#${existingTicket.channelId}>\n\n` +
-                `Please close an existing ticket before creating a new one.`,
+                  `Oldest: \`#${existingTicket.ticketId.split("-").pop()}\` — <#${existingTicket.channelId}>\n\n` +
+                  `Please close an existing ticket before creating a new one.`,
             "Ticket Limit Reached",
             interaction.client,
           ),
@@ -157,8 +157,6 @@ export async function handleTicketCreate(interaction, customId) {
     }
 
     // Get next ticket number from atomic counter (peek only, actual increment happens in TicketManager.createTicket)
-    const settings =
-      await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
     const ticketNumber = (settings?.counters?.ticket || 0) + 1;
     const channelName = `ticket-${ticketNumber.toString().padStart(4, "0")}`;
 

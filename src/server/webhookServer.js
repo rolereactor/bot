@@ -164,7 +164,8 @@ async function initializeMiddleware({ withSession = true } = {}) {
         const internalKey = process.env.INTERNAL_API_KEY;
         const hasInternalAuth =
           internalKey &&
-          ((authHeader.startsWith("Bearer ") && authHeader.slice(7) === internalKey) ||
+          ((authHeader.startsWith("Bearer ") &&
+            authHeader.slice(7) === internalKey) ||
             apiKey === internalKey);
         if (hasInternalAuth) {
           req._skipSession = true;

@@ -15,7 +15,14 @@ import { getMentionableCommand } from "../../../utils/commandUtils.js";
  * @param {string} [options.avatarURL] - User's avatar URL
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createShopItemEmbed(item, index, total, status, client, options = {}) {
+export function createShopItemEmbed(
+  item,
+  index,
+  total,
+  status,
+  client,
+  options = {},
+) {
   const { username, avatarURL } = options;
   const coreEmoji = emojiConfig.core;
   const sparkEmoji = emojiConfig.spark;
@@ -25,7 +32,11 @@ export function createShopItemEmbed(item, index, total, status, client, options 
   const costStatus = canAfford ? "✅ Can Afford" : "❌ Not Enough";
 
   const giftCmd = getMentionableCommand(client, "gift", options.guildId);
-  const inventoryCmd = getMentionableCommand(client, "inventory", options.guildId);
+  const inventoryCmd = getMentionableCommand(
+    client,
+    "inventory",
+    options.guildId,
+  );
 
   const embed = new EmbedBuilder()
     .setColor(canAfford ? THEME.SUCCESS : THEME.WARNING)
@@ -52,7 +63,12 @@ export function createShopItemEmbed(item, index, total, status, client, options 
       },
       {
         name: "How to Use",
-        value: "1. Buy this item → goes to your inventory\n2. Gift it to another user via " + giftCmd + "\n3. Recipient activates it → gets **" + item.storedAmount + " Cores** added to their balance",
+        value:
+          "1. Buy this item → goes to your inventory\n2. Gift it to another user via " +
+          giftCmd +
+          "\n3. Recipient activates it → gets **" +
+          item.storedAmount +
+          " Cores** added to their balance",
         inline: false,
       },
       {
@@ -72,19 +88,24 @@ export function createShopItemEmbed(item, index, total, status, client, options 
       },
     );
   } else if (item.type === "engine_module") {
-    const durationText = item.durationDays === 1
-      ? "1 day"
-      : `${item.durationDays} days`;
+    const durationText =
+      item.durationDays === 1 ? "1 day" : `${item.durationDays} days`;
 
     embed.addFields(
       {
         name: "What It Does",
-        value: "Activates **Pro Engine** for this server, unlocking all premium features for the duration.",
+        value:
+          "Activates **Pro Engine** for this server, unlocking all premium features for the duration.",
         inline: false,
       },
       {
         name: "How to Use",
-        value: "1. Buy this item → goes to your inventory\n2. Activate it via " + inventoryCmd + "\n3. Pro Engine activates for **" + durationText + "**",
+        value:
+          "1. Buy this item → goes to your inventory\n2. Activate it via " +
+          inventoryCmd +
+          "\n3. Pro Engine activates for **" +
+          durationText +
+          "**",
         inline: false,
       },
       {
@@ -128,7 +149,14 @@ export function createShopItemEmbed(item, index, total, status, client, options 
  * @param {Object} [options.sales] - Active sales data
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createShopListEmbed(items, status, page, totalPages, client, options = {}) {
+export function createShopListEmbed(
+  items,
+  status,
+  page,
+  totalPages,
+  client,
+  options = {},
+) {
   const { username, avatarURL, stock, sales, guildId } = options;
   const coreEmoji = emojiConfig.core;
   const sparkEmoji = emojiConfig.spark;
@@ -148,32 +176,37 @@ export function createShopListEmbed(items, status, page, totalPages, client, opt
   }
 
   // Build compact list
-  const itemList = items.map(item => {
-    const currencyEmoji = item.currency === "cores" ? coreEmoji : sparkEmoji;
-    const stockInfo = stock?.[item.id];
-    const stockText = stockInfo && stockInfo.remaining !== Infinity
-      ? ` | ${stockInfo.remaining}/${stockInfo.total}`
-      : "";
+  const itemList = items
+    .map(item => {
+      const currencyEmoji = item.currency === "cores" ? coreEmoji : sparkEmoji;
+      const stockInfo = stock?.[item.id];
+      const stockText =
+        stockInfo && stockInfo.remaining !== Infinity
+          ? ` | ${stockInfo.remaining}/${stockInfo.total}`
+          : "";
 
-    // Check for sale
-    const sale = sales?.[item.id];
-    let priceText;
-    if (sale) {
-      const discountedPrice = sale.fixedPrice !== undefined
-        ? sale.fixedPrice
-        : Math.ceil(item.cost * (1 - sale.discountPercent / 100));
-      priceText = `~~${item.cost.toLocaleString()}~~ **${discountedPrice.toLocaleString()}** 🔥`;
-    } else {
-      priceText = item.cost.toLocaleString();
-    }
+      // Check for sale
+      const sale = sales?.[item.id];
+      let priceText;
+      if (sale) {
+        const discountedPrice =
+          sale.fixedPrice !== undefined
+            ? sale.fixedPrice
+            : Math.ceil(item.cost * (1 - sale.discountPercent / 100));
+        priceText = `~~${item.cost.toLocaleString()}~~ **${discountedPrice.toLocaleString()}** 🔥`;
+      } else {
+        priceText = item.cost.toLocaleString();
+      }
 
-    if (item.type === "power_cell") {
-      return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Stores **${item.storedAmount} Cores** — gift or activate later`;
-    } else {
-      const durationText = item.durationDays === 1 ? "1 day" : `${item.durationDays} days`;
-      return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Activates **${durationText}** of Pro Engine`;
-    }
-  }).join("\n\n");
+      if (item.type === "power_cell") {
+        return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Stores **${item.storedAmount} Cores** — gift or activate later`;
+      } else {
+        const durationText =
+          item.durationDays === 1 ? "1 day" : `${item.durationDays} days`;
+        return `${item.emoji} **${item.name}** | ${currencyEmoji} ${priceText}${stockText}\n> Activates **${durationText}** of Pro Engine`;
+      }
+    })
+    .join("\n\n");
 
   embed.addFields({
     name: "\u200b",
@@ -191,12 +224,9 @@ export function createShopListEmbed(items, status, page, totalPages, client, opt
  * @param {Object} client - Discord client
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createPurchaseSuccessEmbed(
-  item,
-  totalCost,
-  _client,
-) {
-  const currencyEmoji = item.currency === "cores" ? emojiConfig.core : emojiConfig.spark;
+export function createPurchaseSuccessEmbed(item, totalCost, _client) {
+  const currencyEmoji =
+    item.currency === "cores" ? emojiConfig.core : emojiConfig.spark;
   const currencyName = item.currency === "cores" ? "Cores" : "Sparks";
 
   return new EmbedBuilder()
@@ -231,7 +261,9 @@ export function createPurchaseCancelledEmbed(_client) {
   return new EmbedBuilder()
     .setColor(THEME.SECONDARY)
     .setTitle("❌ Purchase Cancelled")
-    .setDescription("The purchase has been cancelled. No currency was deducted.");
+    .setDescription(
+      "The purchase has been cancelled. No currency was deducted.",
+    );
 }
 
 /**

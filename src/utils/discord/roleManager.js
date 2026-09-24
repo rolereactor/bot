@@ -100,7 +100,9 @@ export async function fetchFreshMember(guild, userId) {
       return member;
     })
     .catch(error => {
-      getLogger().debug(`Failed to fetch fresh member ${userId}: ${error.message}`);
+      getLogger().debug(
+        `Failed to fetch fresh member ${userId}: ${error.message}`,
+      );
       return null;
     })
     .finally(() => {
@@ -145,14 +147,17 @@ export function recordUniqueModeEvent(guildId, userId) {
 }
 
 // Cleanup cooldowns every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, timestamp] of uniqueModeCooldowns.entries()) {
-    if (now - timestamp > UNIQUE_MODE_COOLDOWN_MS * 2) {
-      uniqueModeCooldowns.delete(key);
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [key, timestamp] of uniqueModeCooldowns.entries()) {
+      if (now - timestamp > UNIQUE_MODE_COOLDOWN_MS * 2) {
+        uniqueModeCooldowns.delete(key);
+      }
     }
-  }
-}, 5 * 60 * 1000).unref();
+  },
+  5 * 60 * 1000,
+).unref();
 
 /**
  * Per-user mutex that waits for Discord to confirm role changes via GUILD_MEMBER_UPDATE.
@@ -209,7 +214,7 @@ class UserMutex {
    * @param {string} userId
    * @param {boolean} timedOut - Whether this unlock was triggered by the fallback timer
    */
-  unlock(userId, timedOut = false) {
+  unlock(userId, _timedOut = false) {
     const lock = this.#locks.get(userId);
     if (!lock || !lock.locked) return;
 
@@ -269,12 +274,15 @@ async function processUserQueue(key) {
 
   const { task, deferred } = queue[0];
 
-  const timeout = new Promise((_, reject) =>
+  const timeout = new Promise((_, reject) => {
     setTimeout(
-      () => reject(new Error(`User queue task timed out after ${USER_QUEUE_TIMEOUT}ms`)),
+      () =>
+        reject(
+          new Error(`User queue task timed out after ${USER_QUEUE_TIMEOUT}ms`),
+        ),
       USER_QUEUE_TIMEOUT,
-    ),
-  );
+    );
+  });
 
   try {
     await Promise.race([task(), timeout]);

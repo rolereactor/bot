@@ -12,13 +12,20 @@ import { getMentionableCommand } from "../../../utils/commandUtils.js";
  * @param {string} [options.avatarURL] - Sender's avatar URL
  * @returns {EmbedBuilder} Discord embed object
  */
-export function createGiftConfirmEmbed(item, targetUser, _client, options = {}) {
+export function createGiftConfirmEmbed(
+  item,
+  targetUser,
+  _client,
+  options = {},
+) {
   const { username, avatarURL } = options;
 
   const embed = new EmbedBuilder()
     .setColor(THEME.PRIMARY)
     .setTitle("🎁 Confirm Gift")
-    .setDescription(`Are you sure you want to gift **${item.name}** to **${targetUser.username}**?`);
+    .setDescription(
+      `Are you sure you want to gift **${item.name}** to **${targetUser.username}**?`,
+    );
 
   if (username && avatarURL) {
     embed.setAuthor({
@@ -76,7 +83,9 @@ export function createGiftSuccessEmbed(item, targetUser, client, options = {}) {
   const embed = new EmbedBuilder()
     .setColor(THEME.SUCCESS)
     .setTitle("✅ Gift Successful!")
-    .setDescription(`Successfully gifted **${item.name}** to **${targetUser.username}**!`);
+    .setDescription(
+      `Successfully gifted **${item.name}** to **${targetUser.username}**!`,
+    );
 
   if (username && avatarURL) {
     embed.setAuthor({

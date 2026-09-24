@@ -170,9 +170,7 @@ export function validateChannelPermissions(
           {
             name: "📋 Missing Channel Permissions",
             value: missingChannelPermissions
-              .map(
-                perm => `• **${perm}** - Required for role-reaction panels`,
-              )
+              .map(perm => `• **${perm}** - Required for role-reaction panels`)
               .join("\n"),
             inline: false,
           },

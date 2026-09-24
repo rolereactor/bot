@@ -154,7 +154,11 @@ export function createCoreEmbed(interaction, userData, creditsNeeded, prompt) {
   const totalCredits = userData.credits || 0;
 
   const coreBreakdown = `**Your Balance**: ${totalCredits} ${CORE_EMOJI}`;
-  const balanceCommand = getMentionableCommand(interaction.client, "balance", interaction.guildId);
+  const balanceCommand = getMentionableCommand(
+    interaction.client,
+    "balance",
+    interaction.guildId,
+  );
 
   return new EmbedBuilder()
     .setColor(THEME.WARNING)

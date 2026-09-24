@@ -4,7 +4,12 @@ import {
   decrementRoleUsage,
 } from "../utils/discord/roleMappingManager.js";
 import { getLogger } from "../utils/logger.js";
-import { getCachedMember, fetchFreshMember, enqueueForUser, userMutex } from "../utils/discord/roleManager.js";
+import {
+  getCachedMember,
+  fetchFreshMember,
+  enqueueForUser,
+  userMutex,
+} from "../utils/discord/roleManager.js";
 import { StarboardManager } from "../features/starboard/StarboardManager.js";
 import { isBotRemoval } from "../utils/discord/botReactionTracker.js";
 
@@ -173,7 +178,9 @@ export async function execute(reaction, user, client) {
 
           if (otherReaction) {
             // Fetch users to populate cache (cache is empty when event fires)
-            const reactionUsers = await otherReaction.users.fetch().catch(() => null);
+            const reactionUsers = await otherReaction.users
+              .fetch()
+              .catch(() => null);
             if (reactionUsers && reactionUsers.has(user.id)) {
               // Collect role IDs from this other emoji
               if (config.roleIds && Array.isArray(config.roleIds)) {
@@ -194,7 +201,9 @@ export async function execute(reaction, user, client) {
         const memberForCheck = freshMember || member;
 
         // Determine which roles actually need to be removed
-        const rolesToRemove = roleIdsToRemove.filter(id => memberForCheck.roles.cache.has(id));
+        const rolesToRemove = roleIdsToRemove.filter(id =>
+          memberForCheck.roles.cache.has(id),
+        );
 
         if (rolesToRemove.length === 0) {
           return;
@@ -218,7 +227,9 @@ export async function execute(reaction, user, client) {
 
     // Standard mode — no serialization needed, roles are independent per emoji
     // Determine which roles actually need to be removed
-    const rolesToRemove = roleIdsToRemove.filter(id => member.roles.cache.has(id));
+    const rolesToRemove = roleIdsToRemove.filter(id =>
+      member.roles.cache.has(id),
+    );
 
     if (rolesToRemove.length === 0) {
       return;

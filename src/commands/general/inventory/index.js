@@ -22,7 +22,8 @@ export const metadata = {
     },
     {
       name: "What You'll See",
-      value: "A list of items you've purchased from the Shop that are ready to use.",
+      value:
+        "A list of items you've purchased from the Shop that are ready to use.",
       inline: false,
     },
     {

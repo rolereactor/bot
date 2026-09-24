@@ -58,9 +58,7 @@ export const data = new SlashCommandBuilder()
   .addSubcommand(subcommand =>
     subcommand
       .setName("vault")
-      .setDescription(
-        "View Guild Vault balance and funded weeks remaining",
-      ),
+      .setDescription("View Guild Vault balance and funded weeks remaining"),
   )
   .addSubcommand(subcommand =>
     subcommand
@@ -79,9 +77,7 @@ export const data = new SlashCommandBuilder()
       .addNumberOption(option =>
         option
           .setName("cores")
-          .setDescription(
-            "Amount of Cores to deposit into Guild Vault (min 1)",
-          )
+          .setDescription("Amount of Cores to deposit into Guild Vault (min 1)")
           .setRequired(true)
           .setMinValue(1),
       ),

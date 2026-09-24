@@ -12,7 +12,7 @@ export async function handleDashboard(interaction) {
   try {
     const { embed, components } = createDashboardEmbed(
       interaction.guildId,
-      interaction.client
+      interaction.client,
     );
 
     await interaction.reply({

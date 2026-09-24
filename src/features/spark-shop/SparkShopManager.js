@@ -1,6 +1,10 @@
 import { getLogger } from "../../utils/logger.js";
 import { getStorageManager } from "../../utils/storage/storageManager.js";
-import { SHOP_LIMITS, MONTHLY_STOCK, getShopItem } from "../../config/shopConfig.js";
+import {
+  SHOP_LIMITS,
+  MONTHLY_STOCK,
+  getShopItem,
+} from "../../config/shopConfig.js";
 
 const logger = getLogger();
 
@@ -46,7 +50,9 @@ export class SparkShopManager {
           if (sale.fixedPrice !== undefined && sale.fixedPrice !== null) {
             finalPrice = sale.fixedPrice;
           } else if (sale.discountPercent) {
-            finalPrice = Math.ceil(item.cost * (1 - sale.discountPercent / 100));
+            finalPrice = Math.ceil(
+              item.cost * (1 - sale.discountPercent / 100),
+            );
           }
           saleInfo = sale;
         }
@@ -58,7 +64,9 @@ export class SparkShopManager {
       const today = new Date().toISOString().split("T")[0];
       const purchases = creditData?.sparkProPurchases || [];
       const todayPurchases = purchases.filter(
-        p => p.purchasedAt && new Date(p.purchasedAt).toISOString().split("T")[0] === today,
+        p =>
+          p.purchasedAt &&
+          new Date(p.purchasedAt).toISOString().split("T")[0] === today,
       );
 
       const limit = SHOP_LIMITS[item.category] || 5;
@@ -91,7 +99,10 @@ export class SparkShopManager {
           };
         }
 
-        const deduction = await db.coreCredits.deductCredits(userId, finalPrice);
+        const deduction = await db.coreCredits.deductCredits(
+          userId,
+          finalPrice,
+        );
         if (!deduction.success) {
           return {
             success: false,
@@ -165,7 +176,10 @@ export class SparkShopManager {
         saleInfo,
       };
     } catch (error) {
-      logger.error(`Failed to process shop purchase for user ${userId}:`, error);
+      logger.error(
+        `Failed to process shop purchase for user ${userId}:`,
+        error,
+      );
       return { success: false, message: "An internal error occurred." };
     }
   }
@@ -236,7 +250,8 @@ export class SparkShopManager {
       const storage = await getStorageManager();
       if (!storage.dbManager) return false;
 
-      const settings = await storage.dbManager.guildSettings.getByGuild(guildId);
+      const settings =
+        await storage.dbManager.guildSettings.getByGuild(guildId);
       const sparkPro = settings?.premiumFeatures?.spark_pro;
 
       if (!sparkPro?.active) return false;
@@ -297,9 +312,7 @@ export class SparkShopManager {
       const creditData = await db.coreCredits.getByUserId(userId);
       const items = creditData?.sparkInventory || [];
 
-      const itemIndex = items.findIndex(
-        i => i.itemId === itemId && !i.used,
-      );
+      const itemIndex = items.findIndex(i => i.itemId === itemId && !i.used);
 
       if (itemIndex === -1) {
         return {
@@ -317,7 +330,10 @@ export class SparkShopManager {
       // Handle different item types (use shopItem for fresh data)
       if (shopItem.type === "power_cell") {
         // Add stored Cores to user's balance
-        const addResult = await db.coreCredits.updateCredits(userId, shopItem.storedAmount);
+        const addResult = await db.coreCredits.updateCredits(
+          userId,
+          shopItem.storedAmount,
+        );
         if (!addResult.success) {
           return { success: false, message: "Failed to add Cores to balance." };
         }
@@ -542,8 +558,15 @@ export class SparkShopManager {
         resetAt: this._getNextMonthReset(),
       };
     } catch (error) {
-      logger.error(`Failed to get guild stock for ${guildId}:${itemId}:`, error);
-      return { remaining: MONTHLY_STOCK[itemId] || 0, total: MONTHLY_STOCK[itemId] || 0, resetAt: null };
+      logger.error(
+        `Failed to get guild stock for ${guildId}:${itemId}:`,
+        error,
+      );
+      return {
+        remaining: MONTHLY_STOCK[itemId] || 0,
+        total: MONTHLY_STOCK[itemId] || 0,
+        resetAt: null,
+      };
     }
   }
 
@@ -569,9 +592,15 @@ export class SparkShopManager {
         stockData[itemId] = { ...itemStock, used: (itemStock.used || 0) + 1 };
       }
 
-      await db.guildSettings.set(guildId, { ...settings, monthlyStock: stockData });
+      await db.guildSettings.set(guildId, {
+        ...settings,
+        monthlyStock: stockData,
+      });
     } catch (error) {
-      logger.error(`Failed to decrement guild stock for ${guildId}:${itemId}:`, error);
+      logger.error(
+        `Failed to decrement guild stock for ${guildId}:${itemId}:`,
+        error,
+      );
     }
   }
 
@@ -619,7 +648,13 @@ export class SparkShopManager {
   /**
    * Add purchase to user's history
    */
-  async _addPurchaseToHistory(db, userId, item, finalPrice = item.cost, saleInfo = null) {
+  async _addPurchaseToHistory(
+    db,
+    userId,
+    item,
+    finalPrice = item.cost,
+    saleInfo = null,
+  ) {
     try {
       const creditData = await db.coreCredits.getByUserId(userId);
       const purchases = creditData?.sparkProPurchases || [];

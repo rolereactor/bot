@@ -219,7 +219,8 @@ export async function apiUserBalance(req, res) {
       const dbManager = await getDatabaseManager();
       if (dbManager?.payments) {
         const stats = await dbManager.payments.getUserStats(requestedUserId);
-        cryptoPaymentCount = stats.byProvider?.crypto?.count || stats.totalPayments || 0;
+        cryptoPaymentCount =
+          stats.byProvider?.crypto?.count || stats.totalPayments || 0;
       }
     } catch {
       // Non-critical — paymentHistory is informational only

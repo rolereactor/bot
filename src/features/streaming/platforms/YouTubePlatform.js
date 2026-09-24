@@ -49,7 +49,8 @@ class YouTubePlatform extends Platform {
    * Validates tokens, fetches channel info, and starts event subscription.
    */
   async init() {
-    const { accessToken, refreshToken, expiresAt } = this.connection.tokens || {};
+    const { accessToken, refreshToken, expiresAt } =
+      this.connection.tokens || {};
 
     if (!accessToken) {
       throw new Error("YouTube access token is required");
@@ -58,7 +59,9 @@ class YouTubePlatform extends Platform {
     // Check if token needs refresh
     if (expiresAt && Date.now() >= expiresAt) {
       if (!refreshToken) {
-        throw new Error("YouTube access token expired and no refresh token available");
+        throw new Error(
+          "YouTube access token expired and no refresh token available",
+        );
       }
       await this.refreshTokensIfNeeded();
     }
@@ -70,7 +73,9 @@ class YouTubePlatform extends Platform {
     }
 
     // Fetch channel info
-    this._channelInfo = await getYouTubeChannelInfo(this.connection.tokens.accessToken);
+    this._channelInfo = await getYouTubeChannelInfo(
+      this.connection.tokens.accessToken,
+    );
     if (!this._channelInfo) {
       throw new Error("Failed to fetch YouTube channel info");
     }
@@ -195,9 +200,12 @@ class YouTubePlatform extends Platform {
     // YouTube Live Chat moderation requires the channel owner or moderator
     // to use the liveChat.messages API with a ban action
     // This is complex and may require additional permissions
-    logger.warn("YouTubePlatform.banUser() requires channel moderator permissions", {
-      userId,
-    });
+    logger.warn(
+      "YouTubePlatform.banUser() requires channel moderator permissions",
+      {
+        userId,
+      },
+    );
     return false;
   }
 
@@ -452,7 +460,8 @@ class YouTubePlatform extends Platform {
    * @private
    */
   _handleMembershipGift(snippet, authorDetails) {
-    const giftedCount = snippet.membershipGiftingDetails?.giftedMembersCount || 1;
+    const giftedCount =
+      snippet.membershipGiftingDetails?.giftedMembersCount || 1;
     this.emit("event", {
       type: "subgift",
       platform: this.platformId,

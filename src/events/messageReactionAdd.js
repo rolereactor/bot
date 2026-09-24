@@ -5,7 +5,12 @@ import {
   getRoleUsageCount,
 } from "../utils/discord/roleMappingManager.js";
 import { getLogger } from "../utils/logger.js";
-import { getCachedMember, fetchFreshMember, enqueueForUser, userMutex } from "../utils/discord/roleManager.js";
+import {
+  getCachedMember,
+  fetchFreshMember,
+  enqueueForUser,
+  userMutex,
+} from "../utils/discord/roleManager.js";
 import { StarboardManager } from "../features/starboard/StarboardManager.js";
 import { markBotRemoval } from "../utils/discord/botReactionTracker.js";
 
@@ -227,12 +232,16 @@ export async function execute(reaction, user, client) {
           if (otherReaction) {
             // Mark as bot-initiated so remove handler skips role cleanup
             markBotRemoval(reaction.message.id, emojiKey, user.id);
-            removeOps.push(otherReaction.users.remove(user.id).catch(() => null));
+            removeOps.push(
+              otherReaction.users.remove(user.id).catch(() => null),
+            );
           }
         }
 
         // Find which new roles the member doesn't have yet
-        const rolesToAdd = roleIds.filter(id => !freshMember.roles.cache.has(id));
+        const rolesToAdd = roleIds.filter(
+          id => !freshMember.roles.cache.has(id),
+        );
 
         logger.info(
           `[DEBUG-ADD] rolesToAdd=${rolesToAdd.length} [${rolesToAdd.join(",")}], removeOps=${removeOps.length}`,

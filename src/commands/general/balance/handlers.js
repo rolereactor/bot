@@ -91,15 +91,21 @@ async function handleBalance(interaction) {
     await interaction.editReply(result);
 
     const collector = interaction.channel.createMessageComponentCollector({
-      filter: (i) => i.user.id === interaction.user.id,
+      filter: i => i.user.id === interaction.user.id,
       time: 60_000,
     });
 
-    collector.on("collect", async (i) => {
+    collector.on("collect", async i => {
       if (i.customId === "balance_shop") {
-        await i.reply({ content: "Use `/shop` to buy items!", ephemeral: true });
+        await i.reply({
+          content: "Use `/shop` to buy items!",
+          ephemeral: true,
+        });
       } else if (i.customId === "balance_inventory") {
-        await i.reply({ content: "Use `/inventory` to view your items!", ephemeral: true });
+        await i.reply({
+          content: "Use `/inventory` to view your items!",
+          ephemeral: true,
+        });
       }
     });
 

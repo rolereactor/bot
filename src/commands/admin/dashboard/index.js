@@ -99,7 +99,7 @@ export async function execute(interaction) {
             title: "Error",
             description: "Failed to open the dashboard.",
             solution: "Please try again or contact support.",
-          })
+          }),
         );
       } catch (replyError) {
         logger.error("Failed to send error reply", {

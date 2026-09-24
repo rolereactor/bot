@@ -35,7 +35,9 @@ export async function execute(interaction, _client) {
     // Cannot gift to yourself
     if (targetUser.id === interaction.user.id) {
       await interaction.editReply({
-        embeds: [createErrorEmbed("You cannot gift to yourself.", interaction.client)],
+        embeds: [
+          createErrorEmbed("You cannot gift to yourself.", interaction.client),
+        ],
         components: [],
       });
       return;
@@ -44,7 +46,12 @@ export async function execute(interaction, _client) {
     // Cannot gift to bots
     if (targetUser.bot) {
       await interaction.editReply({
-        embeds: [createErrorEmbed("You cannot gift to bot accounts.", interaction.client)],
+        embeds: [
+          createErrorEmbed(
+            "You cannot gift to bot accounts.",
+            interaction.client,
+          ),
+        ],
         components: [],
       });
       return;
@@ -55,7 +62,11 @@ export async function execute(interaction, _client) {
     const rawItem = inventory.items.find(i => i.itemId === itemId && !i.used);
 
     if (!rawItem) {
-      const inventoryCommand = getMentionableCommand(interaction.client, "inventory", interaction.guildId);
+      const inventoryCommand = getMentionableCommand(
+        interaction.client,
+        "inventory",
+        interaction.guildId,
+      );
       await interaction.editReply({
         embeds: [
           createErrorEmbed(
@@ -171,7 +182,9 @@ export async function execute(interaction, _client) {
       );
     } catch (_e) {
       await interaction.editReply({
-        embeds: [createErrorEmbed("Confirmation timed out.", interaction.client)],
+        embeds: [
+          createErrorEmbed("Confirmation timed out.", interaction.client),
+        ],
         components: [],
       });
     }
