@@ -38,7 +38,7 @@ Most read endpoints are public. Payment creation and user-specific endpoints req
 1. User initiates login via `GET /auth/discord`
 2. After OAuth flow, session cookie is set
 3. Include `credentials: 'include'` in fetch requests
-4. Session expires after 24 hours
+4. Session expires after 30 minutes of inactivity (default `SESSION_TIMEOUT_MS`)
 
 ```javascript
 // Example authenticated request
@@ -77,9 +77,9 @@ Returns server information and capabilities.
   "status": "success",
   "message": "Unified API Server Information",
   "server": {
-    "name": "Role Reactor Bot API Server",
+    "name": "Bot API Server",
     "version": "1.8.0",
-    "description": "A powerful Discord bot..."
+    "description": "Discord bot for server management with role assignment, AI image generation, and community engagement features."
   },
   "features": {
     "webhooks": true,
@@ -156,7 +156,7 @@ GET /api/v1/pricing?user_id=YOUR_DISCORD_USER_ID
       "valuePerDollar": "16.5 Cores/$1",
       "description": "string",
       "estimatedUsage": "string",
-      "popular": false,
+      "popular": true,
       "features": []
     }
   ],
@@ -165,7 +165,15 @@ GET /api/v1/pricing?user_id=YOUR_DISCORD_USER_ID
   "paymentMethods": {
     "crypto": true
   },
-  "promotions": [],
+  "promotions": [
+    {
+      "name": "string",
+      "type": "first_purchase",
+      "bonus": "50%",
+      "maxBonus": 100,
+      "description": "string"
+    }
+  ],
   "referralSystem": {
     "enabled": true,
     "referrerBonus": "15%",
@@ -194,13 +202,14 @@ GET /api/v1/pricing?user_id=YOUR_DISCORD_USER_ID
 
 Creates a new payment invoice using Plisio. **Email is automatically pre-filled from Discord OAuth.**
 
-**Authentication:** Required (internal auth + user session)
+**Authentication:** `internalAuth` (service key). Session cookie **or** `discordId` in the body identifies the payer.
 
 **Request Body:**
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `amount` | number | Yes | Payment amount in USD (minimum from server config) |
 | `packageId` | string | No | Package identifier (e.g., `"$10"`, `"$25"`) |
+| `discordId` | string | No* | Discord user ID (required if no session cookie) |
 
 **Request:**
 
@@ -222,6 +231,12 @@ Creates a new payment invoice using Plisio. **Email is automatically pre-filled 
   "amount": 10,
   "currency": "USD",
   "packageId": "$10",
+  "user": {
+    "discordId": "YOUR_DISCORD_USER_ID",
+    "username": "your_username",
+    "emailPrefilled": true
+  },
+  "message": "Payment invoice created successfully. Redirect user to invoiceUrl.",
   "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
@@ -250,7 +265,7 @@ async function createPayment(packageId, amount) {
 
   if (data.success) {
     // Redirect to payment page (email pre-filled!)
-    window.location.href = data.invoiceUrl || data.data?.invoiceUrl;
+    window.location.href = data.invoiceUrl;
   } else {
     console.error("Payment failed:", data.message || data.error);
   }
@@ -270,7 +285,7 @@ Returns a user's Core credit balance.
 |-----------|------|-------------|
 | `userId` | string | Discord user ID |
 
-**Alternative:** `GET /api/v1/balance` (authenticated)
+**Alternative:** `GET /api/v1/balance?user_id=:userId` (internal auth + session; `user_id` query param is required)
 
 **Response:**
 
@@ -278,10 +293,12 @@ Returns a user's Core credit balance.
 {
   "success": true,
   "status": "success",
-  "userId": "YOUR_DISCORD_USER_ID",
+  "requestedUserId": "YOUR_DISCORD_USER_ID",
   "credits": 165,
   "sparks": 25,
   "hasAccount": true,
+  "lastUpdated": "2026-09-24T09:00:00.000Z",
+  "paymentHistory": { "crypto": 1 },
   "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
@@ -314,7 +331,7 @@ Returns a user's payment history.
 {
   "success": true,
   "status": "success",
-  "userId": "YOUR_DISCORD_USER_ID",
+  "requestedUserId": "YOUR_DISCORD_USER_ID",
   "payments": [
     {
       "paymentId": "YOUR_DISCORD_USER_ID_1705234567890",
@@ -322,12 +339,19 @@ Returns a user's payment history.
       "amount": 10,
       "currency": "USD",
       "coresGranted": 165,
+      "sparksGranted": 0,
       "tier": "$10",
       "status": "completed",
-      "createdAt": "2026-09-24T09:00:00.000Z"
+      "createdAt": "2026-09-24T09:00:00.000Z",
+      "metadata": null
     }
   ],
   "total": 1,
+  "stats": {
+    "totalAmount": 10,
+    "totalCores": 165,
+    "byProvider": {}
+  },
   "pagination": {
     "limit": 50,
     "skip": 0,
@@ -363,6 +387,12 @@ Returns global payment statistics. (Admin endpoint)
     "totalCoresGranted": 0,
     "uniqueCustomers": 0
   },
+  "votes": {
+    "totalVotes": 0,
+    "totalCoresGranted": 0,
+    "uniqueVoters": 0
+  },
+  "byProvider": [],
   "recentPayments": [],
   "dateRange": {
     "start": null,
@@ -519,21 +549,22 @@ Verifies webhook token configuration.
 
 Returns server health status.
 
-**Response (200 OK):**
+**Response (200 OK — healthy or degraded):**
 
 ```json
 {
+  "success": true,
   "status": "healthy",
   "service": "Unified API Server",
+  "timestamp": "2026-09-24T10:00:00.000Z",
   "uptime": 12345,
   "memory": { "rss": 50000000, "heapTotal": 80000000, "heapUsed": 45000000 },
   "environment": "production",
   "checks": {
-    "database": { "status": "healthy", "duration": 15 },
-    "memory": { "status": "healthy" },
-    "discord_api": { "status": "healthy", "ping": 45 }
-  },
-  "timestamp": "2026-09-24T10:00:00.000Z"
+    "server": { "status": "healthy", "message": "Server is running" },
+    "services": {},
+    "database": { "status": "healthy", "message": "Database accessible" }
+  }
 }
 ```
 
@@ -541,12 +572,13 @@ Returns server health status.
 
 ```json
 {
+  "success": true,
   "status": "unhealthy",
   "service": "Unified API Server"
 }
 ```
 
-Also available: `GET /api/v1/health`, `GET /health/docker`
+Also available: `GET /api/v1/health`, `GET /health/docker` (each returns a slightly different shape).
 
 ---
 
@@ -596,21 +628,22 @@ Some endpoints may also include `success: false` and an `error` field — check 
 
 ## Rate Limiting
 
-API requests are rate-limited to prevent abuse:
+API requests are rate-limited per IP. Limits are configured via environment variables:
 
-- **API endpoints:** 100 requests per minute per IP
-- **Webhook endpoints:** 30 requests per minute per IP
+| Limiter | Env vars | Defaults (if unset) |
+|---------|----------|---------------------|
+| **API** | `API_RATE_LIMIT_MAX`, `API_RATE_LIMIT_WINDOW_MS` | 60 requests / 15 minutes |
+| **Webhook** | `WEBHOOK_RATE_LIMIT_MAX`, `WEBHOOK_RATE_LIMIT_WINDOW_MS` | 100 requests / 15 minutes |
+
+Deployed env files often raise the API limit (e.g. 1000/min). Requests that include a valid `Authorization: Bearer <INTERNAL_API_KEY>` skip the API limiter. Health endpoints are never rate-limited.
 
 When rate limited, you'll receive:
 
 ```json
 {
-  "success": false,
-  "error": {
-    "message": "Too many requests",
-    "code": 429
-  },
-  "retryAfter": 60
+  "status": "error",
+  "message": "Too many API requests, please try again later",
+  "retryAfter": "15 minutes"
 }
 ```
 

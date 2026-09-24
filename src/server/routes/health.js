@@ -93,7 +93,7 @@ export async function healthCheck(req, res) {
       ? "healthy"
       : "degraded";
 
-  const { response } = createSuccessResponse({
+  const payload = createSuccessResponse({
     status: overallStatus,
     service: "Unified API Server",
     timestamp: new Date().toISOString(),
@@ -109,7 +109,7 @@ export async function healthCheck(req, res) {
       : overallStatus === "degraded"
         ? 200
         : 503;
-  res.status(statusCode).json(response);
+  res.status(statusCode).json(payload);
 }
 
 /**

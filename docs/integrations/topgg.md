@@ -50,27 +50,24 @@ Run `/vote` in Discord. You should see:
 
 ### Test the Webhook
 
-```bash
-curl -X POST https://your-bot-url.com/webhook/topgg \
-  -H "Authorization: Bearer YOUR_TOPGG_WEBHOOK_AUTH" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "user": "YOUR_DISCORD_USER_ID",
-    "username": "TestUser",
-    "discriminator": "0001",
-    "type": "vote"
-  }'
-```
-
-**Expected response:**
+top.gg signs each request with an HMAC of the raw body using your webhook token (`x-topgg-signature` header). For a quick local check you can temporarily verify with a computed signature, or hit the endpoint from the top.gg dashboard after setting the URL.
 
 ```json
 {
-  "success": true,
-  "message": "Vote processed successfully",
-  "sparksGranted": 5
+  "user": "YOUR_DISCORD_USER_ID",
+  "username": "TestUser",
+  "discriminator": "0001",
+  "type": "vote"
 }
 ```
+
+**Expected response (success):**
+
+```json
+{ "success": true }
+```
+
+On invalid signature or missing user you'll get a non-200 error with `{ "success": false, "message": "..." }`. The HTTP response does **not** include the Spark amount — check bot logs (`✅ top.gg: Rewarded...`) or the user's `/balance` instead.
 
 **Verify:** You should receive a DM from the bot, your Sparks balance should increase, and bot logs should show `✅ top.gg: Rewarded [user-id] with N Sparks`.
 

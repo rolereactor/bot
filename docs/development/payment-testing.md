@@ -72,13 +72,15 @@ Expected response:
 ```json
 {
   "success": true,
-  "data": {
-    "user": {
-      "id": "YOUR_DISCORD_USER_ID",
-      "username": "your_username",
-      "email": "your@email.com"
-    }
-  }
+  "status": "success",
+  "user": {
+    "id": "YOUR_DISCORD_USER_ID",
+    "username": "your_username",
+    "email": "your@email.com",
+    "credits": 0,
+    "role": "user"
+  },
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 
@@ -98,25 +100,30 @@ curl "http://localhost:3030/api/v1/pricing?user_id=YOUR_DISCORD_USER_ID"
 
 ## Step 4: Test Payment Creation
 
+`POST /api/v1/payments/create` requires the internal service key (`Authorization: Bearer <INTERNAL_API_KEY>`) plus a session cookie **or** `discordId` in the body.
+
 ```bash
 # First login via browser, then:
 curl -X POST http://localhost:3030/api/v1/payments/create \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $INTERNAL_API_KEY" \
   -b cookies.txt \
   -d '{"packageId": "$10", "amount": 10}'
 ```
 
-Expected response:
+Expected response (flat fields, not nested under `data`):
 
 ```json
 {
   "success": true,
-  "data": {
-    "invoiceUrl": "https://plisio.net/invoice/...",
-    "orderId": "YOUR_DISCORD_USER_ID_1705234567890",
-    "amount": 10,
-    "currency": "USD"
-  }
+  "status": "success",
+  "invoiceUrl": "https://plisio.net/invoice/...",
+  "orderId": "YOUR_DISCORD_USER_ID_1705234567890",
+  "amount": 10,
+  "currency": "USD",
+  "packageId": "$10",
+  "message": "Payment invoice created successfully. Redirect user to invoiceUrl.",
+  "timestamp": "2026-09-24T10:00:00.000Z"
 }
 ```
 

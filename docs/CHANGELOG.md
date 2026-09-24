@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gift System**: New `/gift` command to gift items to other users.
 - **Engine Command**: New `/engine` command to manage Pro Engine status, view Guild Vault, and deposit Cores into the server vault.
 - **Dashboard Command**: New `/dashboard` admin command to open the web dashboard.
-- **Referral System**: Claim a friend's referral code on the dashboard for bonus Sparks and Cores on qualifying purchases.
+- **Referral System**: Claim a friend's referral code on the dashboard for bonus Cores on qualifying purchases.
 - **Web Dashboard**: New panels for ticket management, goodbye system configuration, and role bundle management.
 
 ## [1.8.0] - 2026-07-23
