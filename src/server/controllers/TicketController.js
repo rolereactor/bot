@@ -340,6 +340,22 @@ export async function apiGetStaffStats(req, res) {
   const { guildId } = req.params;
   logRequest(`Get staff stats: ${guildId}`, req);
 
+  // Pro Engine gate — staff analytics is a premium benefit
+  const { getPremiumManager } = await import(
+    "../../features/premium/PremiumManager.js"
+  );
+  const isPro = await getPremiumManager().isFeatureActive(
+    guildId,
+    "pro_engine",
+  );
+  if (!isPro) {
+    const { statusCode, response } = createErrorResponse(
+      "Pro Engine is required to access staff analytics",
+      403,
+    );
+    return res.status(statusCode).json(response);
+  }
+
   try {
     const { getStorageManager } = await import(
       "../../utils/storage/storageManager.js"
