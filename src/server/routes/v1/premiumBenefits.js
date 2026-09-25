@@ -118,6 +118,30 @@ const BENEFITS = [
     type: "limit",
     category: "Automation",
   },
+  {
+    name: "Custom Variables",
+    freeKey: "CUSTOM_VARIABLES_MAX",
+    proKey: "CUSTOM_VARIABLES_MAX",
+    tooltip: "Reusable values (counters, text, dates) usable in commands and embeds",
+    type: "limit",
+    category: "Automation",
+  },
+  {
+    name: "Event Triggers",
+    freeKey: "CUSTOM_EVENT_TRIGGERS_MAX",
+    proKey: "CUSTOM_EVENT_TRIGGERS_MAX",
+    tooltip: "Automated action chains that fire when a custom event happens",
+    type: "limit",
+    category: "Automation",
+  },
+  {
+    name: "Event Types",
+    freeValue: "Join / Leave",
+    proValue: "All events",
+    tooltip: "Which events can start a trigger (free: member join & leave only)",
+    type: "feature",
+    category: "Automation",
+  },
 
   // Ticketing
   {
@@ -129,9 +153,17 @@ const BENEFITS = [
     category: "Ticketing",
   },
   {
-    name: "Categories per Panel",
+    name: "Panels per Server",
     freeKey: "TICKET_MAX_PANELS",
     proKey: "TICKET_MAX_PANELS",
+    tooltip: "How many ticket panels you can create in your server",
+    type: "limit",
+    category: "Ticketing",
+  },
+  {
+    name: "Categories per Panel",
+    freeKey: "TICKET_MAX_CATEGORIES",
+    proKey: "TICKET_MAX_CATEGORIES",
     tooltip:
       "Separate topic channels within a ticket panel (e.g. Billing, Tech Support)",
     type: "limit",
@@ -150,7 +182,7 @@ const BENEFITS = [
   {
     name: "Export Formats",
     freeValue: "MD",
-    proValue: "HTML, JSON",
+    proValue: "HTML, JSON, MD",
     tooltip: "Download ticket transcripts as formatted files",
     type: "feature",
     category: "Ticketing",
@@ -165,10 +197,11 @@ const BENEFITS = [
   },
   {
     name: "Ticket Automation",
-    free: false,
-    pro: true,
-    tooltip: "Auto-close inactive tickets and send reminder alerts",
-    type: "feature",
+    free: "7 days",
+    pro: "30 days",
+    tooltip:
+      "Auto-close tickets after inactivity (configurable window)",
+    type: "limit",
     category: "Ticketing",
   },
 
