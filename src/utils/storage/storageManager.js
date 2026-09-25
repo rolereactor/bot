@@ -317,6 +317,15 @@ class StorageManager {
     return false;
   }
 
+  async setTicketFeedback(ticketId, feedback) {
+    if (this.provider instanceof DatabaseProvider) {
+      if (this.dbManager && this.dbManager.tickets) {
+        return await this.dbManager.tickets.setFeedback(ticketId, feedback);
+      }
+    }
+    return false;
+  }
+
   async deleteTicket(ticketId) {
     if (this.provider instanceof DatabaseProvider) {
       if (this.dbManager && this.dbManager.tickets) {

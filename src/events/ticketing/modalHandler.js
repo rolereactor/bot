@@ -33,6 +33,12 @@ export async function handleTicketModals(interaction) {
   if (customId === "ticket_transfer_modal") {
     return await handleTransferModal(interaction);
   }
+
+  // CSAT comment modal: ticket_csat_modal:<ticketId>
+  if (customId.startsWith("ticket_csat_modal:")) {
+    const { handleCsatCommentModal } = await import("./handlers/ticketCsat.js");
+    return await handleCsatCommentModal(interaction);
+  }
 }
 
 /**

@@ -22,6 +22,7 @@ import {
   createSuccessEmbed,
   createTranscriptLogEmbed,
 } from "../../../features/ticketing/embeds.js";
+import { promptCsatOnClose } from "../../../features/ticketing/csat.js";
 
 const logger = getLogger();
 
@@ -118,6 +119,13 @@ export async function handleTicketClose(interaction) {
         ],
       });
     }
+
+    // Ask the opener to rate the support experience (DM, best-effort)
+    await promptCsatOnClose({
+      client: interaction.client,
+      guildId: ticket.guildId,
+      ticket,
+    });
 
     // Calculate duration
     const duration = formatDuration(new Date(ticket.openedAt), new Date());

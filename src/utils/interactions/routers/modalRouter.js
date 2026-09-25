@@ -59,7 +59,8 @@ export async function routeModalInteraction(interaction, _client) {
     // Handle ticket modals
     if (
       customId === "ticket_add_user_modal" ||
-      customId === "ticket_transfer_modal"
+      customId === "ticket_transfer_modal" ||
+      customId.startsWith("ticket_csat_modal:")
     ) {
       const { handleTicketModals } = await import(
         "../../../events/ticketing/modalHandler.js"

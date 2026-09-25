@@ -16,6 +16,10 @@ import {
   handleTicketAddUser,
   handleTicketTransfer,
 } from "./handlers/ticketActions.js";
+import {
+  handleCsatRating,
+  handleCsatCommentButton,
+} from "./handlers/ticketCsat.js";
 
 /**
  * Handle ticket button interactions
@@ -27,6 +31,16 @@ export async function handleTicketButtons(interaction) {
   // Ticket creation buttons: ticket_create_*
   if (customId.startsWith("ticket_create_")) {
     return await handleTicketCreate(interaction, customId);
+  }
+
+  // CSAT star rating: ticket_csat:<ticketId>:<1-5>
+  if (customId.startsWith("ticket_csat:")) {
+    return await handleCsatRating(interaction);
+  }
+
+  // CSAT comment button: ticket_csat_comment:<ticketId>
+  if (customId.startsWith("ticket_csat_comment:")) {
+    return await handleCsatCommentButton(interaction);
   }
 
   // Claim button (inside ticket thread): ticket_claim

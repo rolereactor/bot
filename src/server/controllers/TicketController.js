@@ -394,6 +394,11 @@ export async function apiGetStaffStats(req, res) {
           ticketsClosed: stat.ticketsClosed,
           avgCloseTimeMinutes: Math.round((stat.avgCloseTime || 0) / 60000),
           avgCloseTimeFormatted: formatDuration(stat.avgCloseTime),
+          avgRating:
+            stat.avgRating != null
+              ? Math.round(stat.avgRating * 10) / 10
+              : null,
+          ratingCount: stat.ratingCount || 0,
         };
       }),
     );
@@ -432,6 +437,8 @@ export async function apiUpdateTicketSettings(req, res) {
     allowUserTranscripts,
     welcomeMessage,
     closeMessage,
+    csatEnabled,
+    csatRelayChannelId,
   } = req.body;
   logRequest(`Update ticket settings: ${guildId}`, req);
 
@@ -468,6 +475,13 @@ export async function apiUpdateTicketSettings(req, res) {
       settings.ticketSettings.welcomeMessage = welcomeMessage;
     if (closeMessage !== undefined)
       settings.ticketSettings.closeMessage = closeMessage;
+    if (csatEnabled !== undefined && typeof csatEnabled === "boolean")
+      settings.ticketSettings.csatEnabled = csatEnabled;
+    if (csatRelayChannelId !== undefined)
+      settings.ticketSettings.csatRelayChannelId =
+        typeof csatRelayChannelId === "string" && csatRelayChannelId
+          ? csatRelayChannelId
+          : null;
 
     await storage.dbManager.guildSettings.set(guildId, settings);
 

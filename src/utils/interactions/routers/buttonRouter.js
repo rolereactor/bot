@@ -119,6 +119,7 @@ export async function routeButtonInteraction(interaction, _client) {
     if (
       customId.startsWith("ticket_create_") ||
       customId.startsWith("ticket_claim_external_") ||
+      customId.startsWith("ticket_csat") ||
       customId === "ticket_claim" ||
       customId === "ticket_close" ||
       customId === "ticket_add_user" ||

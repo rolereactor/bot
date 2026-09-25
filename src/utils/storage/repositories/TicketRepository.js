@@ -292,6 +292,41 @@ export class TicketRepository extends BaseRepository {
   }
 
   /**
+   * Save CSAT feedback (rating and/or comment) on a closed ticket.
+   * Re-rating replaces the previous rating; comment can be set or cleared.
+   * @param {string} ticketId - Ticket ID
+   * @param {Object} feedback - Feedback data
+   * @param {number} [feedback.rating] - Star rating (1-5)
+   * @param {string|null} [feedback.ratedStaffId] - Staff member credited for the rating
+   * @param {string|null} [feedback.comment] - Optional comment text
+   * @returns {Promise<boolean>} Success status
+   */
+  async setFeedback(ticketId, feedback) {
+    try {
+      const updateData = { updatedAt: new Date().toISOString() };
+
+      if (feedback.rating !== undefined) {
+        updateData["metadata.feedbackRating"] = feedback.rating;
+        if (feedback.ratedStaffId !== undefined) {
+          updateData["metadata.ratedStaffId"] = feedback.ratedStaffId;
+        }
+      }
+      if (feedback.comment !== undefined) {
+        updateData["metadata.feedbackComment"] = feedback.comment;
+      }
+
+      const result = await this.collection.updateOne(
+        { ticketId },
+        { $set: updateData },
+      );
+      return result.matchedCount > 0;
+    } catch (error) {
+      this.logger.error(`Failed to set feedback for ticket ${ticketId}`, error);
+      return false;
+    }
+  }
+
+  /**
    * Add participant to ticket
    * @param {string} ticketId - Ticket ID
    * @param {string} userId - User ID to add
@@ -434,6 +469,12 @@ export class TicketRepository extends BaseRepository {
             _id: "$claimedBy",
             ticketsClosed: { $sum: 1 },
             avgCloseTime: { $avg: { $subtract: ["$closedAt", "$openedAt"] } },
+            avgRating: { $avg: "$metadata.feedbackRating" },
+            ratingCount: {
+              $sum: {
+                $cond: [{ $ne: ["$metadata.feedbackRating", null] }, 1, 0],
+              },
+            },
           },
         },
         {

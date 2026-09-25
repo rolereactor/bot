@@ -15,6 +15,7 @@ import {
   createTranscriptLogEmbed,
 } from "../../../../features/ticketing/embeds.js";
 import { checkStaffRole, formatDuration } from "../utils.js";
+import { promptCsatOnClose } from "../../../../features/ticketing/csat.js";
 import { getLogger } from "../../../../utils/logger.js";
 import { InputSanitizer } from "../../../../utils/validation/inputValidation.js";
 
@@ -125,6 +126,13 @@ export async function handleClose(interaction) {
       ],
     });
   }
+
+  // Ask the opener to rate the support experience (DM, best-effort)
+  await promptCsatOnClose({
+    client: interaction.client,
+    guildId: ticket.guildId,
+    ticket,
+  });
 
   const duration = formatDuration(new Date(ticket.openedAt), new Date());
 

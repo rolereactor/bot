@@ -1,6 +1,7 @@
 import { getTicketTranscript } from "../../features/ticketing/TicketTranscript.js";
 import { getTicketManager } from "../../features/ticketing/TicketManager.js";
 import { createTicketClosedEmbed } from "../../features/ticketing/embeds.js";
+import { promptCsatOnClose } from "../../features/ticketing/csat.js";
 import { formatDuration } from "../../features/ticketing/helpers.js";
 import { getLogger } from "../../utils/logger.js";
 
@@ -197,6 +198,9 @@ async function cleanupGuild(guildId, storageManager, client) {
           "system",
           `Auto-closed: inactive for ${inactiveDays}+ days`,
         );
+
+        // Ask the opener to rate the support experience (DM, best-effort)
+        await promptCsatOnClose({ client, guildId, ticket });
 
         // Delete channel or thread after a short delay so the message is visible for a moment
         setTimeout(async () => {
