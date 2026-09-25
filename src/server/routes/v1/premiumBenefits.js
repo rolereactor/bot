@@ -122,7 +122,8 @@ const BENEFITS = [
     name: "Custom Variables",
     freeKey: "CUSTOM_VARIABLES_MAX",
     proKey: "CUSTOM_VARIABLES_MAX",
-    tooltip: "Reusable values (counters, text, dates) usable in commands and embeds",
+    tooltip:
+      "Reusable values (counters, text, dates) usable in commands and embeds",
     type: "limit",
     category: "Automation",
   },
@@ -138,7 +139,8 @@ const BENEFITS = [
     name: "Event Types",
     freeValue: "Join / Leave",
     proValue: "All events",
-    tooltip: "Which events can start a trigger (free: member join & leave only)",
+    tooltip:
+      "Which events can start a trigger (free: member join & leave only)",
     type: "feature",
     category: "Automation",
   },
@@ -188,10 +190,20 @@ const BENEFITS = [
     category: "Ticketing",
   },
   {
+    name: "Ticket Ratings",
+    free: true,
+    pro: "CSAT analytics",
+    tooltip:
+      "Members rate support 1–5 stars after close; Pro adds ratings to Staff Analytics",
+    type: "feature",
+    category: "Ticketing",
+  },
+  {
     name: "Staff Analytics",
     free: false,
     pro: true,
-    tooltip: "See how quickly your support team responds to tickets",
+    tooltip:
+      "Response times, tickets closed, and star ratings per staff member",
     type: "feature",
     category: "Ticketing",
   },
@@ -199,8 +211,7 @@ const BENEFITS = [
     name: "Ticket Automation",
     free: "7 days",
     pro: "30 days",
-    tooltip:
-      "Auto-close tickets after inactivity (configurable window)",
+    tooltip: "Auto-close tickets after inactivity (configurable window)",
     type: "limit",
     category: "Ticketing",
   },
