@@ -37,8 +37,8 @@ describe("Pro Engine Benefits", () => {
 
 
   describe("Transcript retention — pro is unlimited (-1)", () => {
-    it("free has 30-day retention", () => {
-      expect(FREE_TIER.TICKET_TRANSCRIPT_DAYS).toBe(30);
+    it("free has 7-day retention", () => {
+      expect(FREE_TIER.TICKET_TRANSCRIPT_DAYS).toBe(7);
     });
 
     it("pro has unlimited retention (-1)", () => {

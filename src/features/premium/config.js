@@ -28,7 +28,7 @@ export const PremiumFeatures = {
     includes: [
       "5x Ticket Capacity (250/month, 10 panels)",
       "Advanced Ticket Automation & HTML Transcripts",
-      "Unlimited Transcript Storage (Free: 30 days)",
+      "Unlimited Transcript Storage (Free: 7 days)",
       "Unlimited Level-Up Rewards & 'Replace Role' Mode",
       "High-Capacity Giveaways (Up to 10,000 entries & 10 winners)",
       "4x Scheduled Role Capacity (100 active slots)",
@@ -73,7 +73,7 @@ export const FREE_TIER = {
   TICKET_MAX_PANELS: 3,
   TICKET_MAX_CATEGORIES: 3,
   TICKET_MAX_TICKETS_PER_MONTH: 50,
-  TICKET_TRANSCRIPT_DAYS: 30,
+  TICKET_TRANSCRIPT_DAYS: 7,
 };
 
 export const PRO_TIER = {

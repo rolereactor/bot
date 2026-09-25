@@ -8,7 +8,7 @@ export const FREE_TIER = {
   MAX_TICKETS_PER_MONTH: 50, // Monthly ticket limit (matches premium benefits display)
   MAX_PANELS: 3, // Maximum ticket panels (matches premium benefits display)
   MAX_CATEGORIES: 3, // Maximum categories per panel
-  TRANSCRIPT_RETENTION_DAYS: 30, // Days before transcript deletion
+  TRANSCRIPT_RETENTION_DAYS: 7, // Days before transcript deletion
   EXPORT_FORMATS: ["md"], // Available export formats
   CUSTOM_COLORS: true, // Custom colors are available for everyone
   MAX_MESSAGES_PER_TRANSCRIPT: 1000, // Message limit

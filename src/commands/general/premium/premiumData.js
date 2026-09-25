@@ -55,7 +55,7 @@ export const PREMIUM_FEATURES = [
     command: "ticket",
     name: "Ticketing",
     emoji: "🎫",
-    free: "3 panels, 50 tickets/month, 30-day transcripts",
+    free: "3 panels, 50 tickets/month, 7-day transcripts",
     pro: "10 panels, 250 tickets/month, unlimited transcripts (HTML/JSON)",
   },
 ];

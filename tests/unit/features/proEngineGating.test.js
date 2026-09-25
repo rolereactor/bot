@@ -148,8 +148,8 @@ describe("Pro Engine - Benefit Copy Matches Runtime Config", () => {
       feature => feature.command === "ticket",
     );
 
-    expect(TICKET_FREE_TIER.TRANSCRIPT_RETENTION_DAYS).toBe(30);
-    expect(ticketFeature.free).toContain("30-day transcripts");
+    expect(TICKET_FREE_TIER.TRANSCRIPT_RETENTION_DAYS).toBe(7);
+    expect(ticketFeature.free).toContain("7-day transcripts");
   });
 });
 
