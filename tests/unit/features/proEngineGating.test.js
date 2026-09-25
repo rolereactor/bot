@@ -139,8 +139,8 @@ describe("Pro Engine - Benefit Copy Matches Runtime Config", () => {
   });
 
   test("ticket panel benefits match the ticketing runtime config", () => {
-    expect(TICKET_FREE_TIER.MAX_PANELS).toBe(2);
-    expect(TICKET_PRO_ENGINE.MAX_PANELS).toBe(5);
+    expect(TICKET_FREE_TIER.MAX_PANELS).toBe(3);
+    expect(TICKET_PRO_ENGINE.MAX_PANELS).toBe(10);
   });
 
   test("/premium copy advertises the runtime ticket transcript retention", () => {

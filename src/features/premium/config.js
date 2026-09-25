@@ -71,6 +71,7 @@ export const FREE_TIER = {
   CUSTOM_EVENT_TYPES: ["member_join", "member_leave"],
   // Ticketing
   TICKET_MAX_PANELS: 3,
+  TICKET_MAX_CATEGORIES: 3,
   TICKET_MAX_TICKETS_PER_MONTH: 50,
   TICKET_TRANSCRIPT_DAYS: 30,
 };
@@ -94,6 +95,7 @@ export const PRO_TIER = {
   CUSTOM_EVENT_TYPES: ["all"],
   // Ticketing
   TICKET_MAX_PANELS: 10,
+  TICKET_MAX_CATEGORIES: 10,
   TICKET_MAX_TICKETS_PER_MONTH: 250, // Balanced database quota (Reduced from 500)
   TICKET_TRANSCRIPT_DAYS: -1, // Unlimited
 };

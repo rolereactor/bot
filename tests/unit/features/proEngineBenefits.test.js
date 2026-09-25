@@ -101,6 +101,7 @@ describe("Pro Engine Benefits", () => {
       "CUSTOM_EVENT_TRIGGERS_MAX",
       "CUSTOM_EVENT_TYPES",
       "TICKET_MAX_PANELS",
+      "TICKET_MAX_CATEGORIES",
       "TICKET_MAX_TICKETS_PER_MONTH",
       "TICKET_TRANSCRIPT_DAYS",
     ];
@@ -121,6 +122,7 @@ describe("Pro Engine Benefits", () => {
       "CUSTOM_EVENT_TRIGGERS_MAX",
       "CUSTOM_EVENT_TYPES",
       "TICKET_MAX_PANELS",
+      "TICKET_MAX_CATEGORIES",
       "TICKET_MAX_TICKETS_PER_MONTH",
       "TICKET_TRANSCRIPT_DAYS",
     ];

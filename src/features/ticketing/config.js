@@ -5,8 +5,8 @@
 
 // Free tier limits - features available without Pro Engine
 export const FREE_TIER = {
-  MAX_TICKETS_PER_MONTH: 25, // Monthly ticket limit
-  MAX_PANELS: 2, // Maximum ticket panels
+  MAX_TICKETS_PER_MONTH: 50, // Monthly ticket limit (matches premium benefits display)
+  MAX_PANELS: 3, // Maximum ticket panels (matches premium benefits display)
   MAX_CATEGORIES: 3, // Maximum categories per panel
   TRANSCRIPT_RETENTION_DAYS: 30, // Days before transcript deletion
   EXPORT_FORMATS: ["md"], // Available export formats
@@ -16,8 +16,8 @@ export const FREE_TIER = {
 
 // Pro Engine features - unlocked with subscription
 export const PRO_ENGINE = {
-  MAX_TICKETS_PER_MONTH: 500, // 20x free tier
-  MAX_PANELS: 5, // Multiple panels
+  MAX_TICKETS_PER_MONTH: 250, // 5x free tier (matches premium benefits display)
+  MAX_PANELS: 10, // Multiple panels (matches premium benefits display)
   MAX_CATEGORIES: 10, // More categories
   TRANSCRIPT_RETENTION_DAYS: -1, // Unlimited (-1 = no expiry)
   EXPORT_FORMATS: ["html", "json", "md"], // All formats
