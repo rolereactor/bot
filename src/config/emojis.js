@@ -31,8 +31,8 @@ class EmojiConfig {
         supercharger: "", // TODO: Upload emoji
       },
       production: {
-        core: "1427267639457222737",
-        spark: "", // TODO: Upload spark_icon.png to prod server and paste ID here
+        core: "1553331040829837423",
+        spark: "1553331118995021874",
         coreBasicBadge: "1427984193756987452",
         corePremiumBadge: "1427984335377793136",
         coreEliteBadge: "1427984418420555906",
