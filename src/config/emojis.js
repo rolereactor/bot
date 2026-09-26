@@ -12,6 +12,9 @@ class EmojiConfig {
    * @returns {Object} Custom emojis for current environment
    */
   get customEmojis() {
+    // All power cell sizes share the same emoji for now;
+    // change individual values below if tiers should get distinct emojis later
+    const powerCellEmoji = ""; // TODO: Upload emoji
     // Different emoji IDs for different environments
     const emojiConfigs = {
       development: {
@@ -20,11 +23,11 @@ class EmojiConfig {
         coreBasicBadge: "1427982373244637244",
         corePremiumBadge: "1427982777466359859",
         coreEliteBadge: "1427983161513607288",
-        // Power Cells
-        powerCellAaa: "", // TODO: Upload emoji
-        powerCellAa: "", // TODO: Upload emoji
-        powerCellC: "", // TODO: Upload emoji
-        powerCellD: "", // TODO: Upload emoji
+        // Power Cells (shared emoji for all sizes)
+        powerCellAaa: powerCellEmoji,
+        powerCellAa: powerCellEmoji,
+        powerCellC: powerCellEmoji,
+        powerCellD: powerCellEmoji,
         // Engine Modules
         piston: "", // TODO: Upload emoji
         turbocharger: "", // TODO: Upload emoji
@@ -36,11 +39,11 @@ class EmojiConfig {
         coreBasicBadge: "1427984193756987452",
         corePremiumBadge: "1427984335377793136",
         coreEliteBadge: "1427984418420555906",
-        // Power Cells
-        powerCellAaa: "", // TODO: Upload emoji
-        powerCellAa: "", // TODO: Upload emoji
-        powerCellC: "", // TODO: Upload emoji
-        powerCellD: "", // TODO: Upload emoji
+        // Power Cells (shared emoji for all sizes)
+        powerCellAaa: powerCellEmoji,
+        powerCellAa: powerCellEmoji,
+        powerCellC: powerCellEmoji,
+        powerCellD: powerCellEmoji,
         // Engine Modules
         piston: "", // TODO: Upload emoji
         turbocharger: "", // TODO: Upload emoji
@@ -98,6 +101,7 @@ class EmojiConfig {
 
   /**
    * Get Power Cell emoji by size
+   * All sizes currently share one emoji; per-size keys allow future differentiation
    * @param {string} size - Power cell size ('aaa', 'aa', 'c', 'd')
    * @returns {string} Custom or fallback emoji
    */
