@@ -191,14 +191,6 @@ export async function processCryptoPayment(
   const cryptoAmt = parseFloat(cryptoAmount) || 0;
   const paymentAmount = fiatAmount > 0 ? fiatAmount : cryptoAmt;
 
-  const coresToAdd =
-    typeof config.calculateCores === "function"
-      ? config.calculateCores(paymentAmount)
-      : Math.floor(
-          paymentAmount *
-            (config.corePricing?.coreSystem?.conversionRate || 50),
-        );
-
   // Atomic credit + atomic dedupe in one op: the filter only matches
   // if this chargeId is NOT already in cryptoPayments, so concurrent
   // deliveries of the same payment can never double-credit.
@@ -206,6 +198,23 @@ export async function processCryptoPayment(
     "../utils/storage/databaseManager.js"
   );
   const dbManager = await getDatabaseManager();
+
+  // First-purchase promotion eligibility (no completed payments yet)
+  let isFirstPurchase = false;
+  try {
+    const stats = await dbManager.payments?.getUserStats(userId);
+    isFirstPurchase = stats ? stats.totalPayments === 0 : false;
+  } catch {
+    isFirstPurchase = false;
+  }
+
+  const coresToAdd =
+    typeof config.calculateCores === "function"
+      ? config.calculateCores(paymentAmount, { isFirstPurchase })
+      : Math.floor(
+          paymentAmount *
+            (config.corePricing?.coreSystem?.conversionRate || 50),
+        );
 
   const updated = await dbManager.coreCredits.collection.findOneAndUpdate(
     { userId, "cryptoPayments.chargeId": { $ne: paymentId } },

@@ -570,9 +570,12 @@ class Config {
   /**
    * Calculate Cores for a given USD amount based on configured packages
    * @param {number} amount - USD amount paid
-   * @returns {number} Calculated Cores
+   * @param {Object} [options]
+   * @param {boolean} [options.isFirstPurchase=false] - Apply first-purchase promotion
+   * @param {Date} [options.date] - Payment date (defaults to now; used for weekend promotion)
+   * @returns {number} Calculated Cores including active promotions
    */
-  calculateCores(amount) {
+  calculateCores(amount, options = {}) {
     const packages = this.corePricing?.packages || {};
     const packageList = Object.entries(packages)
       .map(([key, pkg]) => ({
@@ -589,7 +592,35 @@ class Config {
       ? applicablePackage.rate
       : packageList[packageList.length - 1]?.rate || 15.0;
 
-    return Math.floor(amount * rate);
+    const baseCores = Math.floor(amount * rate);
+    return this._applyPromotions(baseCores, options);
+  }
+
+  /**
+   * Apply active promotions to a base Cores amount
+   * @param {number} baseCores - Cores before promotions
+   * @param {Object} [options]
+   * @param {boolean} [options.isFirstPurchase=false]
+   * @param {Date} [options.date]
+   * @returns {number} Cores including promotion bonuses
+   */
+  _applyPromotions(
+    baseCores,
+    { isFirstPurchase = false, date = new Date() } = {},
+  ) {
+    const promotions = this.corePricing?.coreSystem?.promotions;
+    if (!promotions?.enabled || !promotions.types) return baseCores;
+
+    let bonus = 0;
+    for (const promo of promotions.types) {
+      if (promo.type === "weekend" && promo.days?.includes(date.getDay())) {
+        bonus += Math.floor(baseCores * promo.bonus);
+      } else if (promo.type === "first_purchase" && isFirstPurchase) {
+        const pctBonus = Math.floor(baseCores * promo.bonus);
+        bonus += promo.maxBonus ? Math.min(pctBonus, promo.maxBonus) : pctBonus;
+      }
+    }
+    return baseCores + bonus;
   }
 
   /**

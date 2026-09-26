@@ -249,10 +249,19 @@ export async function handleBMACWebhook(req, res) {
       }
 
       try {
+        // First-purchase promotion eligibility (no completed payments yet)
+        let isFirstPurchase = false;
+        try {
+          const stats = await dbManager.payments?.getUserStats(userId);
+          isFirstPurchase = stats ? stats.totalPayments === 0 : false;
+        } catch {
+          isFirstPurchase = false;
+        }
+
         // Calculate cores based on fiat amount, adjusted for BMAC fees
         const baseCores =
           typeof config.calculateCores === "function"
-            ? config.calculateCores(paymentAmount)
+            ? config.calculateCores(paymentAmount, { isFirstPurchase })
             : Math.floor(
                 paymentAmount *
                   (config.corePricing?.coreSystem?.conversionRate || 15),

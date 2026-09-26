@@ -41,7 +41,7 @@ export function createBalanceEmbed(
     .setColor(THEME.PRIMARY)
     .setAuthor({ name: username, iconURL: avatarURL })
     .setDescription(
-      `Earn Cores with ${voteCmd} and ${shopCmd} • Use ${engineCmd} for Pro features`,
+      `Earn Sparks with ${voteCmd} • Buy Cores on the website • ${shopCmd} for items, ${engineCmd} for Pro`,
     )
     .addFields(
       {
