@@ -3,6 +3,7 @@ import { getStorageManager } from "../../utils/storage/storageManager.js";
 import {
   SHOP_LIMITS,
   MONTHLY_STOCK,
+  SHOP_ITEMS,
   getShopItem,
 } from "../../config/shopConfig.js";
 
@@ -60,13 +61,19 @@ export class SparkShopManager {
 
       const creditData = await db.coreCredits.getByUserId(userId);
 
-      // Check daily purchase limit
+      // Check daily purchase limit (per category)
       const today = new Date().toISOString().split("T")[0];
+      const categoryItemIds = new Set(
+        Object.values(SHOP_ITEMS)
+          .filter(i => i.category === item.category)
+          .map(i => i.id),
+      );
       const purchases = creditData?.sparkProPurchases || [];
       const todayPurchases = purchases.filter(
         p =>
           p.purchasedAt &&
-          new Date(p.purchasedAt).toISOString().split("T")[0] === today,
+          new Date(p.purchasedAt).toISOString().split("T")[0] === today &&
+          categoryItemIds.has(p.itemId),
       );
 
       const limit = SHOP_LIMITS[item.category] || 5;
