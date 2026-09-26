@@ -12,9 +12,6 @@ class EmojiConfig {
    * @returns {Object} Custom emojis for current environment
    */
   get customEmojis() {
-    // All power cell sizes share the same emoji for now;
-    // change individual values below if tiers should get distinct emojis later
-    const powerCellEmoji = ""; // TODO: Upload emoji
     // Different emoji IDs for different environments
     const emojiConfigs = {
       development: {
@@ -23,15 +20,15 @@ class EmojiConfig {
         coreBasicBadge: "1427982373244637244",
         corePremiumBadge: "1427982777466359859",
         coreEliteBadge: "1427983161513607288",
-        // Power Cells (shared emoji for all sizes)
-        powerCellAaa: powerCellEmoji,
-        powerCellAa: powerCellEmoji,
-        powerCellC: powerCellEmoji,
-        powerCellD: powerCellEmoji,
+        // Power Cell (shared by all sizes; per-size keys kept for future differentiation)
+        powerCellAaa: "1553352592057438260",
+        powerCellAa: "1553352592057438260",
+        powerCellC: "1553352592057438260",
+        powerCellD: "1553352592057438260",
         // Engine Modules
-        piston: "", // TODO: Upload emoji
-        turbocharger: "", // TODO: Upload emoji
-        supercharger: "", // TODO: Upload emoji
+        piston: "1553352629684277360",
+        turbocharger: "1553352656121241690",
+        supercharger: "1553352682440491038",
       },
       production: {
         core: "1553331040829837423",
@@ -39,11 +36,11 @@ class EmojiConfig {
         coreBasicBadge: "1427984193756987452",
         corePremiumBadge: "1427984335377793136",
         coreEliteBadge: "1427984418420555906",
-        // Power Cells (shared emoji for all sizes)
-        powerCellAaa: powerCellEmoji,
-        powerCellAa: powerCellEmoji,
-        powerCellC: powerCellEmoji,
-        powerCellD: powerCellEmoji,
+        // Power Cell (shared by all sizes; per-size keys kept for future differentiation)
+        powerCellAaa: "", // TODO: Upload emoji
+        powerCellAa: "", // TODO: Upload emoji
+        powerCellC: "", // TODO: Upload emoji
+        powerCellD: "", // TODO: Upload emoji
         // Engine Modules
         piston: "", // TODO: Upload emoji
         turbocharger: "", // TODO: Upload emoji
