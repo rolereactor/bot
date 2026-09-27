@@ -63,6 +63,11 @@ export async function handleSettings(interaction) {
       ? `${EMOJIS.STATUS.SUCCESS} Enabled`
       : `⚫ Disabled`;
 
+    const csatEnabled = settings?.ticketSettings?.csatEnabled === true;
+    const csatDisplay = csatEnabled
+      ? `${EMOJIS.STATUS.SUCCESS} Enabled`
+      : `⚫ Disabled`;
+
     const embed = new EmbedBuilder()
       .setTitle("Ticketing System")
       .setDescription("Configure support tickets for your server")
@@ -91,6 +96,11 @@ export async function handleSettings(interaction) {
         {
           name: "Member Self-Export",
           value: accessDisplay,
+          inline: true,
+        },
+        {
+          name: "Rating Prompt",
+          value: csatDisplay,
           inline: true,
         },
         {
@@ -139,9 +149,18 @@ export async function handleSettings(interaction) {
         .setStyle(ButtonStyle.Danger),
     );
 
+    const row3 = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("t_toggle_csat")
+        .setLabel(
+          csatEnabled ? "Disable Rating Prompt" : "Enable Rating Prompt",
+        )
+        .setStyle(ButtonStyle.Secondary),
+    );
+
     const response = {
       embeds: [embed],
-      components: [row1, row2],
+      components: [row1, row2, row3],
     };
 
     if (inter.replied || inter.deferred) {
@@ -219,6 +238,20 @@ export async function handleSettings(interaction) {
       settings.ticketSettings = settings.ticketSettings || {};
       const current = settings.ticketSettings.allowUserTranscripts !== false;
       settings.ticketSettings.allowUserTranscripts = !current;
+      await ticketManager.storage.dbManager.guildSettings.set(
+        guildId,
+        settings,
+      );
+      return await renderDashboard(i);
+    }
+
+    if (i.customId === "t_toggle_csat") {
+      const settings =
+        await ticketManager.storage.dbManager.guildSettings.getByGuild(guildId);
+      settings.ticketSettings = settings.ticketSettings || {};
+      settings.ticketSettings.csatEnabled = !(
+        settings.ticketSettings.csatEnabled === true
+      );
       await ticketManager.storage.dbManager.guildSettings.set(
         guildId,
         settings,
