@@ -69,16 +69,18 @@ function makeTicket(overrides = {}) {
 }
 
 describe("CSAT helpers", () => {
-  it("isCsatEnabled defaults to enabled", () => {
-    expect(isCsatEnabled(null)).toBe(true);
-    expect(isCsatEnabled({})).toBe(true);
-    expect(isCsatEnabled({ ticketSettings: {} })).toBe(true);
-    expect(isCsatEnabled({ ticketSettings: { csatEnabled: true } })).toBe(true);
-  });
-
-  it("isCsatEnabled respects explicit opt-out", () => {
+  it("isCsatEnabled defaults to disabled", () => {
+    expect(isCsatEnabled(null)).toBe(false);
+    expect(isCsatEnabled({})).toBe(false);
+    expect(isCsatEnabled({ ticketSettings: {} })).toBe(false);
     expect(isCsatEnabled({ ticketSettings: { csatEnabled: false } })).toBe(
       false,
+    );
+  });
+
+  it("isCsatEnabled respects explicit opt-in", () => {
+    expect(isCsatEnabled({ ticketSettings: { csatEnabled: true } })).toBe(
+      true,
     );
   });
 
@@ -111,7 +113,21 @@ describe("promptCsatOnClose", () => {
     );
   });
 
-  it("skips when CSAT is disabled for the guild", async () => {
+  it("skips by default when the guild has not opted in", async () => {
+    const user = { send: vi.fn() };
+    const client = { users: { fetch: vi.fn().mockResolvedValue(user) } };
+
+    const result = await promptCsatOnClose({
+      client,
+      guildId: "999",
+      ticket: makeTicket(),
+    });
+
+    expect(result).toBe(false);
+    expect(user.send).not.toHaveBeenCalled();
+  });
+
+  it("skips when CSAT is explicitly disabled", async () => {
     mocks.storageManager.dbManager.guildSettings.getByGuild.mockResolvedValue({
       ticketSettings: { csatEnabled: false },
     });
@@ -128,7 +144,10 @@ describe("promptCsatOnClose", () => {
     expect(user.send).not.toHaveBeenCalled();
   });
 
-  it("sends the star prompt DM when enabled", async () => {
+  it("sends the star prompt DM when explicitly enabled", async () => {
+    mocks.storageManager.dbManager.guildSettings.getByGuild.mockResolvedValue({
+      ticketSettings: { csatEnabled: true },
+    });
     const user = { send: vi.fn().mockResolvedValue(undefined) };
     const client = { users: { fetch: vi.fn().mockResolvedValue(user) } };
 
@@ -145,6 +164,9 @@ describe("promptCsatOnClose", () => {
   });
 
   it("returns false silently when DMs are closed", async () => {
+    mocks.storageManager.dbManager.guildSettings.getByGuild.mockResolvedValue({
+      ticketSettings: { csatEnabled: true },
+    });
     const client = {
       users: {
         fetch: vi.fn().mockResolvedValue({

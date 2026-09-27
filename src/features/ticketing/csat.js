@@ -11,12 +11,12 @@ const logger = getLogger();
 
 /**
  * Whether the CSAT rating prompt is enabled for a guild.
- * Defaults to enabled unless explicitly turned off.
+ * Defaults to disabled; guilds must opt in via ticket settings.
  * @param {Object|null} guildSettings
  * @returns {boolean}
  */
 export function isCsatEnabled(guildSettings) {
-  return guildSettings?.ticketSettings?.csatEnabled !== false;
+  return guildSettings?.ticketSettings?.csatEnabled === true;
 }
 
 /**
