@@ -42,9 +42,9 @@ class EmojiConfig {
         powerCellC: "", // TODO: Upload emoji
         powerCellD: "", // TODO: Upload emoji
         // Engine Modules
-        piston: "", // TODO: Upload emoji
-        turbocharger: "", // TODO: Upload emoji
-        supercharger: "", // TODO: Upload emoji
+        piston: "1554447758801510471",
+        turbocharger: "1554447783388254279",
+        supercharger: "1554447806864035871",
       },
     };
 
