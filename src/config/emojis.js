@@ -37,10 +37,10 @@ class EmojiConfig {
         corePremiumBadge: "1427984335377793136",
         coreEliteBadge: "1427984418420555906",
         // Power Cell (shared by all sizes; per-size keys kept for future differentiation)
-        powerCellAaa: "", // TODO: Upload emoji
-        powerCellAa: "", // TODO: Upload emoji
-        powerCellC: "", // TODO: Upload emoji
-        powerCellD: "", // TODO: Upload emoji
+        powerCellAaa: "1554448498554835054",
+        powerCellAa: "1554448498554835054",
+        powerCellC: "1554448498554835054",
+        powerCellD: "1554448498554835054",
         // Engine Modules
         piston: "1554447758801510471",
         turbocharger: "1554447783388254279",
